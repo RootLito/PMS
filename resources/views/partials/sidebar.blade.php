@@ -20,17 +20,19 @@
             Employee
         </a>
 
-        <a href="/adjustment" class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
-               {{ request()->is('adjustment*') ? 'bg-gray-300 text-gray-700' : '' }}">
-            <i class="fa-solid fa-file-pen  ml-5"></i>
-            Adjustment
-        </a>
-
         <a href="/contribution" class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('contribution*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fas fa-hand-holding-usd ml-5"></i>
             Contribution
         </a>
+
+        <a href="/adjustment" class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('adjustment*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-file-pen  ml-5"></i>
+            Payroll
+        </a>
+
+        
     </div>
 
 

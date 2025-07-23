@@ -10,6 +10,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>@yield('title', 'pms')</title>
     @vite('resources/css/app.css')
+    @livewireStyles
 </head>
 
 <body>
@@ -24,6 +25,8 @@
             @yield('content')
         </div>
     </div>
+
+    @livewireScripts
 </body>
 
 </html>
