@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -23,6 +24,16 @@ Route::get('/employee/new', function () {
     return view('jocos.employee.new-emp');
 })->name('employee.new');
 
+
+
+
+
+
+
+
+
+
+
 Route::get('/employee/update', function () {
     return view('jocos.employee.update-emp');
 })->name('employee.update');
@@ -30,16 +41,16 @@ Route::get('/employee/update', function () {
 
 
 //ADJUSTMENT ROUTE
-Route::get('/adjustment', function () {
-    return view('jocos/adjustment');
+Route::get('/payroll', function () {
+    return view('jocos/payroll');
 });
 
 
 
 //CONTRIBUTION ROUTE
-Route::get('contribution', function (){
-    return view('jocos/contribution');
-})->name('contribution');
+Route::get('computation', function (){
+    return view('jocos/computation');
+})->name('computation');
 
 Route::get('/contribution/new', function () {
     return view('jocos.contribution.new-cont');

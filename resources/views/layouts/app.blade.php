@@ -15,6 +15,25 @@
 
 <body>
     <div class="w-full min-h-screen bg-red-100 flex relative">
+        @if ($errors->any())
+            <div
+                class="absolute top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow z-50 max-w-sm">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if (session()->has('message'))
+            <div
+                class="absolute top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow z-50 max-w-sm">
+                {{ session('message') }}
+            </div>
+        @endif
+
+
         <div class="w-56 h-screen sticky bg-gray-50">
             @include('partials.sidebar')
         </div>
