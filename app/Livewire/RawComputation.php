@@ -3,19 +3,40 @@
 namespace App\Livewire;
 
 use App\Models\Employee;
+use App\Models\RawCalculation;
 use Livewire\Component;
 use Carbon\Carbon;
 
 class RawComputation extends Component
 {
-    public $adjustments = '';
+    public $adjustments = null;
     public $remarks = '';
-    public $SS_CON = '';
-    public $EC_CON = '';
-    public $WISP = '';
     public $cutoff = '';
     public $search = '';
     public $designation = '';
+    public $selectedEmployee = null;
+    public $monthly_rate = null;
+    public $matchedRate;
+    public $gross = null;
+    public $daily = null;
+    public $minutes = null;
+    public $amount = null;
+    public $min_amount = null;
+    public $total = null;
+    public $net_late_absences = null;
+    public $tax = null;
+    public $net_tax = null;
+    public $net_pay = null;
+    public $ss_con = null;
+    public $ec_con = null;
+    public $wisp = null;
+    public $hdmf_pi = null;
+    public $hdmf_mpl = null;
+    public $hdmf_mp2 = null;
+    public $hdmf_cl = null;
+    public $dareco = null;
+    public $total_cont = null;
+    public $currentCutoffLabel = '';
     public $fields = [];
     public $designations = [
         "CFO DAVAO CITY",
@@ -41,30 +62,19 @@ class RawComputation extends Component
     ];
     protected $cutoffFields = [
         '1-15' => [
-            'HDMF-PI',
-            'HDMF-MPL',
-            'HDMF-MP2',
-            'HDMF-CL',
-            'DARECO',
+            ['label' => 'HDMF-PI',  'model' => 'hdmf_pi'],
+            ['label' => 'HDMF-MPL', 'model' => 'hdmf_mpl'],
+            ['label' => 'HDMF-MP2', 'model' => 'hdmf_mp2'],
+            ['label' => 'HDMF-CL',  'model' => 'hdmf_cl'],
+            ['label' => 'DARECO',   'model' => 'dareco'],
         ],
         '16-31' => [
-            'SS CON',
-            'EC CON',
-            'WISP',
+            ['label' => 'SS CON',   'model' => 'ss_con'],
+            ['label' => 'EC CON',   'model' => 'ec_con'],
+            ['label' => 'WISP',     'model' => 'wisp'],
         ],
     ];
 
-
-    public $selectedEmployee = null;
-    public $monthly_rate = '';
-
-    public $gross = '';
-    public $daily = '';
-    public $minutes = '';
-    public $amount = '';
-    public $adjustment_amount = '';
-    public $total = '';
-    public $net_late_absences = '';
     protected $deductionRates = [
         13378 => ['daily' => 608.09, 'halfday' => 304.04, 'hourly' => 76.01, 'per_min' => 1.26],
         15275 => ['daily' => 694.31, 'halfday' => 347.15, 'hourly' => 86.78, 'per_min' => 1.44],
@@ -93,66 +103,195 @@ class RawComputation extends Component
             $this->cutoff = '16-31';
         }
         $this->fields = $this->cutoffFields[$this->cutoff] ?? [];
+        $this->currentCutoffLabel = $this->cutoffLabels[$this->cutoff] ?? '';
     }
+    protected $cutoffLabels = [
+        '1-15'  => '1st Cutoff (1-15)',
+        '16-31' => '2nd Cutoff (16-31)',
+    ];
     public function updatedCutoff($value)
     {
         $this->fields = $this->cutoffFields[$value] ?? [];
+        $this->currentCutoffLabel = $this->cutoffLabels[$value] ?? '';
+        foreach ($this->fields as $field) {
+            if (!property_exists($this, $field['model'])) {
+                $this->{$field['model']} = '';
+            }
+        }
     }
-
-    // $this->monthly_rate = $employee->monthly_rate; 
-
-
-    // Handle employee selection and reset calculation values
     public function employeeSelected($employeeId)
     {
         $employee = Employee::find($employeeId);
 
         if ($employee) {
+            $this->resetCalculation();
             $this->selectedEmployee = $employeeId;
             $this->gross = $employee->gross;
-
-
+            $this->monthly_rate = $employee->monthly_rate;
             $this->net_late_absences = $employee->gross;
+            $this->net_pay = $employee->gross;
+            $this->matchedRate = $this->deductionRates[(int) $this->monthly_rate] ?? null;
         }
     }
-
     public function resetCalculation()
     {
-        $this->daily = 0;
-        $this->minutes = 0;
-        $this->amount = 0;
-        $this->adjustment_amount = 0;
-        $this->total = 0;
-        $this->net_late_absences = 0;
-    }
+        $this->daily = null;
+        $this->minutes = null;
+        $this->amount = null;
+        $this->min_amount = null;
+        $this->total = null;
+        $this->net_late_absences = null;
 
+        $this->net_pay = null;
+        $this->ss_con = null;
+        $this->ec_con = null;
+        $this->wisp = null;
+        $this->hdmf_pi = null;
+        $this->hdmf_mpl = null;
+        $this->hdmf_mp2 = null;
+        $this->hdmf_cl = null;
+        $this->dareco = null;
+    }
     public function updatedDaily()
     {
+        $this->calculateDailyAmount();
         $this->calculateDeduction();
     }
-
     public function updatedMinutes()
     {
+        $this->calculateMinuteAmount();
         $this->calculateDeduction();
     }
-
-    public function calculateDeduction()
+    protected function getRate()
     {
-        if ($this->selectedEmployee) {
-            $employeeRate = $this->deductionRates[$this->selectedEmployee->monthly_rate] ?? null;
+        return $this->deductionRates[(int)$this->monthly_rate] ?? null;
+    }
+    public function calculateDailyAmount()
+    {
+        $rate = $this->getRate();
+        if ($rate) {
+            $this->amount = (float) $this->daily * $rate['daily'];
+        } else {
+            $this->amount = null;
+        }
+    }
+    public function calculateMinuteAmount()
+    {
+        $rate = $this->getRate();
+        if ($rate) {
+            $this->min_amount = (float) $this->minutes * $rate['per_min'];
+        } else {
+            $this->min_amount = null;
+        }
+    }
+    public function calculateDeduction($applyLateAbsences = true)
+    {
+        if ($this->monthly_rate) {
+            $employeeRate = $this->deductionRates[(int) $this->monthly_rate] ?? null;
 
             if ($employeeRate) {
-                $dailyDeduction = $this->daily * $employeeRate['daily'];
-                $halfdayDeduction = ($this->daily == 0.5) ? $employeeRate['halfday'] : 0;
-                $minutesDeduction = $this->minutes * $employeeRate['per_min'];
+                $daily = (float) $this->daily;
+                $minutes = (float) $this->minutes;
 
-                $this->total = $dailyDeduction + $halfdayDeduction + $minutesDeduction;
+                if ($applyLateAbsences) {
+                    $dailyDeduction = ($daily == 0.5) ? $employeeRate['halfday'] : $daily * $employeeRate['daily'];
+                    $minutesDeduction = $minutes * $employeeRate['per_min'];
 
-                $this->net_late_absences = $this->gross - $this->total;
+                    $this->total = round($dailyDeduction + $minutesDeduction, 2);
+                    $this->net_late_absences = $this->gross - $this->total;
+                } else {
+                    $this->total = null;
+                    $this->net_late_absences = $this->gross;
+                }
+                $this->calculateContributions();
             }
         }
     }
+    public function updated($propertyName)
+    {
+        $this->calculateDeduction();
+    }
+    protected function calculateContributions()
+    {
+        $contributions = null;
+        foreach ($this->fields as $field) {
+            $modelKey = $field['model'];
+            $contributions += isset($this->{$modelKey}) ? (float) $this->{$modelKey} : null;
+        }
+        $this->net_pay = round($this->net_late_absences - $contributions, 2);
+    }
+    //SAVE RAW CALCULATION
+    public function saveCalculation()
+    {
+        $totalDeduction =
+            floatval($this->hdmf_pi) +
+            floatval($this->hdmf_mpl) +
+            floatval($this->hdmf_mp2) +
+            floatval($this->hdmf_cl) +
+            floatval($this->dareco) +
+            floatval($this->ss_con) +
+            floatval($this->ec_con) +
+            floatval($this->wisp);
 
+        $totalDeduction = ($totalDeduction == 0) ? null : $totalDeduction;
+
+
+
+        $model = RawCalculation::updateOrCreate(
+            ['employee_id' => $this->selectedEmployee],
+            [
+                'is_completed' => false,
+                'absent' => $this->amount,
+                'late_undertime' => $this->min_amount,
+                'total_absent_late' => $this->total,
+                'net_late_absences' => $this->net_late_absences,
+                'tax' => $this->tax,
+                'net_tax' => $this->net_tax,
+                'hdmf_pi' => $this->hdmf_pi,
+                'hdmf_mpl' => $this->hdmf_mpl,
+                'hdmf_mp2' => $this->hdmf_mp2,
+                'hdmf_cl' => $this->hdmf_cl,
+                'dareco' => $this->dareco,
+                'ss_con' => $this->ss_con,
+                'ec_con' => $this->ec_con,
+                'wisp' => $this->wisp,
+                'total_deduction' => $totalDeduction,
+                'net_pay' => $this->net_pay,
+                'remarks' => $this->remarks,
+            ]
+        );
+
+        dd($model);
+
+        // $data = [
+        //     'employee_id' => $this->selectedEmployee,
+        //     'absent' => $this->amount,
+        //     'late_undertime' => $this->min_amount,
+        //     'total_absent_late' => $this->total,
+        //     'net_late_absences' => $this->net_late_absences,
+        //     'tax' => $this->tax,
+        //     'net_tax' => $this->net_tax,
+        //     'hdmf_pi' => $this->hdmf_pi,
+        //     'hdmf_mpl' => $this->hdmf_mpl,
+        //     'hdmf_mp2' => $this->hdmf_mp2,
+        //     'hdmf_cl' => $this->hdmf_cl,
+        //     'dareco' => $this->dareco,
+        //     'ss_con' => $this->ss_con,
+        //     'ec_con' => $this->ec_con,
+        //     'wisp' => $this->wisp,
+        //     'total_deduction' => $totalDeduction,
+        //     'net_pay' => $this->net_pay,
+        //     'remarks' => $this->remarks,
+        // ];
+
+        // dd($data);
+
+        // RawCalculation::create($data);
+
+
+        session()->flash('success', 'Calculation saved successfully.');
+        $this->resetCalculation();
+    }
     public function render()
     {
         $employees = Employee::query()
