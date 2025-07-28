@@ -128,18 +128,18 @@
                 </div>
 
                 <div class="flex flex-col">
-                    <label for="adjustments" class="block text-sm text-gray-700">
+                    <label for="adjustment" class="block text-sm text-gray-700">
                         ADJUSTMENTS
                     </label>
-                    <input id="adjustments" wire:model="adjustments" type="number"
+                    <input id="adjustment" wire:model.live="adjustment" type="number"
                         class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
                         is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
                 <div class="flex flex-col">
-                    <label for="adjustments" class="block text-sm text-gray-700">
+                    <label for="tax" class="block text-sm text-gray-700">
                         TAX
                     </label>
-                    <input id="adjustments" wire:model="adjustments" type="number"
+                    <input id="tax" wire:model.live="tax" type="number"
                         class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
                         is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>

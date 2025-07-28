@@ -1,4 +1,4 @@
-<div class="h-full flex flex-col p-6">
+<div class="h-screen flex flex-col p-6">
     <div class="w-full flex flex-col gap-4">
         <div class="mx-auto w-32 h-32 rounded-full bg-slate-700">
         </div>

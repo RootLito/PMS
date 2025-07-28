@@ -34,7 +34,7 @@
         @endif
 
 
-        <div class="w-56 h-screen sticky bg-gray-50">
+        <div class="w-56 h-screen sticky top-0 bg-white">
             @include('partials.sidebar')
         </div>
 

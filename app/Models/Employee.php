@@ -21,4 +21,9 @@ class Employee extends Model
         'monthly_rate',
         'gross',
     ];
+
+    public function rawCalculation()
+    {
+        return $this->hasOne(RawCalculation::class);
+    }
 }

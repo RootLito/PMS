@@ -1,4 +1,4 @@
-<div class="w-full h-16 bg-white flex items-center justify-between px-10">
+<div class="w-full h-16 bg-white flex items-center justify-between px-10 sticky top-0 z-1">
     <h2 class="font-bold">PAYROLL MANAGMENT SYSTEM</h2>
 
 

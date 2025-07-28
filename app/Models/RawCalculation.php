@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RawCalculation extends Model
 {
     protected $fillable = [
+        'is_completed',
         'employee_id',
         'absent',
         'late_undertime',

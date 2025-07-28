@@ -9,7 +9,6 @@ use Carbon\Carbon;
 
 class RawComputation extends Component
 {
-    public $adjustments = null;
     public $remarks = '';
     public $cutoff = '';
     public $search = '';
@@ -24,6 +23,7 @@ class RawComputation extends Component
     public $min_amount = null;
     public $total = null;
     public $net_late_absences = null;
+    public $adjustment = null;
     public $tax = null;
     public $net_tax = null;
     public $net_pay = null;
@@ -204,6 +204,11 @@ class RawComputation extends Component
                     $this->net_late_absences = $this->gross;
                 }
                 $this->calculateContributions();
+
+                $this->net_pay -=(float) $this->tax; 
+
+
+                $this->net_pay +=(float) $this->adjustment;
             }
         }
     }
@@ -220,6 +225,9 @@ class RawComputation extends Component
         }
         $this->net_pay = round($this->net_late_absences - $contributions, 2);
     }
+
+
+
     //SAVE RAW CALCULATION
     public function saveCalculation()
     {
@@ -235,12 +243,12 @@ class RawComputation extends Component
 
         $totalDeduction = ($totalDeduction == 0) ? null : $totalDeduction;
 
+        $this->net_tax = $this->net_late_absences - $this->tax;
 
-
-        $model = RawCalculation::updateOrCreate(
+        RawCalculation::updateOrCreate(
             ['employee_id' => $this->selectedEmployee],
             [
-                'is_completed' => false,
+                'is_completed' => true,
                 'absent' => $this->amount,
                 'late_undertime' => $this->min_amount,
                 'total_absent_late' => $this->total,
@@ -260,34 +268,6 @@ class RawComputation extends Component
                 'remarks' => $this->remarks,
             ]
         );
-
-        dd($model);
-
-        // $data = [
-        //     'employee_id' => $this->selectedEmployee,
-        //     'absent' => $this->amount,
-        //     'late_undertime' => $this->min_amount,
-        //     'total_absent_late' => $this->total,
-        //     'net_late_absences' => $this->net_late_absences,
-        //     'tax' => $this->tax,
-        //     'net_tax' => $this->net_tax,
-        //     'hdmf_pi' => $this->hdmf_pi,
-        //     'hdmf_mpl' => $this->hdmf_mpl,
-        //     'hdmf_mp2' => $this->hdmf_mp2,
-        //     'hdmf_cl' => $this->hdmf_cl,
-        //     'dareco' => $this->dareco,
-        //     'ss_con' => $this->ss_con,
-        //     'ec_con' => $this->ec_con,
-        //     'wisp' => $this->wisp,
-        //     'total_deduction' => $totalDeduction,
-        //     'net_pay' => $this->net_pay,
-        //     'remarks' => $this->remarks,
-        // ];
-
-        // dd($data);
-
-        // RawCalculation::create($data);
-
 
         session()->flash('success', 'Calculation saved successfully.');
         $this->resetCalculation();
