@@ -33,6 +33,7 @@ return new class extends Migration
             $table->decimal('total_deduction', 10, 2)->nullable();
             $table->decimal('net_pay', 10, 2)->nullable();
             $table->string('remarks')->nullable();
+            $table->string('voucher_include')->nullable();
 
 
             $table->timestamps();

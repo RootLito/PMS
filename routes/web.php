@@ -17,27 +17,16 @@ Route::get('/dashboard', function () {
 
 //EMPLOYEE ROUTE 
 Route::get('/employee', function () {
-    return view('jocos.employee'); 
+    return view('jocos.employee');
 })->name('employee');
 
 Route::get('/employee/new', function () {
     return view('jocos.employee.new-emp');
 })->name('employee.new');
 
-
-
-
-
-
-
-
-
-
-
-Route::get('/employee/update', function () {
-    return view('jocos.employee.update-emp');
+Route::get('/employee/update/{id}', function ($id) {
+    return view('jocos.employee.update-emp', ['id' => $id]);
 })->name('employee.update');
-
 
 
 //ADJUSTMENT ROUTE
@@ -48,7 +37,7 @@ Route::get('/payroll', function () {
 
 
 //CONTRIBUTION ROUTE
-Route::get('computation', function (){
+Route::get('computation', function () {
     return view('jocos/computation');
 })->name('computation');
 
@@ -57,7 +46,6 @@ Route::get('/contribution/new', function () {
 })->name('contribution.new');
 
 
-
-
-
-
+Route::get('/computation/voucher', function () {
+    return view('jocos.raw.voucher'); 
+})->name('computation.voucher');

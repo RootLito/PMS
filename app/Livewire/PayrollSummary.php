@@ -4,13 +4,19 @@ namespace App\Livewire;
 
 use App\Models\Employee;
 use Livewire\Component;
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class PayrollSummary extends Component
 {
     protected $employees;
-
+    public $designation = '';
     public $cutoff = '';
+    public $dateRange = '';
+
+    public array $selectedEmployees = [];
+    public string $selectedDesignation = '';
+
+
     protected $cutoffFields = [
         '1-15' => [
             ['label' => 'HDMF-PI',  'model' => 'hdmf_pi'],
@@ -23,10 +29,10 @@ class PayrollSummary extends Component
             ['label' => 'SS CON',   'model' => 'ss_con'],
             ['label' => 'EC CON',   'model' => 'ec_con'],
             ['label' => 'WISP',     'model' => 'wisp'],
+            ['label' => '',       'model' => ''],
+            ['label' => '',       'model' => ''],
         ],
     ];
-
-
     public $designations = [
         "CFO DAVAO CITY",
         "Development of Organizational Policies, Plans & Procedures",
@@ -51,45 +57,110 @@ class PayrollSummary extends Component
     ];
 
 
-
-
     public function mount()
+    {
+        $today = Carbon::today();
+        $day = $today->day;
+        $year = $today->year;
+        $month = strtoupper($today->format('F'));
+
+        if ($day <= 15) {
+            $this->cutoff = '1st';
+            $this->dateRange = "{$month} 1-15, {$year}";
+        } else {
+            $this->cutoff = '2nd';
+            $this->dateRange = "{$month} 16-31, {$year}";
+        }
+    }
+
+    public function updatedCutoff($value)
+    {
+        $today = Carbon::today();
+        $year = $today->year;
+        $month = strtoupper($today->format('F'));
+
+        if ($value == '1st') {
+            $this->dateRange = "{$month} 1-15, {$year}";
+        } elseif ($value == '2nd') {
+            $this->dateRange = "{$month} 16-31, {$year}";
+        } else {
+            $this->dateRange = '';
+        }
+    }
+
+
+
+
+    public function confirmSelected()
+    {
+        $employees = Employee::with('rawCalculation')
+            ->whereIn('id', $this->selectedEmployees)
+            ->get();
+
+        foreach ($employees as $employee) {
+            if ($employee->rawCalculation) {
+                $employee->rawCalculation->update([
+                    'voucher_include' => $this->selectedDesignation,
+                ]);
+            }
+        }
+
+        $this->reset(['selectedEmployees', 'selectedDesignation']);
+    }
+
+
+
+
+
+    // }
+
+    public function render()
     {
         $this->employees = Employee::with('rawCalculation')
             ->whereHas('rawCalculation', fn($q) => $q->where('is_completed', true))
             ->get();
 
-        // Log::info('Employees fetched: ' . $this->employees->count());
-    }
+        // Filter based on effective designation: voucher_include > designation
+        $filteredEmployees = $this->employees->filter(function ($employee) {
+            $effectiveDesignation = $employee->rawCalculation->voucher_include ?? $employee->designation;
+            return $this->designation
+                ? $effectiveDesignation === $this->designation
+                : true;
+        });
 
-    public function render()
-    {
-        $groupedEmployees = $this->employees
-            ->groupBy('designation')
+        // Determine cutoff fields
+        $cutoffFields = $this->cutoff === '1st'
+            ? $this->cutoffFields['1-15']
+            : ($this->cutoff === '2nd' ? $this->cutoffFields['16-31'] : []);
+
+        // Group by effective designation (voucher_include > designation), then by office
+        $groupedEmployees = $filteredEmployees
+            ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
             ->map(
-                fn($group) => $group->groupBy('office_name')
+                fn($group) =>
+                $group->groupBy('office_name')
                     ->map(fn($officeGroup) => [
                         'employees' => $officeGroup,
                         'totalGross' => $officeGroup->sum('gross'),
-                        'totalAbsent' => $officeGroup->sum(fn($employee) => $employee->rawCalculation->absent ?? 0),
-                        'totalLateUndertime' => $officeGroup->sum(fn($employee) => $employee->rawCalculation->late_undertime ?? 0),
-                        'totalAbsentLate' => $officeGroup->sum(fn($employee) => $employee->rawCalculation->total_absent_late ?? 0),
-                        'totalNetLateAbsences' => $officeGroup->sum(fn($employee) => $employee->rawCalculation->net_late_absences ?? 0),
-                        'totalTax' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->tax ?? 0),
-                        'totalNetTax' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->net_tax ?? 0),
-                        'totalHdmfPi' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->hdmf_pi ?? 0),
-                        'totalHdmfMpl' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->hdmf_mpl ?? 0),
-                        'totalHdmfMp2' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->hdmf_mp2 ?? 0),
-                        'totalHdmfCl' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->hdmf_cl ?? 0),
-                        'totalDareco' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->dareco ?? 0),
-                        'totalSsCon' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->ss_con ?? 0),
-                        'totalEcCon' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->ec_con ?? 0),
-                        'totalWisp' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->wisp ?? 0),
-                        'totalTotalDeduction' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->total_deduction ?? 0),
-                        'totalNetPay' => $officeGroup->sum(fn($employee) => (float) $employee->rawCalculation->net_pay ?? 0),
+                        'totalAbsent' => $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0),
+                        'totalLateUndertime' => $officeGroup->sum(fn($e) => $e->rawCalculation->late_undertime ?? 0),
+                        'totalAbsentLate' => $officeGroup->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
+                        'totalNetLateAbsences' => $officeGroup->sum(fn($e) => $e->rawCalculation->net_late_absences ?? 0),
+                        'totalTax' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->tax ?? 0),
+                        'totalNetTax' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->net_tax ?? 0),
+                        'totalHdmfPi' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->hdmf_pi ?? 0),
+                        'totalHdmfMpl' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->hdmf_mpl ?? 0),
+                        'totalHdmfMp2' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->hdmf_mp2 ?? 0),
+                        'totalHdmfCl' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->hdmf_cl ?? 0),
+                        'totalDareco' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->dareco ?? 0),
+                        'totalSsCon' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->ss_con ?? 0),
+                        'totalEcCon' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->ec_con ?? 0),
+                        'totalWisp' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->wisp ?? 0),
+                        'totalTotalDeduction' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->total_deduction ?? 0),
+                        'totalNetPay' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->net_pay ?? 0),
                     ])
             );
 
-        return view('livewire.payroll-summary', compact('groupedEmployees'));
+        return view('livewire.payroll-summary', compact('groupedEmployees', 'cutoffFields'));
     }
 }

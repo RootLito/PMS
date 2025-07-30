@@ -4,7 +4,7 @@
             <i class="fa-solid fa-arrow-left"></i>
         </a>
         <h2 class="text-xl text-gray-700 font-bold">
-            New Employee
+            Update Employee
         </h2>
     </div>
 
@@ -52,7 +52,7 @@
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
                 <option value="" disabled>Select designation</option>
                 @foreach ($designations as $designationOption)
-                    <option value="{{ $designationOption }}">{{ $designationOption }}</option>
+                <option value="{{ $designationOption }}">{{ $designationOption }}</option>
                 @endforeach
             </select>
             @error('designation') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -61,12 +61,13 @@
         <div>
             <label for="office_name" class="block text-sm text-gray-700">Office Name</label>
             <select id="office_name" wire:model.live="office_name"
-                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" {{ !$designation ? 'disabled' : '' }}>
+                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" {{ !$designation
+                ? 'disabled' : '' }}>
                 <option value="" disabled>Select office</option>
                 @if ($designation)
-                    @foreach ($officeOptions[$designation] ?? [] as $office => $code)
-                        <option value="{{ $office }}">{{ $office }}</option>
-                    @endforeach
+                @foreach ($officeOptions[$designation] ?? [] as $office => $code)
+                <option value="{{ $office }}">{{ $office }}</option>
+                @endforeach
                 @endif
             </select>
             @error('office_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -75,7 +76,7 @@
         <div>
             <label for="office_code" class="block text-sm text-gray-700">PAP</label>
             <input type="text" id="office_code" wire:model="office_code" readonly
-                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" disabled>
             @error('office_code') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
     </div>
@@ -108,7 +109,7 @@
                 Gross<span class="text-red-400">*</span>
             </label>
             <input type="number" id="gross" wire:model="gross" readonly
-                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" disabled>
             @error('gross') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
     </div>

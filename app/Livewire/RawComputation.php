@@ -7,8 +7,11 @@ use App\Models\RawCalculation;
 use Livewire\Component;
 use Carbon\Carbon;
 
+use Livewire\WithPagination;
+
 class RawComputation extends Component
 {
+    use WithPagination;
     public $remarks = '';
     public $cutoff = '';
     public $search = '';
@@ -170,20 +173,24 @@ class RawComputation extends Component
     {
         $rate = $this->getRate();
         if ($rate) {
-            $this->amount = (float) $this->daily * $rate['daily'];
+            $calculated = round((float) $this->daily * (float) $rate['daily'], 2);
+            $this->amount = $calculated == 0 ? null : $calculated;
         } else {
             $this->amount = null;
         }
     }
+
     public function calculateMinuteAmount()
     {
         $rate = $this->getRate();
         if ($rate) {
-            $this->min_amount = (float) $this->minutes * $rate['per_min'];
+            $calculated = round((float) $this->minutes * (float) $rate['per_min'], 2);
+            $this->min_amount = $calculated == 0 ? null : $calculated;
         } else {
             $this->min_amount = null;
         }
     }
+
     public function calculateDeduction($applyLateAbsences = true)
     {
         if ($this->monthly_rate) {
@@ -198,20 +205,35 @@ class RawComputation extends Component
                     $minutesDeduction = $minutes * $employeeRate['per_min'];
 
                     $this->total = round($dailyDeduction + $minutesDeduction, 2);
+                    if ($this->total == 0) {
+                        $this->total = null;  // Show empty input instead of 0
+                    }
+
                     $this->net_late_absences = $this->gross - $this->total;
                 } else {
                     $this->total = null;
                     $this->net_late_absences = $this->gross;
                 }
+
                 $this->calculateContributions();
 
-                $this->net_pay -=(float) $this->tax; 
+                // Adjust net pay for tax and round
+                $this->net_pay -= (float) $this->tax;
+                $this->net_pay = round($this->net_pay, 2);
+                if ($this->net_pay == 0) {
+                    $this->net_pay = null; // Show empty if zero
+                }
 
-
-                $this->net_pay +=(float) $this->adjustment;
+                // Add adjustment and round
+                $this->net_pay += (float) $this->adjustment;
+                $this->net_pay = round($this->net_pay, 2);
+                if ($this->net_pay == 0) {
+                    $this->net_pay = null; // Show empty if zero
+                }
             }
         }
     }
+
     public function updated($propertyName)
     {
         $this->calculateDeduction();
@@ -243,7 +265,10 @@ class RawComputation extends Component
 
         $totalDeduction = ($totalDeduction == 0) ? null : $totalDeduction;
 
-        $this->net_tax = $this->net_late_absences - $this->tax;
+        $netLateAbsences = (float) $this->net_late_absences;
+        $tax = (float) $this->tax;
+
+        $this->net_tax = $netLateAbsences - $tax;
 
         RawCalculation::updateOrCreate(
             ['employee_id' => $this->selectedEmployee],
@@ -272,6 +297,20 @@ class RawComputation extends Component
         session()->flash('success', 'Calculation saved successfully.');
         $this->resetCalculation();
     }
+
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingDesignation()
+    {
+        $this->resetPage();
+    }
+
+
+
     public function render()
     {
         $employees = Employee::query()
@@ -285,6 +324,7 @@ class RawComputation extends Component
                 $query->where('designation', $this->designation);
             })
             ->paginate(10);
+
         return view('livewire.raw-computation', [
             'employees' => $employees
         ]);

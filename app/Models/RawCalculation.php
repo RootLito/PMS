@@ -25,6 +25,8 @@ class RawCalculation extends Model
         'wisp',
         'total_deduction',
         'net_pay',
+        'remarks',
+        'voucher_include',
     ];
 
     public function employee()

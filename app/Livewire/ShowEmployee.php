@@ -2,11 +2,13 @@
 
 namespace App\Livewire;
 
+use Livewire\WithPagination;
 use Livewire\Component;
 use App\Models\Employee;
 
 class ShowEmployee extends Component
 {
+    use WithPagination;
     public $search = '';
     public $designation = '';
     public $designations = [
@@ -31,6 +33,17 @@ class ShowEmployee extends Component
         "SAAD",
         "TOS NABUNTURAN"
     ];
+
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingDesignation()
+    {
+        $this->resetPage();
+    }
+
 
     public function render()
     {

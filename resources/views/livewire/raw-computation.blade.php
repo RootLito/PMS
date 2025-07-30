@@ -146,13 +146,27 @@
             </div>
 
 
-            <div class="w-full flex flex-col mt-2">
-                <label for="remarks" class="block text-sm text-gray-700 mt-auto">
-                    Remarks
-                </label>
-                <input id="remarks" wire:model.live="remarks" type="text"
-                    class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-                    is_null($selectedEmployee) ? 'disabled' : '' }}>
+            <div class="w-full flex gap-2">
+                <div class="w-full flex flex-col mt-2">
+                    <label for="remarks" class="block text-sm text-gray-700 mt-auto">
+                        Remarks
+                    </label>
+                    <input id="remarks" wire:model.live="remarks" type="text"
+                        class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" {{
+                        is_null($selectedEmployee) ? 'disabled' : '' }}>
+                </div>
+                {{-- <div class="w-full flex flex-col mt-2">
+                    <label for="remarks" class="block text-sm text-gray-700 mt-auto">
+                        Include to other voucher
+                    </label>
+                    <select id="designation" wire:model.live="designation"
+                        class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                        <option value="" disabled>Select designation</option>
+                        @foreach ($designations as $designationOption)
+                        <option value="{{ $designationOption }}">{{ $designationOption }}</option>
+                        @endforeach
+                    </select>
+                </div> --}}
             </div>
 
             <div class="flex justify-between mt-4">

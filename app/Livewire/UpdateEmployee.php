@@ -5,14 +5,15 @@ namespace App\Livewire;
 use App\Models\Employee;
 use Livewire\Component;
 
-class EmployeeForm extends Component
+class UpdateEmployee extends Component
 {
+    public $employeeId;
+    public $employee;
     public $last_name;
     public $first_name;
     public $middle_initial;
     public $suffix;
     public $employment_status = '';
-
     public $designation = '';
     public $office_code = '';
     public $office_name = '';
@@ -155,6 +156,23 @@ class EmployeeForm extends Component
     {
         $this->gross = $this->monthly_rate ? number_format($this->monthly_rate / 2, 2, '.', '') : null;
     }
+    public function mount($id)
+    {
+        $this->employeeId = $id;
+
+        $employee = Employee::findOrFail($id);
+
+        $this->last_name = $employee->last_name;
+        $this->first_name = $employee->first_name;
+        $this->middle_initial = $employee->middle_initial;
+        $this->suffix = $employee->suffix;
+        $this->employment_status = $employee->employment_status;
+        $this->designation = $employee->designation;
+        $this->office_code = $employee->office_code;
+        $this->office_name = $employee->office_name;
+        $this->monthly_rate = $employee->monthly_rate;
+        $this->gross = $employee->gross;
+    }
     public function save()
     {
         $validatedData = $this->validate([
@@ -170,15 +188,17 @@ class EmployeeForm extends Component
             'gross'            => 'required|numeric',
         ]);
 
-        Employee::create($validatedData);
+        $employee = Employee::findOrFail($this->employeeId);
+        $employee->update($validatedData);
 
-        session()->flash('message', 'Employee successfully added.');
+        session()->flash('message', 'Employee successfully updated.');
 
-        return redirect()->route('employee.new');
+        return redirect()->route('employee');
     }
+
 
     public function render()
     {
-        return view('livewire.employee-form');
+        return view('livewire.update-employee');
     }
 }
