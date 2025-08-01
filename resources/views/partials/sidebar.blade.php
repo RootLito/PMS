@@ -1,4 +1,4 @@
-<div class="h-screen flex flex-col p-6">
+<div class="h-screen flex flex-col p-6 border-r border-gray-200">
     <div class="w-full flex flex-col gap-4">
         <div class="mx-auto w-32 h-32 rounded-full bg-slate-700">
         </div>
@@ -33,12 +33,12 @@
             Payroll
         </a>
 
-
+        <a href="/signatory" class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('signatory*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-pen-nib ml-5 text-lg"></i>
+            Signatory
+        </a>
     </div>
-
-
-
-
 
     <form action="" class="mt-auto">
         <button class="w-full h-10 text-sm font-semibold bg-red-400  text-white rounded-lg">

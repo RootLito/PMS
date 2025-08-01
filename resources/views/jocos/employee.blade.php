@@ -13,7 +13,7 @@
             <div class="flex">
                 <a href="{{ route('employee.new') }}">
                     <button class="w-53 h-12 bg-slate-700 rounded-md text-white cursor-pointer hover:bg-slate-500 ">
-                        Add Employee
+                        Add Employee <i class="fa-solid fa-plus"></i>
                     </button>
                 </a>
 

@@ -31,6 +31,7 @@ class EmployeeForm extends Component
         "SAAD",
         "FPSSD (LGU Assisted)",
         "Monitoring, Control and Surveillance - FMRED",
+        "Research and Development - NSAP",
         "Extension, Support, Education and Training Services (ESETS)",
         "Fisheries Laboratory Section",
         "General Management and Supervision - ORD",
@@ -99,6 +100,9 @@ class EmployeeForm extends Component
             'Driver' => '310200100001000',
             'Region' => '310200100001000',
             'CFVGL' => '310200100003000',
+        ],
+        'Research and Development - NSAP' => [
+            'Research and Development - NSAP' => '200000100002',
         ],
         'Extension, Support, Education and Training Services (ESETS)' => [
             'Fisherfolk Coordination Unit' => '310300100001000',

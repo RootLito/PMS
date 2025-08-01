@@ -9,14 +9,21 @@ use Carbon\Carbon;
 class PayrollSummary extends Component
 {
     protected $employees;
-    public $designation = '';
     public $cutoff = '';
     public $dateRange = '';
-
     public array $selectedEmployees = [];
     public string $selectedDesignation = '';
-
-
+    public $designation = [];
+    public $showDesignations = false;
+    public function toggleDesignations()
+    {
+        $this->showDesignations = !$this->showDesignations;
+        // $this->showDesignations = true;
+    }
+    public function proceed()
+    {
+        $this->showDesignations = false;
+    }
     protected $cutoffFields = [
         '1-15' => [
             ['label' => 'HDMF-PI',  'model' => 'hdmf_pi'],
@@ -55,8 +62,6 @@ class PayrollSummary extends Component
         "SAAD",
         "TOS NABUNTURAN"
     ];
-
-
     public function mount()
     {
         $today = Carbon::today();
@@ -72,7 +77,6 @@ class PayrollSummary extends Component
             $this->dateRange = "{$month} 16-31, {$year}";
         }
     }
-
     public function updatedCutoff($value)
     {
         $today = Carbon::today();
@@ -87,10 +91,6 @@ class PayrollSummary extends Component
             $this->dateRange = '';
         }
     }
-
-
-
-
     public function confirmSelected()
     {
         $employees = Employee::with('rawCalculation')
@@ -107,33 +107,58 @@ class PayrollSummary extends Component
 
         $this->reset(['selectedEmployees', 'selectedDesignation']);
     }
-
-
-
-
-
-    // }
-
     public function render()
     {
+        // Load employees with completed rawCalculation relationship
         $this->employees = Employee::with('rawCalculation')
             ->whereHas('rawCalculation', fn($q) => $q->where('is_completed', true))
             ->get();
 
-        // Filter based on effective designation: voucher_include > designation
+        // Filter employees by effective designation (voucher_include if present, else designation)
         $filteredEmployees = $this->employees->filter(function ($employee) {
             $effectiveDesignation = $employee->rawCalculation->voucher_include ?? $employee->designation;
-            return $this->designation
-                ? $effectiveDesignation === $this->designation
-                : true;
+
+            // If no designation filter selected, include all; else check if effectiveDesignation is in selected designations
+            return empty($this->designation)
+                ? true
+                : in_array($effectiveDesignation, $this->designation);
         });
 
-        // Determine cutoff fields
+        $overallTotal = [
+            'gross' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->gross ?? 0)),
+            'totalAbsentLate' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->total_absent_late ?? 0)),
+            'tax' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0)),
+            'hdmfPi' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0)),
+            'hdmfMpl' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0)),
+            'hdmfMp2' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0)),
+            'hdmfCl' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0)),
+            'dareco' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0)),
+            'ssCon' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0)),
+            'ecCon' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0)),
+            'wisp' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0)),
+            'totalDeduction' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->total_deduction ?? 0)),
+            'netPay' => $this->employees->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
+        ];
+
+        // Compute total net pay for each designation or voucher
+        $voucherNetPays = collect($this->designation)->mapWithKeys(function ($voucher) use ($filteredEmployees) {
+            $totalNetPay = $filteredEmployees
+                ->filter(function ($e) use ($voucher) {
+                    // Prioritize voucher_include, fall back to designation
+                    $effectiveDesignation = $e->rawCalculation->voucher_include ?? $e->designation;
+                    return $effectiveDesignation === $voucher;
+                })
+                ->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0));
+
+            return [$voucher => $totalNetPay];
+        });
+
+        // Determine cutoff fields based on selected cutoff
         $cutoffFields = $this->cutoff === '1st'
             ? $this->cutoffFields['1-15']
             : ($this->cutoff === '2nd' ? $this->cutoffFields['16-31'] : []);
 
-        // Group by effective designation (voucher_include > designation), then by office
+        // Group filtered employees by effective designation, then by office, aggregating various sums
         $groupedEmployees = $filteredEmployees
             ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
             ->map(
@@ -146,21 +171,25 @@ class PayrollSummary extends Component
                         'totalLateUndertime' => $officeGroup->sum(fn($e) => $e->rawCalculation->late_undertime ?? 0),
                         'totalAbsentLate' => $officeGroup->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
                         'totalNetLateAbsences' => $officeGroup->sum(fn($e) => $e->rawCalculation->net_late_absences ?? 0),
-                        'totalTax' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->tax ?? 0),
-                        'totalNetTax' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->net_tax ?? 0),
-                        'totalHdmfPi' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->hdmf_pi ?? 0),
-                        'totalHdmfMpl' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->hdmf_mpl ?? 0),
-                        'totalHdmfMp2' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->hdmf_mp2 ?? 0),
-                        'totalHdmfCl' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->hdmf_cl ?? 0),
-                        'totalDareco' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->dareco ?? 0),
-                        'totalSsCon' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->ss_con ?? 0),
-                        'totalEcCon' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->ec_con ?? 0),
-                        'totalWisp' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->wisp ?? 0),
-                        'totalTotalDeduction' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->total_deduction ?? 0),
-                        'totalNetPay' => $officeGroup->sum(fn($e) => (float) $e->rawCalculation->net_pay ?? 0),
+                        'totalTax' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0)),
+                        'totalNetTax' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_tax ?? 0)),
+                        'totalHdmfPi' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0)),
+                        'totalHdmfMpl' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0)),
+                        'totalHdmfMp2' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0)),
+                        'totalHdmfCl' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0)),
+                        'totalDareco' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0)),
+                        'totalSsCon' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0)),
+                        'totalEcCon' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0)),
+                        'totalWisp' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0)),
+                        'totalTotalDeduction' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->total_deduction ?? 0)),
+                        'totalNetPay' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
                     ])
             );
 
-        return view('livewire.payroll-summary', compact('groupedEmployees', 'cutoffFields'));
+
+
+
+
+        return view('livewire.payroll-summary', compact('groupedEmployees', 'cutoffFields', 'voucherNetPays', 'overallTotal'));
     }
 }

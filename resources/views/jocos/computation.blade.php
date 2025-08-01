@@ -13,7 +13,7 @@
             <div class="flex">
                 <a href="{{ route('computation.voucher') }}">
                     <button class="w-53 h-12 bg-slate-700 rounded-md text-white cursor-pointer hover:bg-slate-500 ">
-                        View Vouchers
+                        View Vouchers <i class="fa-solid fa-ticket"></i>
                     </button>
                 </a>
             </div>

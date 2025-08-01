@@ -19,15 +19,15 @@
         <table class="min-w-full table-auto text-sm">
             <thead class="bg-gray-100 text-left">
                 <tr class="border-b border-t border-gray-200">
-                    <th class="px-4 py-3">Employment Status</th>
-                    <th class="px-4 py-2">Last Name</th>
-                    <th class="px-4 py-2">First Name</th>
-                    <th class="px-4 py-2">M.I.</th>
-                    <th class="px-4 py-2">Monthly Rate</th>
-                    <th class="px-4 py-2">Gross</th>
-                    <th class="px-4 py-2">Designation</th>
-                    <th class="px-4 py-2">Office</th>
-                    <th class="px-4 py-2">Action</th>
+                    <th class="px-4 py-3 text-nowrap">Status</th>
+                    <th class="px-4 py-2 text-nowrap">Last Name</th>
+                    <th class="px-4 py-2 text-nowrap">First Name</th>
+                    <th class="px-4 py-2 text-nowrap">M.I.</th>
+                    <th class="px-4 py-2 text-nowrap">Monthly Rate</th>
+                    <th class="px-4 py-2 text-nowrap">Gross</th>
+                    <th class="px-4 py-2 text-nowrap">Designation</th>
+                    <th class="px-4 py-2 text-nowrap">Office</th>
+                    <th class="px-4 py-2 text-nowrap">Action</th>
                 </tr>
             </thead>
             <tbody>

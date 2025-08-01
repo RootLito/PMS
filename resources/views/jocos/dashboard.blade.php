@@ -11,8 +11,8 @@
 
 
             <div class="flex">
-                <button class="w-53 h-12 bg-slate-700 rounded-md text-white">
-                    Filter
+                <button class="w-12 h-12 bg-slate-700 rounded-md text-white cursor-pointer">
+                    <i class="fa-solid fa-sliders"></i>
                 </button>
             </div>
         </div>

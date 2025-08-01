@@ -49,3 +49,11 @@ Route::get('/contribution/new', function () {
 Route::get('/computation/voucher', function () {
     return view('jocos.raw.voucher'); 
 })->name('computation.voucher');
+
+
+
+
+//SIGNATORY ROUTE
+Route::get('/signatory', function () {
+    return view('jocos.signatory'); 
+})->name('signatory');
