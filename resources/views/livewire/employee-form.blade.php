@@ -101,23 +101,12 @@
             <select id="monthly_rate" wire:model.live="monthly_rate" step="0.01"
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
                 <option value="" disabled selected>- - Select - -</option>
-                <option value="13378.00">13,378.00</option>
-                <option value="15275.00">15,275.00</option>
-                <option value="15368.00">15,368.00</option>
-                <option value="15738.00">15,738.00</option>
-                <option value="16458.00">16,458.00</option>
-                <option value="16758.00">16,758.00</option>
-                <option value="17179.00">17,179.00</option>
-                <option value="17505.00">17,505.00</option>
-                <option value="18251.00">18,251.00</option>
-                <option value="18784.00">18,784.00</option>
-                <option value="20572.00">20,572.00</option>
-                <option value="21205.00">21,205.00</option>
-                <option value="23877.00">23,877.00</option>
-                <option value="25232.00">25,232.00</option>
-                <option value="25439.00">25,439.00</option>
-                <option value="35097.00">35,097.00</option>
-                <option value="75359.00">75,359.00</option>
+
+                @foreach($salaries as $salary)
+                    <option value="{{ $salary->monthly_rate }}">
+                        {{ number_format($salary->monthly_rate, 2) }}
+                    </option>
+                @endforeach
             </select>
 
 
@@ -135,7 +124,7 @@
             <label for="gross" class="block text-sm text-gray-700">
                 Gross<span class="text-red-400">*</span>
             </label>
-            <input type="number" id="gross" wire:model="gross" readonly
+            <input type="number" id="gross" wire:model="gross" step="0.01" readonly
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
             @error('gross') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>

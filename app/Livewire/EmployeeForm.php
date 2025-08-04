@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Employee;
+use App\Models\Salary;
 use Livewire\Component;
 
 class EmployeeForm extends Component
@@ -12,12 +13,19 @@ class EmployeeForm extends Component
     public $middle_initial;
     public $suffix;
     public $employment_status = '';
-
     public $designation = '';
     public $office_code = '';
     public $office_name = '';
-    public $monthly_rate;
+
+
+    public $monthly_rate = '';
     public $gross;
+
+
+
+
+
+
     public $designations = [
         "PFO DAVAO ORIENTAL",
         "Operation and Management of Production Facilities - TOS TAGABULI",
@@ -31,6 +39,7 @@ class EmployeeForm extends Component
         "SAAD",
         "FPSSD (LGU Assisted)",
         "Monitoring, Control and Surveillance - FMRED",
+        "FISHERIES MANAGEMENT, REGULATORY AND ENFORCEMENT DIVISION (FMRED)",
         "Research and Development - NSAP",
         "Extension, Support, Education and Training Services (ESETS)",
         "Fisheries Laboratory Section",
@@ -101,6 +110,9 @@ class EmployeeForm extends Component
             'Region' => '310200100001000',
             'CFVGL' => '310200100003000',
         ],
+        "FISHERIES MANAGEMENT, REGULATORY AND ENFORCEMENT DIVISION (FMRED)" => [
+            "IMEMS" => '310200100001000'
+        ],
         'Research and Development - NSAP' => [
             'Research and Development - NSAP' => '200000100002',
         ],
@@ -115,19 +127,19 @@ class EmployeeForm extends Component
             'Microbiology Lab' => '310200100002000',
         ],
         'General Management and Supervision - ORD' => [
-            'Budget'                    => '100000100001000',
-            'Accounting'                => '100000100001000',
-            'GSU'                       => '100000100001000',
-            'Driver'                    => '100000100001000',
-            'Admin'                     => '100000100001000',
-            'Cashier'                   => '100000100001000',
-            'BAC'                       => '100000100001000',
-            'COA'                       => '100000100001000',
-            'ORD'                       => '100000100001000',
-            'GAD'                       => '100000100001000',
-            'FSP'                       => '100000100001000',
-            'GSU - Handyman'            => '100000100001000',
-            'HRMU'                      => '100000100001000',
+            'Budget' => '100000100001000',
+            'Accounting' => '100000100001000',
+            'GSU' => '100000100001000',
+            'Driver' => '100000100001000',
+            'Admin' => '100000100001000',
+            'Cashier' => '100000100001000',
+            'BAC' => '100000100001000',
+            'COA' => '100000100001000',
+            'ORD' => '100000100001000',
+            'GAD' => '100000100001000',
+            'FSP' => '100000100001000',
+            'GSU - Handyman' => '100000100001000',
+            'HRMU' => '100000100001000',
         ],
         'Development of Organizational Policies, Plans & Procedures' => [
             'PMEU' => '200000100001000',
@@ -146,6 +158,8 @@ class EmployeeForm extends Component
             "PHMS - Philippine Salt Industry Dev’t Project" => '',
         ],
     ];
+
+    
     public function updatedDesignation($value)
     {
         $this->office_name = '';
@@ -162,16 +176,16 @@ class EmployeeForm extends Component
     public function save()
     {
         $validatedData = $this->validate([
-            'last_name'        => 'required|string|max:100',
-            'first_name'       => 'required|string|max:100',
-            'middle_initial'   => 'nullable|string|max:1',
-            'suffix'           => 'nullable|string|max:5',
-            'designation'      => 'required|string',
-            'office_name'      => 'nullable|string',
-            'office_code'      => 'nullable|string',
+            'last_name' => 'required|string|max:100',
+            'first_name' => 'required|string|max:100',
+            'middle_initial' => 'nullable|string|max:1',
+            'suffix' => 'nullable|string|max:5',
+            'designation' => 'required|string',
+            'office_name' => 'nullable|string',
+            'office_code' => 'nullable|string',
             'employment_status' => 'required|string',
-            'monthly_rate'     => 'required|numeric',
-            'gross'            => 'required|numeric',
+            'monthly_rate' => 'required|numeric',
+            'gross' => 'required|numeric',
         ]);
 
         Employee::create($validatedData);
@@ -183,6 +197,10 @@ class EmployeeForm extends Component
 
     public function render()
     {
-        return view('livewire.employee-form');
+        
+        $salaries = Salary::latest()->get();
+        return view('livewire.employee-form', [
+            'salaries' => $salaries
+        ]);
     }
 }

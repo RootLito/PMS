@@ -5,13 +5,36 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Salary;
 use Livewire\WithPagination;
+
 class SalaryEncode extends Component
 {
     use WithPagination;
+
     public $salaryId, $monthly_rate, $daily_rate, $halfday_rate, $hourly_rate, $per_min_rate;
     public $isUpdating = false;
 
-    // Store the data (Create/Update)
+// public function updatedMonthlyRate($value)
+// {
+//     if ($value) {
+//         $this->daily_rate = floor((float)$value / 22, 2);  
+//         $this->halfday_rate = floor($this->daily_rate / 2, 2);  
+//         $this->hourly_rate = floor($this->halfday_rate / 4, 2);  
+//         $this->per_min_rate = floor($this->hourly_rate / 60, 2);  
+//     }
+// }
+
+
+public function updatedMonthlyRate($value)
+{
+    if ($value) {
+        $this->daily_rate = floor((float)$value / 22 * 100) / 100;  
+        $this->halfday_rate = floor($this->daily_rate / 2 * 100) / 100;  
+        $this->hourly_rate = floor($this->halfday_rate /4 * 100) / 100; 
+        $this->per_min_rate = floor($this->hourly_rate /60 * 100) / 100; 
+    }
+}
+
+
     public function save()
     {
         $this->validate([
@@ -46,7 +69,6 @@ class SalaryEncode extends Component
         $this->resetFields();
     }
 
-    // Edit the salary record
     public function edit($id)
     {
         $salary = Salary::find($id);
@@ -60,29 +82,26 @@ class SalaryEncode extends Component
         $this->isUpdating = true;
     }
 
-    // Delete the salary record
     public function delete($id)
     {
         Salary::find($id)->delete();
         session()->flash('message', 'Salary record deleted successfully!');
     }
 
-    // Reset form fields
     public function resetFields()
     {
         $this->salaryId = null;
-        $this->monthly_rate = '';
-        $this->daily_rate = '';
-        $this->halfday_rate = '';
-        $this->hourly_rate = '';
-        $this->per_min_rate = '';
+        $this->monthly_rate = null;
+        $this->daily_rate = null;
+        $this->halfday_rate = null;
+        $this->hourly_rate = null;
+        $this->per_min_rate = null;
         $this->isUpdating = false;
     }
 
-    // Render the component
     public function render()
     {
-        $salaries = Salary::paginate(10);
+        $salaries = Salary::latest()->paginate(10);
         return view('livewire.salary-encode', compact('salaries'));
     }
 }

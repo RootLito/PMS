@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Employee;
+use App\Models\Salary;
 use App\Models\RawCalculation;
 use Livewire\Component;
 use Carbon\Carbon;
@@ -41,6 +42,8 @@ class RawComputation extends Component
     public $total_cont = null;
     public $currentCutoffLabel = '';
     public $fields = [];
+
+    public $mergedDeductionRates = [];
     public $designations = [
         "CFO DAVAO CITY",
         "Development of Organizational Policies, Plans & Procedures",
@@ -65,16 +68,16 @@ class RawComputation extends Component
     ];
     protected $cutoffFields = [
         '1-15' => [
-            ['label' => 'HDMF-PI',  'model' => 'hdmf_pi'],
+            ['label' => 'HDMF-PI', 'model' => 'hdmf_pi'],
             ['label' => 'HDMF-MPL', 'model' => 'hdmf_mpl'],
             ['label' => 'HDMF-MP2', 'model' => 'hdmf_mp2'],
-            ['label' => 'HDMF-CL',  'model' => 'hdmf_cl'],
-            ['label' => 'DARECO',   'model' => 'dareco'],
+            ['label' => 'HDMF-CL', 'model' => 'hdmf_cl'],
+            ['label' => 'DARECO', 'model' => 'dareco'],
         ],
         '16-31' => [
-            ['label' => 'SS CON',   'model' => 'ss_con'],
-            ['label' => 'EC CON',   'model' => 'ec_con'],
-            ['label' => 'WISP',     'model' => 'wisp'],
+            ['label' => 'SS CON', 'model' => 'ss_con'],
+            ['label' => 'EC CON', 'model' => 'ec_con'],
+            ['label' => 'WISP', 'model' => 'wisp'],
         ],
     ];
 
@@ -97,6 +100,7 @@ class RawComputation extends Component
         35097 => ['daily' => 1595.31, 'halfday' => 797.65, 'hourly' => 199.41, 'per_min' => 3.32],
         75359 => ['daily' => 3425.40, 'halfday' => 1712.70, 'hourly' => 428.17, 'per_min' => 7.13],
     ];
+
     public function mount()
     {
         $day = Carbon::now()->day;
@@ -107,9 +111,12 @@ class RawComputation extends Component
         }
         $this->fields = $this->cutoffFields[$this->cutoff] ?? [];
         $this->currentCutoffLabel = $this->cutoffLabels[$this->cutoff] ?? '';
+
+        $this->mergeSalariesWithDeductionRates();
+
     }
     protected $cutoffLabels = [
-        '1-15'  => '1st Cutoff (1-15)',
+        '1-15' => '1st Cutoff (1-15)',
         '16-31' => '2nd Cutoff (16-31)',
     ];
     public function updatedCutoff($value)
@@ -121,6 +128,14 @@ class RawComputation extends Component
                 $this->{$field['model']} = '';
             }
         }
+    }
+    public function mergeSalariesWithDeductionRates()
+    {
+        $salaries = Salary::all();
+
+        $dynamicRates = $salaries->pluck('monthly_rate')->toArray();
+
+        $this->mergedDeductionRates = array_merge($this->deductionRates, array_flip($dynamicRates));
     }
     public function employeeSelected($employeeId)
     {
@@ -167,7 +182,7 @@ class RawComputation extends Component
     }
     protected function getRate()
     {
-        return $this->deductionRates[(int)$this->monthly_rate] ?? null;
+        return $this->deductionRates[(int) $this->monthly_rate] ?? null;
     }
     public function calculateDailyAmount()
     {
@@ -324,6 +339,9 @@ class RawComputation extends Component
                 $query->where('designation', $this->designation);
             })
             ->paginate(10);
+
+
+
 
         return view('livewire.raw-computation', [
             'employees' => $employees
