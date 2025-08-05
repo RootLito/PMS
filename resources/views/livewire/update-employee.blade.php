@@ -52,7 +52,7 @@
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
                 <option value="" disabled>Select designation</option>
                 @foreach ($designations as $designationOption)
-                <option value="{{ $designationOption }}">{{ $designationOption }}</option>
+                    <option value="{{ $designationOption }}">{{ $designationOption }}</option>
                 @endforeach
             </select>
             @error('designation') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -62,12 +62,12 @@
             <label for="office_name" class="block text-sm text-gray-700">Office Name</label>
             <select id="office_name" wire:model.live="office_name"
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" {{ !$designation
-                ? 'disabled' : '' }}>
+    ? 'disabled' : '' }}>
                 <option value="" disabled>Select office</option>
                 @if ($designation)
-                @foreach ($officeOptions[$designation] ?? [] as $office => $code)
-                <option value="{{ $office }}">{{ $office }}</option>
-                @endforeach
+                    @foreach ($officeOptions[$designation] ?? [] as $office => $code)
+                        <option value="{{ $office }}">{{ $office }}</option>
+                    @endforeach
                 @endif
             </select>
             @error('office_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -99,8 +99,16 @@
             <label for="monthly_rate" class="block text-sm text-gray-700">
                 Monthly Rate <span class="text-red-400">*</span>
             </label>
-            <input type="number" id="monthly_rate" wire:model.live="monthly_rate" step="0.01"
+            <select id="monthly_rate" wire:model.live="monthly_rate" step="0.01"
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                <option value="" disabled selected>- - Select - -</option>
+
+                @foreach($salaries as $salary)
+                    <option value="{{ $salary->monthly_rate }}">
+                        {{ number_format($salary->monthly_rate, 2) }}
+                    </option>
+                @endforeach
+            </select>   
             @error('monthly_rate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
         </div>
 

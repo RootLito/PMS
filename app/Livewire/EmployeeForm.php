@@ -159,7 +159,7 @@ class EmployeeForm extends Component
         ],
     ];
 
-    
+
     public function updatedDesignation($value)
     {
         $this->office_name = '';
@@ -195,9 +195,11 @@ class EmployeeForm extends Component
         return redirect()->route('employee.new');
     }
 
+
+
     public function render()
     {
-        
+
         $salaries = Salary::latest()->get();
         return view('livewire.employee-form', [
             'salaries' => $salaries

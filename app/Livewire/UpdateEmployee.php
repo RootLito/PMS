@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Employee;
+use App\Models\Salary;
 use Livewire\Component;
 
 class UpdateEmployee extends Component
@@ -112,19 +113,19 @@ class UpdateEmployee extends Component
             'Microbiology Lab' => '310200100002000',
         ],
         'General Management and Supervision - ORD' => [
-            'Budget'                    => '100000100001000',
-            'Accounting'                => '100000100001000',
-            'GSU'                       => '100000100001000',
-            'Driver'                    => '100000100001000',
-            'Admin'                     => '100000100001000',
-            'Cashier'                   => '100000100001000',
-            'BAC'                       => '100000100001000',
-            'COA'                       => '100000100001000',
-            'ORD'                       => '100000100001000',
-            'GAD'                       => '100000100001000',
-            'FSP'                       => '100000100001000',
-            'GSU - Handyman'            => '100000100001000',
-            'HRMU'                      => '100000100001000',
+            'Budget' => '100000100001000',
+            'Accounting' => '100000100001000',
+            'GSU' => '100000100001000',
+            'Driver' => '100000100001000',
+            'Admin' => '100000100001000',
+            'Cashier' => '100000100001000',
+            'BAC' => '100000100001000',
+            'COA' => '100000100001000',
+            'ORD' => '100000100001000',
+            'GAD' => '100000100001000',
+            'FSP' => '100000100001000',
+            'GSU - Handyman' => '100000100001000',
+            'HRMU' => '100000100001000',
         ],
         'Development of Organizational Policies, Plans & Procedures' => [
             'PMEU' => '200000100001000',
@@ -176,16 +177,16 @@ class UpdateEmployee extends Component
     public function save()
     {
         $validatedData = $this->validate([
-            'last_name'        => 'required|string|max:100',
-            'first_name'       => 'required|string|max:100',
-            'middle_initial'   => 'nullable|string|max:1',
-            'suffix'           => 'nullable|string|max:5',
-            'designation'      => 'required|string',
-            'office_name'      => 'nullable|string',
-            'office_code'      => 'nullable|string',
+            'last_name' => 'required|string|max:100',
+            'first_name' => 'required|string|max:100',
+            'middle_initial' => 'nullable|string|max:1',
+            'suffix' => 'nullable|string|max:5',
+            'designation' => 'required|string',
+            'office_name' => 'nullable|string',
+            'office_code' => 'nullable|string',
             'employment_status' => 'required|string',
-            'monthly_rate'     => 'required|numeric',
-            'gross'            => 'required|numeric',
+            'monthly_rate' => 'required|numeric',
+            'gross' => 'required|numeric',
         ]);
 
         $employee = Employee::findOrFail($this->employeeId);
@@ -199,6 +200,10 @@ class UpdateEmployee extends Component
 
     public function render()
     {
-        return view('livewire.update-employee');
+        $salaries = Salary::latest()->get();
+
+        return view('livewire.update-employee', [
+            'salaries' => $salaries,
+        ]);
     }
 }

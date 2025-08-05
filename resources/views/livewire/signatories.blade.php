@@ -96,10 +96,11 @@
                         <td class="px-4 py-2">{{ $signatory->designation }}</td>
                         <td class="px-4 py-2 flex gap-2">
                             <button wire:click="startEdit({{ $signatory->id }})"
-                                class="bg-blue-500 text-white py-1 px-2 rounded  cursor-pointer">Edit</button>
+                                class="bg-blue-500 text-white py-1 px-2 rounded  cursor-pointer"><i class="fas fa-edit"></i> Edit</button>
                             <button wire:click="confirmDelete({{ $signatory->id }})"
-                                class="bg-red-500 text-white py-1 px-2 rounded  cursor-pointer">Delete</button>
+                                class="bg-red-500 text-white py-1 px-2 rounded  cursor-pointer"><i class="fas fa-trash-alt"></i> Delete</button>
                         </td>
+                        
                         @endif
                     </tr>
                     @empty

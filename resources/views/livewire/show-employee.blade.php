@@ -8,7 +8,7 @@
             wire:model.live="designation">
             <option value="">All Designations</option>
             @foreach ($designations as $desig)
-            <option value="{{ $desig }}">{{ $desig }}</option>
+                <option value="{{ $desig }}">{{ $desig }}</option>
             @endforeach
         </select>
 
@@ -32,38 +32,39 @@
             </thead>
             <tbody>
                 @forelse ($employees as $employee)
-                <tr class="border-b border-gray-200 hover:bg-gray-100 cursor-pointer">
-                    <td class="px-4 py-2 font-bold">{{ $employee->employment_status }}</td>
-                    <td class="px-4 py-2">{{ $employee->last_name }}</td>
-                    <td class="px-4 py-2">
-                        {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
-                    </td>
+                    <tr class="border-b border-gray-200 hover:bg-gray-100 cursor-pointer">
+                        <td class="px-4 py-2 font-bold">{{ $employee->employment_status }}</td>
+                        <td class="px-4 py-2">{{ $employee->last_name }}</td>
+                        <td class="px-4 py-2">
+                            {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
+                        </td>
 
-                    <td class="px-4 py-2">{{ $employee->middle_initial }}</td>
-                    <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
-                    <td class="px-4 py-2">{{ number_format($employee->gross, 2) }}</td>
-                    <td class="px-4 py-2">{{ $employee->designation }}</td>
-                    <td class="px-4 py-2">{{ $employee->office_name }}</td>
-                    <td class="px-4 py-2 flex gap-2">
-                        <a href="{{ url('/employee/update', ['id' => $employee->id]) }}"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
-                            title="Edit">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
+                        <td class="px-4 py-2">{{ $employee->middle_initial }}</td>
+                        <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
+                        <td class="px-4 py-2">{{ number_format($employee->gross, 2) }}</td>
+                        <td class="px-4 py-2">{{ $employee->designation }}</td>
+                        <td class="px-4 py-2">{{ $employee->office_name }}</td>
+                        <td class="px-4 py-2 flex gap-2">
+                            <a href="{{ url('/employee/update', ['id' => $employee->id]) }}"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
+                                title="Edit">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
 
 
-                        <button
-                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
-                            title="Delete">
-                            <i class="fas fa-trash-alt"></i> Delete
-                        </button>
-                    </td>
+                            <button
+                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
+                                title="Delete" wire:click="deleteEmployee({{ $employee->id }})">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
 
-                </tr>
+                        </td>
+
+                    </tr>
                 @empty
-                <tr>
-                    <td colspan="9" class="px-4 py-2 text-center text-gray-500">No employees found.</td>
-                </tr>
+                    <tr>
+                        <td colspan="9" class="px-4 py-2 text-center text-gray-500">No employees found.</td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>

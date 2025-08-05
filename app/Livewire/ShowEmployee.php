@@ -44,6 +44,19 @@ class ShowEmployee extends Component
         $this->resetPage();
     }
 
+    
+    public function deleteEmployee($employeeId)
+    {
+        $employee = Employee::find($employeeId);
+
+        if ($employee) {
+            $employee->delete();
+            session()->flash('message', 'Employee successfully deleted.');
+        } else {
+            session()->flash('error', 'Employee not found.');
+        }
+    }
+
 
     public function render()
     {

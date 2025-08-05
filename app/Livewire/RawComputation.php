@@ -43,7 +43,8 @@ class RawComputation extends Component
     public $currentCutoffLabel = '';
     public $fields = [];
 
-    public $mergedDeductionRates = [];
+
+
     public $designations = [
         "CFO DAVAO CITY",
         "Development of Organizational Policies, Plans & Procedures",
@@ -81,25 +82,29 @@ class RawComputation extends Component
         ],
     ];
 
-    protected $deductionRates = [
-        13378 => ['daily' => 608.09, 'halfday' => 304.04, 'hourly' => 76.01, 'per_min' => 1.26],
-        15275 => ['daily' => 694.31, 'halfday' => 347.15, 'hourly' => 86.78, 'per_min' => 1.44],
-        15368 => ['daily' => 698.54, 'halfday' => 349.27, 'hourly' => 87.31, 'per_min' => 1.45],
-        15738 => ['daily' => 715.36, 'halfday' => 357.68, 'hourly' => 89.42, 'per_min' => 1.49],
-        16458 => ['daily' => 748.09, 'halfday' => 374.04, 'hourly' => 93.51, 'per_min' => 1.55],
-        16758 => ['daily' => 761.72, 'halfday' => 380.86, 'hourly' => 95.21, 'per_min' => 1.58],
-        17179 => ['daily' => 780.86, 'halfday' => 390.43, 'hourly' => 97.60, 'per_min' => 1.62],
-        17505 => ['daily' => 795.68, 'halfday' => 397.84, 'hourly' => 99.46, 'per_min' => 1.65],
-        18251 => ['daily' => 829.59, 'halfday' => 414.79, 'hourly' => 103.69, 'per_min' => 1.72],
-        18784 => ['daily' => 853.81, 'halfday' => 426.90, 'hourly' => 106.72, 'per_min' => 1.77],
-        20572 => ['daily' => 935.09, 'halfday' => 467.54, 'hourly' => 116.88, 'per_min' => 1.94],
-        21205 => ['daily' => 963.86, 'halfday' => 481.93, 'hourly' => 120.48, 'per_min' => 2.00],
-        23877 => ['daily' => 1085.31, 'halfday' => 542.65, 'hourly' => 135.66, 'per_min' => 2.26],
-        25232 => ['daily' => 1146.90, 'halfday' => 573.45, 'hourly' => 143.36, 'per_min' => 2.38],
-        25439 => ['daily' => 1156.31, 'halfday' => 578.15, 'hourly' => 144.53, 'per_min' => 2.40],
-        35097 => ['daily' => 1595.31, 'halfday' => 797.65, 'hourly' => 199.41, 'per_min' => 3.32],
-        75359 => ['daily' => 3425.40, 'halfday' => 1712.70, 'hourly' => 428.17, 'per_min' => 7.13],
-    ];
+
+
+    // protected $deductionRates = [];
+
+    // protected $deductionRates = [
+    //     13378 => ['daily' => 608.09, 'halfday' => 304.04, 'hourly' => 76.01, 'per_min' => 1.26],
+    //     15275 => ['daily' => 694.31, 'halfday' => 347.15, 'hourly' => 86.78, 'per_min' => 1.44],
+    //     15368 => ['daily' => 698.54, 'halfday' => 349.27, 'hourly' => 87.31, 'per_min' => 1.45],
+    //     15738 => ['daily' => 715.36, 'halfday' => 357.68, 'hourly' => 89.42, 'per_min' => 1.49],
+    //     16458 => ['daily' => 748.09, 'halfday' => 374.04, 'hourly' => 93.51, 'per_min' => 1.55],
+    //     16758 => ['daily' => 761.72, 'halfday' => 380.86, 'hourly' => 95.21, 'per_min' => 1.58],
+    //     17179 => ['daily' => 780.86, 'halfday' => 390.43, 'hourly' => 97.60, 'per_min' => 1.62],
+    //     17505 => ['daily' => 795.68, 'halfday' => 397.84, 'hourly' => 99.46, 'per_min' => 1.65],
+    //     18251 => ['daily' => 829.59, 'halfday' => 414.79, 'hourly' => 103.69, 'per_min' => 1.72],
+    //     18784 => ['daily' => 853.81, 'halfday' => 426.90, 'hourly' => 106.72, 'per_min' => 1.77],
+    //     20572 => ['daily' => 935.09, 'halfday' => 467.54, 'hourly' => 116.88, 'per_min' => 1.94],
+    //     21205 => ['daily' => 963.86, 'halfday' => 481.93, 'hourly' => 120.48, 'per_min' => 2.00],
+    //     23877 => ['daily' => 1085.31, 'halfday' => 542.65, 'hourly' => 135.66, 'per_min' => 2.26],
+    //     25232 => ['daily' => 1146.90, 'halfday' => 573.45, 'hourly' => 143.36, 'per_min' => 2.38],
+    //     25439 => ['daily' => 1156.31, 'halfday' => 578.15, 'hourly' => 144.53, 'per_min' => 2.40],
+    //     35097 => ['daily' => 1595.31, 'halfday' => 797.65, 'hourly' => 199.41, 'per_min' => 3.32],
+    //     75359 => ['daily' => 3425.40, 'halfday' => 1712.70, 'hourly' => 428.17, 'per_min' => 7.13],
+    // ];
 
     public function mount()
     {
@@ -111,10 +116,11 @@ class RawComputation extends Component
         }
         $this->fields = $this->cutoffFields[$this->cutoff] ?? [];
         $this->currentCutoffLabel = $this->cutoffLabels[$this->cutoff] ?? '';
-
-        $this->mergeSalariesWithDeductionRates();
-
     }
+
+
+
+
     protected $cutoffLabels = [
         '1-15' => '1st Cutoff (1-15)',
         '16-31' => '2nd Cutoff (16-31)',
@@ -129,28 +135,50 @@ class RawComputation extends Component
             }
         }
     }
-    public function mergeSalariesWithDeductionRates()
-    {
-        $salaries = Salary::all();
 
-        $dynamicRates = $salaries->pluck('monthly_rate')->toArray();
 
-        $this->mergedDeductionRates = array_merge($this->deductionRates, array_flip($dynamicRates));
-    }
     public function employeeSelected($employeeId)
     {
+        $this->deductionRates = [];
+
+        $salaries = Salary::all();
+
+        foreach ($salaries as $salary) {
+            $monthlyRate = round((float) $salary->monthly_rate, 2);
+
+            $this->deductionRates[$monthlyRate] = [
+                'daily' => round((float) $salary->daily_rate, 2),
+                'halfday' => round((float) $salary->halfday_rate, 2),
+                'hourly' => round((float) $salary->hourly_rate, 2),
+                'per_min' => round((float) $salary->per_min_rate, 2),
+            ];
+        }
+
         $employee = Employee::find($employeeId);
 
         if ($employee) {
             $this->resetCalculation();
+
             $this->selectedEmployee = $employeeId;
+
             $this->gross = $employee->gross;
-            $this->monthly_rate = $employee->monthly_rate;
             $this->net_late_absences = $employee->gross;
             $this->net_pay = $employee->gross;
-            $this->matchedRate = $this->deductionRates[(int) $this->monthly_rate] ?? null;
+
+            $this->monthly_rate = round((float) $employee->monthly_rate, 2);
+
+            $this->matchedRate = $this->deductionRates[$this->monthly_rate] ?? null;
+
+            if (!$this->matchedRate) {
+                dd("No matched rate for: ", $this->monthly_rate, $this->deductionRates);
+            }
         }
     }
+
+
+
+
+
     public function resetCalculation()
     {
         $this->daily = null;
@@ -180,10 +208,36 @@ class RawComputation extends Component
         $this->calculateMinuteAmount();
         $this->calculateDeduction();
     }
+
+
+    public function fetchDeductionRates()
+    {
+        $this->deductionRates = [];
+
+        $salaries = Salary::all();
+
+        foreach ($salaries as $salary) {
+            $monthlyRate = round((float) $salary->monthly_rate, 2);
+
+            $this->deductionRates[$monthlyRate] = [
+                'daily' => round((float) $salary->daily_rate, 2),
+                'halfday' => round((float) $salary->halfday_rate, 2),
+                'hourly' => round((float) $salary->hourly_rate, 2),
+                'per_min' => round((float) $salary->per_min_rate, 2),
+            ];
+        }
+    }
+
+
     protected function getRate()
     {
-        return $this->deductionRates[(int) $this->monthly_rate] ?? null;
+        $this->fetchDeductionRates();
+        $key = round((float) $this->monthly_rate, 2);
+        return $this->deductionRates[$key] ?? null;
     }
+
+
+
     public function calculateDailyAmount()
     {
         $rate = $this->getRate();
@@ -221,7 +275,7 @@ class RawComputation extends Component
 
                     $this->total = round($dailyDeduction + $minutesDeduction, 2);
                     if ($this->total == 0) {
-                        $this->total = null;  // Show empty input instead of 0
+                        $this->total = null;
                     }
 
                     $this->net_late_absences = $this->gross - $this->total;
@@ -231,6 +285,12 @@ class RawComputation extends Component
                 }
 
                 $this->calculateContributions();
+
+
+
+
+
+                // $this->fetchDeductionRates();
 
                 // Adjust net pay for tax and round
                 $this->net_pay -= (float) $this->tax;
@@ -339,7 +399,6 @@ class RawComputation extends Component
                 $query->where('designation', $this->designation);
             })
             ->paginate(10);
-
 
 
 

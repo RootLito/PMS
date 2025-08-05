@@ -82,9 +82,9 @@
                             <td class="px-4 py-2">{{ number_format($salary->per_min_rate, 2) }}</td>
                             <td class="px-4 py-2 text-nowrap">
                                 <button wire:click="edit({{ $salary->id }})"
-                                    class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-400">Edit</button>
+                                    class="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-400"><i class="fas fa-edit"></i> Edit</button>
                                 <button wire:click="delete({{ $salary->id }})"
-                                    class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-400">Delete</button>
+                                    class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-400"><i class="fas fa-trash-alt"></i> Delete</button>
                             </td>
                         </tr>
                     @endforeach
