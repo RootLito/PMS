@@ -7,7 +7,7 @@
                 wire:model.live="designation">
                 <option value="">All Designations</option>
                 @foreach ($designations as $desig)
-                <option value="{{ $desig }}">{{ $desig }}</option>
+                    <option value="{{ $desig }}">{{ $desig }}</option>
                 @endforeach
             </select>
         </div>
@@ -27,28 +27,32 @@
                 </thead>
                 <tbody>
                     @foreach ($employees as $employee)
-                    <tr class="border-b border-gray-200 hover:bg-gray-100 cursor-pointer">
-                        <td class="px-4 py-2">{{ $employee->last_name }}</td>
-                        <td class="px-4 py-2">
-                            {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
-                        </td>
-                        <td class="px-4 py-2">{{ $employee->middle_initial }}</td>
-                        <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
-                        <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
-                        <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
-                        <td class="px-4 py-2">
-                            <button wire:click="employeeSelected({{ $employee->id }})"
-                                class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer">
-                                Select
-                            </button>
-                        </td>
-                    </tr>
+                        <tr class="border-b border-gray-200 hover:bg-gray-100 cursor-pointer">
+                            <td class="px-4 py-2">{{ $employee->last_name }}</td>
+                            <td class="px-4 py-2">
+                                {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
+                            </td>
+                            <td class="px-4 py-2">{{ $employee->middle_initial }}</td>
+                            <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
+                            <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
+                            <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
+                            <td class="px-4 py-2">
+                                <button wire:click="employeeSelected({{ $employee->id }})"
+                                    class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer">
+                                    Select
+                                </button>
+                            </td>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
 
         <div class="mt-auto">
+            {{-- <div class="text-sm text-gray-600 mb-2">
+                Page {{ $employees->currentPage() }} of {{ $employees->lastPage() }}
+            </div>
+            {{ $employees->links('pagination::simple-tailwind') }} --}}
             {{ $employees->links() }}
         </div>
     </div>
@@ -58,17 +62,17 @@
             <h2 class="text-2xl text-gray-700 font-bold">Deduction</h2>
             <p>
                 @if ($selectedEmployee)
-                @if ($matchedRate)
-                <span class="mr-2">Monthly Rate : {{ number_format($monthly_rate, 2) }}</span>
-                <span class="mr-2">Daily: {{ number_format($matchedRate['daily'], 2) }}</span>
-                <span class="mr-2">Halfday: {{ number_format($matchedRate['halfday'], 2) }}</span>
-                <span class="mr-2">Hourly: {{ number_format($matchedRate['hourly'], 2) }}</span>
-                <span class="mr-2">Per Minute: {{ number_format($matchedRate['per_min'], 2) }}</span>
+                    @if ($matchedRate)
+                        <span class="mr-2">Monthly Rate : {{ number_format($monthly_rate, 2) }}</span>
+                        <span class="mr-2">Daily: {{ number_format($matchedRate['daily'], 2) }}</span>
+                        <span class="mr-2">Halfday: {{ number_format($matchedRate['halfday'], 2) }}</span>
+                        <span class="mr-2">Hourly: {{ number_format($matchedRate['hourly'], 2) }}</span>
+                        <span class="mr-2">Per Minute: {{ number_format($matchedRate['per_min'], 2) }}</span>
+                    @else
+                        No rate matched.
+                    @endif
                 @else
-                No rate matched.
-                @endif
-                @else
-                Please select an employee.
+                    Please select an employee.
                 @endif
             </p>
 
@@ -81,7 +85,7 @@
                     </label>
                     <input id="daily" wire:model.live="daily" type="number" min="0" step="0.01"
                         class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-                        is_null($selectedEmployee) ? 'disabled' : '' }}>
+    is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
 
                 <div class="flex flex-col">
@@ -98,7 +102,7 @@
                     </label>
                     <input id="minutes" wire:model.live="minutes" type="number" min="0"
                         class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-                        is_null($selectedEmployee) ? 'disabled' : '' }}>
+    is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
 
                 <div class="flex flex-col">
@@ -133,7 +137,7 @@
                     </label>
                     <input id="adjustment" wire:model.live="adjustment" type="number"
                         class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-                        is_null($selectedEmployee) ? 'disabled' : '' }}>
+    is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
                 <div class="flex flex-col">
                     <label for="tax" class="block text-sm text-gray-700">
@@ -141,7 +145,7 @@
                     </label>
                     <input id="tax" wire:model.live="tax" type="number"
                         class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-                        is_null($selectedEmployee) ? 'disabled' : '' }}>
+    is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
             </div>
 
@@ -153,7 +157,7 @@
                     </label>
                     <input id="remarks" wire:model.live="remarks" type="text"
                         class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-                        is_null($selectedEmployee) ? 'disabled' : '' }}>
+    is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
             </div>
 
@@ -167,18 +171,18 @@
             </div>
 
             @if ($cutoff)
-            <div class="">
-                @foreach ($fields as $field)
-                <div class="flex items-center">
-                    <label for="{{ $field['model'] }}" class="text-sm text-gray-700 w-24">
-                        {{ $field['label'] }}
-                    </label>
-                    <input type="number" step="0.01" id="{{ $field['model'] }}" wire:model.live="{{ $field['model'] }}"
-                        class="flex-1 mt-2 h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
+                <div class="">
+                    @foreach ($fields as $field)
+                            <div class="flex items-center">
+                                <label for="{{ $field['model'] }}" class="text-sm text-gray-700 w-24">
+                                    {{ $field['label'] }}
+                                </label>
+                                <input type="number" step="0.01" id="{{ $field['model'] }}" wire:model.live="{{ $field['model'] }}"
+                                    class="flex-1 mt-2 h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
                         is_null($selectedEmployee) ? 'disabled' : '' }}>
+                            </div>
+                    @endforeach
                 </div>
-                @endforeach
-            </div>
             @endif
 
 
@@ -199,7 +203,7 @@
                 </div>
 
                 @php
-                $isDisabled = is_null($selectedEmployee);
+                    $isDisabled = is_null($selectedEmployee);
                 @endphp
 
                 <button

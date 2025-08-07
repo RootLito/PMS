@@ -284,44 +284,72 @@ class RawComputation extends Component
                     $this->net_late_absences = $this->gross;
                 }
 
-                $this->calculateContributions();
+        $this->calculateNetPay();
 
 
-
-
-
-                // $this->fetchDeductionRates();
-
-                // Adjust net pay for tax and round
-                $this->net_pay -= (float) $this->tax;
-                $this->net_pay = round($this->net_pay, 2);
-                if ($this->net_pay == 0) {
-                    $this->net_pay = null; // Show empty if zero
-                }
-
-                // Add adjustment and round
-                $this->net_pay += (float) $this->adjustment;
-                $this->net_pay = round($this->net_pay, 2);
-                if ($this->net_pay == 0) {
-                    $this->net_pay = null; // Show empty if zero
-                }
             }
         }
     }
 
+    public function updatedTax($value)
+    {
+        if (!is_null($value)) {
+            $this->calculateTax();
+        }
+    }
+
+    public function calculateTax()
+    {
+        $this->net_pay -= (float) $this->tax;
+        $this->net_pay = round($this->net_pay, 2);
+
+        if ($this->net_pay == 0) {
+            $this->net_pay = null;
+        }
+    }
+
+
+    public function updatedAdjustment($value)
+    {
+        if (!is_null($value)) {
+            $this->calculateAdjustment();
+        }
+    }
+
+    public function calculateAdjustment()
+    {
+        $this->net_pay += (float) $this->adjustment;
+        $this->net_pay = round($this->net_pay, 2);
+        if ($this->net_pay == 0) {
+            $this->net_pay = null;
+        }
+    }
+
+
+
+
     public function updated($propertyName)
     {
         $this->calculateDeduction();
+        $this->calculateNetPay();
+
     }
-    protected function calculateContributions()
+
+
+    public function calculateNetPay()
     {
-        $contributions = null;
+        $deductions = 0;
         foreach ($this->fields as $field) {
-            $modelKey = $field['model'];
-            $contributions += isset($this->{$modelKey}) ? (float) $this->{$modelKey} : null;
+            $key = $field['model'];
+            $deductions += isset($this->{$key}) ? (float) $this->{$key} : 0;
         }
-        $this->net_pay = round($this->net_late_absences - $contributions, 2);
+        $this->net_pay = round($this->net_late_absences - $deductions, 2);
+
+        if ($this->net_pay == 0) {
+            $this->net_pay = null;
+        }
     }
+
 
 
 

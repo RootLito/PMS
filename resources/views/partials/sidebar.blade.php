@@ -43,6 +43,11 @@
             <i class="fa-solid fa-coins ml-5 text-lg"></i>
             Monthly Rate
         </a>
+        <a href="/contribution" class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('contribution*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-money-bill-wave ml-5 text-lg"></i>
+            Contribution
+        </a>
     </div>
 
     <form action="" class="mt-auto">

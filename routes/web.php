@@ -39,7 +39,7 @@ Route::get('/payroll/voucher', function () {
 
 
 
-//CONTRIBUTION ROUTE
+//COMPUTATION ROUTE
 Route::get('computation', function () {
     return view('jocos/computation');
 })->name('computation');
@@ -67,3 +67,10 @@ Route::get('/signatory', function () {
 Route::get('/salary', function () {
     return view('jocos.salary');
 })->name('salary');
+
+
+
+//CONTRIBUTION ROUTE
+Route::get('/contribution', function () {
+    return view('jocos.contribution');
+})->name('contribution');
