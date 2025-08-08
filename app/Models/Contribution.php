@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Contribution extends Model
 {
     protected $fillable = [
+        'employee_id',
         'hdmf_pi',
         'hdmf_mpl',
         'hdmf_mp2',
@@ -27,4 +28,10 @@ class Contribution extends Model
         'ec' => 'array',
         'wisp' => 'array',
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
 }

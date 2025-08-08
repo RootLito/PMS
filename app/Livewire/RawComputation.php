@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Employee;
 use App\Models\Salary;
 use App\Models\RawCalculation;
+use App\Models\Contribution;
 use Livewire\Component;
 use Carbon\Carbon;
 
@@ -173,7 +174,63 @@ class RawComputation extends Component
                 dd("No matched rate for: ", $this->monthly_rate, $this->deductionRates);
             }
         }
+
+
+        //CONTRIBUTION
+        $contribution = Contribution::where('employee_id', $employeeId)->first();
+
+        if ($contribution) {
+            $sss = json_decode($contribution->sss, true);
+            $ec = json_decode($contribution->ec, true);
+            $wisp = json_decode($contribution->wisp, true);
+            $hdmf_pi = json_decode($contribution->hdmf_pi, true);
+            $hdmf_mp2 = json_decode($contribution->hdmf_mp2, true);
+            $hdmf_mpl = json_decode($contribution->hdmf_mpl, true);
+            $hdmf_cl = json_decode($contribution->hdmf_cl, true);
+            $dareco = json_decode($contribution->dareco, true);
+
+
+
+
+            // 1st cutoff 
+            $this->hdmf_pi = $hdmf_pi['ee_share'] ?? null;
+            $this->hdmf_mp2 = $hdmf_mp2['ee_share'] ?? null;
+            $this->hdmf_mpl = $hdmf_mpl['amount'] ?? null;
+            $this->hdmf_cl = $hdmf_cl['ee_share'] ?? null;
+            $this->dareco = $dareco['amount'] ?? null;
+
+            // 2nd cutoff 
+            $this->ss_con = $sss['amount'] ?? null;
+            $this->ec_con = $ec['amount'] ?? null;
+            $this->wisp = $wisp['amount'] ?? null;
+
+            if ($this->cutoff === '1-15') {
+                $this->total_cont = $this->hdmf_pi + $this->hdmf_mp2 + $this->hdmf_mpl
+                    + $this->hdmf_cl + $this->dareco;
+                $this->net_pay = $this->net_pay - $this->total_cont;
+            } elseif ($this->cutoff === '16-31') {
+                $this->total_cont = $this->ss_con + $this->ec_con + $this->wisp;
+                $this->net_pay = $this->net_pay - $this->total_cont;
+            }
+        } else {
+            $this->resetContributionAmounts();
+        }
+
     }
+
+
+    public function resetContributionAmounts()
+    {
+        $this->ss_con = null;
+        $this->ec_con = null;
+        $this->wisp = null;
+        $this->hdmf_pi = null;
+        $this->hdmf_mp2 = null;
+        $this->hdmf_mpl = null;
+        $this->hdmf_cl = null;
+        $this->dareco = null;
+    }
+
 
 
 
@@ -284,7 +341,7 @@ class RawComputation extends Component
                     $this->net_late_absences = $this->gross;
                 }
 
-        $this->calculateNetPay();
+                $this->calculateNetPay();
 
 
             }

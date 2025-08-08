@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('contributions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('employee_id')->constrained()->onDelete('cascade');
             $table->json('hdmf_pi')->nullable();
             $table->json('hdmf_mpl')->nullable();
             $table->json('hdmf_mp2')->nullable();

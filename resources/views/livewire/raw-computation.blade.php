@@ -178,8 +178,7 @@
                                     {{ $field['label'] }}
                                 </label>
                                 <input type="number" step="0.01" id="{{ $field['model'] }}" wire:model.live="{{ $field['model'] }}"
-                                    class="flex-1 mt-2 h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-                        is_null($selectedEmployee) ? 'disabled' : '' }}>
+                                    class="flex-1 mt-2 h-9 border border-gray-200 bg-gray-50 rounded-md px-2" disabled>
                             </div>
                     @endforeach
                 </div>
