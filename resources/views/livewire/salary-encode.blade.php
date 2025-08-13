@@ -53,9 +53,6 @@
             </button>
         </form>
 
-        <div class="h-24 bg-gray-100 p-6  mt-10 rounded-lg">
-            <h2 class="text-gray-400 font-semibold">Reminder</h2>
-        </div>
     </div>
 
     <div class="flex-1 flex flex-col p-6 rounded-xl bg-white h-full overflow-auto">

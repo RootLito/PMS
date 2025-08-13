@@ -18,6 +18,7 @@ class EmployeeContribution extends Component
     public $search = '';
     public $designation = '';
     public $selectedContribution = '';
+    public $sortOrder = '';
     public $percov = '';
     public $selectedEmployee = null;
 
@@ -36,12 +37,35 @@ class EmployeeContribution extends Component
 
 
     // MP2 -------------------------------------------
-    public $mp2_account_number;
-    public $mp2_mem_program;
-    public $mp2_percov;
-    public $ee_share;
-    public $er_share;
-    public $mp2_remarks;
+    // public $mp2_account_number;
+    // public $mp2_mem_program;
+    // public $mp2_percov;
+    // public $ee_share;
+    // public $er_share;
+    // public $mp2_remarks;
+
+    public array $mp2Entries = [
+        [
+            'account_number' => '',
+            'mem_program' => '',
+            'percov' => '',
+            'ee_share' => '',
+            'er_share' => '',
+            'remarks' => '',
+        ]
+    ];
+
+    public function addMp2Entry()
+    {
+        $this->mp2Entries[] = [
+            'account_number' => '',
+            'mem_program' => '',
+            'percov' => '',
+            'ee_share' => '',
+            'er_share' => '',
+            'remarks' => '',
+        ];
+    }
 
 
 
@@ -107,6 +131,60 @@ class EmployeeContribution extends Component
     {
         $this->selectedEmployee = $employeeId;
         $contribution = Contribution::where('employee_id', $employeeId)->first();
+
+
+
+        if (!$contribution) {
+            $this->selectedContributions = [];
+            return; // Or handle no contribution found scenario appropriately
+        }
+        $fields = [
+            'hdmf_pi',
+            'hdmf_mpl',
+            'hdmf_mp2',
+            'hdmf_cl',
+            'dareco',
+            'sss',
+            'ec',
+            'wisp',
+        ];
+
+
+        foreach ($fields as $field) {
+    $jsonString = $contribution->$field;
+    $decoded = json_decode($jsonString, true);
+
+    if (is_array($decoded)) {
+        // Filter all null and empty strings
+        $filtered = array_filter($decoded, function ($value) {
+            return !is_null($value) && $value !== '';
+        });
+
+        // For SSS, EC, WISP, check if 'amount' is empty or zero
+        if (in_array($field, ['sss', 'ec', 'wisp'])) {
+            if (empty($decoded['amount']) || floatval($decoded['amount']) == 0) {
+                // Skip this if amount is empty or zero
+                continue;
+            }
+        }
+
+        if (!empty($filtered)) {
+            if (in_array($field, ['hdmf_pi', 'hdmf_mpl', 'hdmf_mp2', 'hdmf_cl'])) {
+                if (count($filtered) === 1 && array_key_exists('pag_ibig_id_rtn', $filtered)) {
+                    continue;
+                }
+            }
+
+            $selectedContributions[] = $field;
+        }
+    }
+}
+
+
+        $this->selectedContributions = $selectedContributions;
+
+
+
         if ($contribution) {
             $mpl = json_decode($contribution->hdmf_mpl, true) ?? [];
             $mp2 = json_decode($contribution->hdmf_mp2, true) ?? [];
@@ -204,81 +282,79 @@ class EmployeeContribution extends Component
                 'cl_end_term',
             ]);
         }
+
+
     }
     // SAVE CONTRIBUTION ----------------------------------------------------------------
     public function saveContributions()
-    {
-        Contribution::updateOrCreate(
-            ['employee_id' => $this->selectedEmployee],
-            [
-                'hdmf_pi' => json_encode([
-                    'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
-                    'app_no' => $this->account_number,
-                    'mem_program' => $this->mem_program,
-                    'percov' => $this->pi_mc_percov,
-                    'ee_share' => $this->pi_mc_ee_share,
-                    'er_share' => $this->pi_mc_er_share,
-                    'remarks' => $this->pi_mc_remarks,
-                ]),
+{
+    Contribution::updateOrCreate(
+        ['employee_id' => $this->selectedEmployee],
+        [
+            'hdmf_pi' => json_encode([
+                'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
+                'app_no' => $this->account_number,
+                'mem_program' => $this->mem_program,
+                'percov' => $this->pi_mc_percov,
+                'ee_share' => $this->pi_mc_ee_share,
+                'er_share' => $this->pi_mc_er_share,
+                'remarks' => $this->pi_mc_remarks,
+            ]),
 
-                'hdmf_mp2' => json_encode([
-                    'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
-                    'account_number' => $this->mp2_account_number,
-                    'mem_program' => $this->mp2_mem_program,
-                    'percov' => $this->mp2_percov,
-                    'ee_share' => $this->ee_share,
-                    'er_share' => $this->er_share,
-                    'remarks' => $this->mp2_remarks,
-                ]),
+    
+            'hdmf_mp2' => json_encode($this->mp2Entries),
 
-                'hdmf_mpl' => json_encode([
-                    'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
-                    'status' => $this->status,
-                    'app_no' => $this->application_number,
-                    'loan_type' => $this->loan_type,
-                    'amount' => $this->mpl_amount,
-                    'remarks' => $this->mpl_remarks,
-                    'notes' => $this->notes,
-                    'start_te' => $this->start_te,
-                    'end_te' => $this->end_te,
-                ]),
+            'hdmf_mpl' => json_encode([
+                'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
+                'status' => $this->status,
+                'app_no' => $this->application_number,
+                'loan_type' => $this->loan_type,
+                'amount' => $this->mpl_amount,
+                'remarks' => $this->mpl_remarks,
+                'notes' => $this->notes,
+                'start_te' => $this->start_te,
+                'end_te' => $this->end_te,
+            ]),
 
-                'hdmf_cl' => json_encode([
-                    'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
-                    'cl_app_no' => $this->cl_app_no,
-                    'cl_loan_type' => $this->cl_loan_type,
-                    'cl_amount' => $this->cl_amount,
-                    'cl_remarks' => $this->cl_remarks,
-                    'cl_start_term' => $this->cl_start_term,
-                    'cl_end_term' => $this->cl_end_term,
-                ]),
+            'hdmf_cl' => json_encode([
+                'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
+                'cl_app_no' => $this->cl_app_no,
+                'cl_loan_type' => $this->cl_loan_type,
+                'cl_amount' => $this->cl_amount,
+                'cl_remarks' => $this->cl_remarks,
+                'cl_start_term' => $this->cl_start_term,
+                'cl_end_term' => $this->cl_end_term,
+            ]),
 
-                'dareco' => json_encode([
-                    'amount' => $this->dareco_amount,
-                    'remarks' => $this->dareco_remarks,
-                ]),
+            'dareco' => json_encode([
+                'amount' => $this->dareco_amount,
+                'remarks' => $this->dareco_remarks,
+            ]),
 
-                'sss' => json_encode([
-                    'amount' => $this->contributions['sss']['amount'],
-                    'remarks' => $this->remarks,
-                    'difference' => $this->difference,
-                ]),
+            'sss' => json_encode([
+                'amount' => $this->contributions['sss']['amount'],
+                'remarks' => $this->remarks,
+                'difference' => $this->difference,
+            ]),
 
-                'ec' => json_encode([
-                    'amount' => $this->contributions['ec']['amount'],
-                    'remarks' => $this->remarks,
-                    'difference' => $this->difference,
-                ]),
+            'ec' => json_encode([
+                'amount' => $this->contributions['ec']['amount'],
+                'remarks' => $this->remarks,
+                'difference' => $this->difference,
+            ]),
 
-                'wisp' => json_encode([
-                    'amount' => $this->contributions['wisp']['amount'],
-                    'remarks' => $this->remarks,
-                    'difference' => $this->difference,
-                ]),
-            ]
-        );
-        $this->selectedEmployee = null;
-    }
+            'wisp' => json_encode([
+                'amount' => $this->contributions['wisp']['amount'],
+                'remarks' => $this->remarks,
+                'difference' => $this->difference,
+            ]),
+        ]
+    );
+
+
+    $this->selectedEmployee = null;
+}
+
 
 
     public array $selectedContributions = [];
@@ -301,7 +377,7 @@ class EmployeeContribution extends Component
     {
         $this->showContributions = false;
     }
-    
+
     //EXPORT CONTRIBUTION ----------------------------------------------------------------
     public function exportContribution()
     {
@@ -355,6 +431,9 @@ class EmployeeContribution extends Component
             })
             ->when($this->designation, function ($query) {
                 $query->where('designation', $this->designation);
+            })
+            ->when(in_array(strtolower($this->sortOrder), ['asc', 'desc']), function ($query) {
+                $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
             })
             ->paginate(10);
         return view('livewire.employee-contribution', [

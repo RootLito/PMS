@@ -29,7 +29,7 @@
 
         <div class="w-full grid grid-cols-2 gap-2">
             <div>
-                <label for="middle_initial" class="block text-sm text-gray-700">Middle Initial</label>
+                <label for="middle_initial" class="block text-sm text-gray-700">Middle Name</label>
                 <input type="text" id="middle_initial" wire:model="middle_initial"
                     class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
                 @error('middle_initial') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror

@@ -1,15 +1,22 @@
 <div class="flex-1 grid grid-cols-2 gap-10">
     <div class="flex flex-col bg-white rounded-xl p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2 mt-2">
+        <div class="flex justify-between mb-4 gap-2 mt-2">
             <input type="text" placeholder="Search by name..."
-                class="border border-gray-300 bg-gray-50 rounded px-4 py-2 w-full sm:w-1/2" wire:model.live="search">
-            <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-full sm:w-1/4"
-                wire:model.live="designation">
-                <option value="">All Designations</option>
-                @foreach ($designations as $desig)
-                    <option value="{{ $desig }}">{{ $desig }}</option>
-                @endforeach
-            </select>
+                class="border border-gray-300 bg-gray-50 rounded px-4 py-2 w-1/2" wire:model.live="search">
+            <div class="w-1/2 flex gap-2 justify-end">
+                <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-48"
+                    wire:model.live="designation">
+                    <option value="">All Designations</option>
+                    @foreach ($designations as $desig)
+                        <option value="{{ $desig }}">{{ $desig }}</option>
+                    @endforeach
+                </select>
+                <select wire:model.live="sortOrder" class="shadow-sm border rounded border-gray-200 px-4 py-2 w-32">
+                    <option value="">Sort By</option>
+                    <option value="asc">A-Z</option>
+                    <option value="desc">Z-A</option>
+                </select>
+            </div>
         </div>
 
         <div class="overflow-auto mt-6">
@@ -58,9 +65,68 @@
             </table>
         </div>
 
-        <div class="mt-auto">
-            {{ $employees->links() }}
-        </div>
+        @if ($employees->hasPages())
+            <div class="w-full flex justify-between items-end">
+                <div class="flex justify-center text-gray-600 mt-2 text-xs select-none">
+                    @php
+                        $from = $employees->firstItem();
+                        $to = $employees->lastItem();
+                        $total = $employees->total();
+                    @endphp
+                    Showing {{ $from }} to {{ $to }} of {{ number_format($total) }} results
+                </div>
+                <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-center mt-4 text-xs">
+                    <ul class="inline-flex items-center space-x-1 select-none">
+                        @if ($employees->onFirstPage())
+                            <li class="text-gray-400 cursor-not-allowed px-4 py-2 rounded ">&lt;</li>
+                        @else
+                            <li>
+                                <button wire:click="previousPage"
+                                    class="px-4 py-2 rounded hover:bg-gray-200 cursor-pointer bg-white shadow-sm">&lt;</button>
+                            </li>
+                        @endif
+
+                        @php
+                            $current = $employees->currentPage();
+                            $last = $employees->lastPage();
+
+                            if ($current == 1) {
+                                $start = 1;
+                                $end = min(3, $last);
+                            } elseif ($current == $last) {
+                                $start = max($last - 2, 1);
+                                $end = $last;
+                            } else {
+                                $start = max($current - 1, 1);
+                                $end = min($current + 1, $last);
+                            }
+                        @endphp
+                        @for ($page = $start; $page <= $end; $page++)
+                            @if ($page == $current)
+                                <li class="bg-blue-600 text-white px-4 py-2 rounded cursor-default">{{ $page }}
+                                </li>
+                            @else
+                                <li>
+                                    <button wire:click="gotoPage({{ $page }})"
+                                        class="px-4 py-2 rounded hover:bg-gray-200 cursor-pointer">{{ $page }}</button>
+                                </li>
+                            @endif
+                        @endfor
+
+                        @if ($employees->hasMorePages())
+                            <li>
+                                <button wire:click="nextPage"
+                                    class="px-4 py-2 rounded hover:bg-gray-200 cursor-pointer bg-white shadow-sm">&gt;</button>
+                            </li>
+                        @else
+                            <li class="text-gray-400 cursor-not-allowed px-4 py-2 rounded ">&gt;</li>
+                        @endif
+
+                    </ul>
+                </nav>
+
+            </div>
+        @endif
     </div>
 
     <div class="flex flex-col gap-10">
@@ -223,20 +289,19 @@
                     {{ $isDisabled ? 'disabled' : '' }}>
                     CONFIRM
                 </button>
-
             </div>
+        </form>
     </div>
-</div>
-</div>
-@if ($showSaveModal)
-    <div class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded shadow-md w-full max-w-sm">
-            <h2 class="text-lg font-semibold mb-2">Saved Successfully</h2>
-            <p class="text-sm text-gray-700 mb-4">Your calculation has been saved.</p>
-            <button wire:click="$set('showSaveModal', false)"
-                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 text-sm">
-                Close
-            </button>
+    @if ($showSaveModal)
+        <div class="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white p-6 rounded shadow-sm w-full max-w-sm">
+                <h2 class="text-lg font-semibold mb-2">Payroll Added Successfully</h2>
+                <p class="text-sm text-gray-700 mb-4">Your calculation has been saved.</p>
+                <button wire:click.prevent="$set('showSaveModal', false)"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 text-sm cursor-pointer">
+                    Close
+                </button>
+            </div>
         </div>
-    </div>
-@endif
+    @endif
+</div>

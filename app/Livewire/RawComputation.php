@@ -18,6 +18,8 @@ class RawComputation extends Component
     public $cutoff = '';
     public $search = '';
     public $designation = '';
+    public $sortOrder = '';
+
     public $employeeSelectedId = null;
     public $employeeName = '';
     public $selectedEmployee = null;
@@ -439,7 +441,7 @@ class RawComputation extends Component
             ]
         );
 
-        session()->flash('success', 'Calculation saved successfully.');
+        session()->flash('success', 'Payroll Added.');
         $this->resetCalculation();
         $this->showSaveModal = true;
     }
@@ -468,6 +470,9 @@ class RawComputation extends Component
             })
             ->when($this->designation, function ($query) {
                 $query->where('designation', $this->designation);
+            })
+            ->when(in_array(strtolower($this->sortOrder), ['asc', 'desc']), function ($query) {
+                $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
             })
             ->paginate(10);
 

@@ -11,6 +11,7 @@ class ShowEmployee extends Component
     use WithPagination;
     public $search = '';
     public $designation = '';
+    public $sortOrder = '';
     public $designations = [
         "CFO DAVAO CITY",
         "Development of Organizational Policies, Plans & Procedures",
@@ -44,7 +45,7 @@ class ShowEmployee extends Component
         $this->resetPage();
     }
 
-    
+
     public function deleteEmployee($employeeId)
     {
         $employee = Employee::find($employeeId);
@@ -69,6 +70,9 @@ class ShowEmployee extends Component
             })
             ->when($this->designation, function ($query) {
                 $query->where('designation', $this->designation);
+            })
+            ->when(in_array(strtolower($this->sortOrder), ['asc', 'desc']), function ($query) {
+                $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
             })
             ->latest()
             ->paginate(10);

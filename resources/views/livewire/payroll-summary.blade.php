@@ -35,7 +35,7 @@
             </select>
             <button class="bg-green-700 text-white font-semibold px-2 py-1 rounded cursor-pointer hover:bg-green-600"><i
                     class="fa-solid fa-floppy-disk mr-1"></i> Save to Archive</button>
-            <button onclick="printPayroll()"
+            <button wire:click.prevent="exportPayroll"
                 class="bg-blue-700 text-white font-semibold px-2 py-1 rounded cursor-pointer hover:bg-blue-600">
                 <i class="fa-regular fa-file-excel mr-1"></i>Export to Excel</button>
         </div>
@@ -47,7 +47,7 @@
             <div class="flex items-center gap-2 justify-end mb-10 ">
 
                 <select id="newDesignation" wire:model.live="newDesignation"
-                    class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                    class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2">
                     <option value="" disabled>Select designation</option>
                     @foreach ($designations as $designationOption)
                         <option value="{{ $designationOption }}">{{ $designationOption }}</option>
@@ -55,7 +55,7 @@
                 </select>
 
                 <select id="office_name" wire:model.live="office_name"
-                    class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
+                    class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
                     {{ !$newDesignation ? 'disabled' : '' }}>
                     <option value="" disabled>Select office</option>
                     @if ($newDesignation)
@@ -66,13 +66,15 @@
                 </select>
 
                 <input type="text" id="office_code" wire:model="office_code" readonly
-                    class="mt-1 w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                    class="mt-1 w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2">
 
 
                 <button wire:click="confirmSelected"
-                    class="bg-blue-700 text-white font-semibold px-2 h-9 shadow rounded cursor-pointer hover:bg-blue-600">
-                    Confirm
+                    class="text-xs bg-blue-700 text-white font-semibold px-4 h-9 shadow rounded cursor-pointer hover:bg-blue-600 flex items-center space-x-2">
+                    <i class="fas fa-arrow-right mr-2"></i>
+                    <span>Transfer</span>
                 </button>
+
             </div>
         @endif
 
@@ -110,7 +112,8 @@
             </div>
             <p class="text-xs font-bold">CONTRACT OF SERVICES / JOB ORDER</p>
             <h2 class="font-bold">{{ $dateRange }}</h2>
-            <table class="table-auto border-collapse w-full text-xs">
+            <table class="table-auto border-collapse w-full text-xs"
+                style="font-size: 10px; font-family: 'Arial Narrow';">
                 <thead>
                     <tr>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Select</th>
@@ -128,6 +131,7 @@
                         <th colspan="5" class="border border-gray-300 px-2 py-1 text-center">Contributions</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Total Deductions</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Net Pay</th>
+                        {{-- <th rowspan="2" class="border border-gray-300 px-2 py-1">Action</th> --}}
                     </tr>
                     <tr>
                         <th class="border border-gray-300 px-2 py-1">Absent</th>
@@ -143,8 +147,8 @@
                         <tr class="bg-green-200 font-bold border border-gray-300">
                             <td></td>
                             <td></td>
-                            <td  style="font-size: 10px">{{ $offices[0]['office_code'] ?? '-' }}</td>
-                            <td class="px-2 py-1"  style="font-size: 10px">{{ strtoupper($designation) }}</td>
+                            <td style="font-size: 10px">{{ $offices[0]['office_code'] ?? '-' }}</td>
+                            <td class="px-2 py-1" style="font-size: 10px">{{ strtoupper($designation) }}</td>
                             <td></td>
                             <td class=" py-1 text-right ">
                                 {{ number_format($totalPerVoucher[$designation]['totalGross'], 2) }}
@@ -214,6 +218,7 @@
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetPay'], 2) }}
                             </td>
+                            {{-- <td></td> --}}
                         </tr>
 
 
@@ -223,10 +228,12 @@
                                 <tr class="bg-gray-200 font-semibold border border-gray-300">
                                     <td></td>
                                     <td></td>
-                                    <td class="px-2 py-2 font-bold"  style="font-size: 10px">
-                                        {{ $employees['employees']->first()->office_code }}
+                                    <td class="px-2 py-2 font-bold" style="font-size: 10px">
+                                        {{ $employees['office_code'] }}
                                     </td>
-                                    <td colspan="" class="px-2 py-2 font-bold"  style="font-size: 10px">{{ $office }}</td>
+                                    <td colspan="" class="px-2 py-2 font-bold" style="font-size: 10px">
+                                        {{ $employees['office_name'] }}</td>
+                                    {{-- <td colspan="" class="px-2 py-2 font-bold"  style="font-size: 10px">{{ $office }}</td> --}}
                                     <td></td>
                                     <td class="text-right">{{ number_format($employees['totalGross'], 2) }}</td>
                                     <td class="text-right">{{ number_format($employees['totalAbsent'], 2) }}</td>
@@ -250,6 +257,7 @@
                                     <td class="text-right">
                                         {{ number_format($employees['totalTotalDeduction'] ?: 0, 2) }}</td>
                                     <td class="text-right">{{ number_format($employees['totalNetPay'], 2) }}</td>
+                                    {{-- <td></td> --}}
                                 </tr>
                             @endif
 
@@ -264,9 +272,16 @@
                                     <td class="border border-gray-300 px-2 py-1">{{ $loop->iteration }}</td>
                                     <td class="border border-gray-300 px-2 py-1"></td>
                                     <td class="border border-gray-300 px-2 py-2" width="300">
-                                        {{ $employee->first_name }} {{ $employee->middle_initial }}
-                                        {{ $employee->last_name }} {{ $employee->suffix }}
+                                        {{ $employee->first_name }}
+                                        @if (!empty($employee->middle_initial))
+                                            {{ strtoupper(substr($employee->middle_initial, 0, 1)) }}.
+                                        @endif
+                                        {{ $employee->last_name }}
+                                        @if (!empty($employee->suffix))
+                                            {{ $employee->suffix }}
+                                        @endif
                                     </td>
+
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ number_format($employee->monthly_rate, 2) }}
                                     </td>
@@ -321,6 +336,14 @@
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ $rc->net_pay == null || $rc->net_pay == 0 ? '-' : number_format($rc->net_pay, 2) }}
                                     </td>
+                                    {{-- <td class="border border-gray-300 px-2 py-1 text-right">
+                                        <a href="" class="text-blue-500 mr-2"><i class="fas fa-edit"></i></a>
+                                        <button class="p-1 text-red-600 hover:text-red-800" title="Remove"
+                                            aria-label="Remove">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td> --}}
+
                                 </tr>
                             @endforeach
                         @endforeach
@@ -402,6 +425,7 @@
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetPay'], 2) }}
                             </td>
+                            {{-- <td></td> --}}
                         </tr>
 
 
@@ -488,6 +512,7 @@
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetPay'], 2) }}
                             </td>
+                            {{-- <td></td> --}}
                         </tr>
                         <tr class="border-x border-t border-gray-300">
                             <td></td>
@@ -563,6 +588,105 @@
                     <tr class="border-x border-b border-gray-300">
                         <td class="invisible">space</td>
                     </tr>
+
+
+
+
+
+
+                    {{-- @foreach ($groupedVoucherEmployees as $voucherInclude => $offices)
+                        <tr class="bg-blue-100 font-bold">
+                            <td colspan="18" class="border border-gray-300 px-2 py-1">
+                                Voucher: {{ $voucherInclude }}
+                            </td>
+                        </tr>
+
+                        @foreach ($offices as $officeName => $officeData)
+                            <tr class="bg-gray-100 font-semibold">
+                                <td colspan="18" class="border border-gray-300 px-2 py-1">
+                                    Office: {{ $officeName }} — Code: {{ $officeData['office_code'] }}
+                                </td>
+                            </tr>
+
+                            @foreach ($officeData['employeeList'] as $index => $employee)
+                                <tr class="border-b border-gray-200">
+                                    <td class="border px-2 py-1 text-center">
+                                        <input type="checkbox" name="selected_employees[]"
+                                            value="{{ $employee->id }}">
+                                    </td>
+                                    <td class="border px-2 py-1 text-center">{{ $index + 1 }}</td>
+                                    <td class="border px-2 py-1 text-center">
+                                        {{ $employee->rawCalculation->pap ?? '-' }}</td>
+                                    <td class="border px-2 py-1">{{ $employee->full_name }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->monthly_rate, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">{{ number_format($employee->gross, 2) }}
+                                    </td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->absent ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->late_undertime ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->total_absent_late ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->net_late_absences ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->tax ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->net_tax ?? 0, 2) }}</td>
+
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->hdmf_pi ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->hdmf_mpl ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->hdmf_mp2 ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->hdmf_cl ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->dareco ?? 0, 2) }}</td>
+
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->total_deduction ?? 0, 2) }}</td>
+                                    <td class="border px-2 py-1 text-right">
+                                        {{ number_format($employee->rawCalculation->net_pay ?? 0, 2) }}</td>
+                                </tr>
+                            @endforeach
+
+                            <tr class="font-semibold bg-gray-50">
+                                <td colspan="5" class="border px-2 py-1 text-right">Totals for
+                                    {{ $officeName }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalGross'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalAbsent'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalLateUndertime'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalAbsentLate'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalNetLateAbsences'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalTax'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalNetTax'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalHdmfPi'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalHdmfMpl'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalHdmfMp2'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalHdmfCl'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalDareco'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalTotalDeduction'], 2) }}</td>
+                                <td class="border px-2 py-1 text-right">
+                                    {{ number_format($officeData['totalNetPay'], 2) }}</td>
+                            </tr>
+                        @endforeach
+                    @endforeach --}}
 
 
 

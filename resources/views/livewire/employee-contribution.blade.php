@@ -1,19 +1,25 @@
 <div class="flex gap-10">
     <div class="w-1/2 flex flex-col bg-white rounded-xl p-6 h-96 overflow-auto">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2 mt-2">
+        <div class="flex justify-between mb-4 gap-2 mt-2">
             <input type="text" placeholder="Search by name..."
-                class="border border-gray-300 bg-gray-50 rounded px-4 py-2 w-full sm:w-1/2" wire:model.live="search">
-            <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-full sm:w-1/4"
-                wire:model.live="designation">
-                <option value="">All Designations</option>
-                @foreach ($designations as $desig)
-                    <option value="{{ $desig }}">{{ $desig }}</option>
-                @endforeach
-            </select>
+                class="border border-gray-300 bg-gray-50 rounded px-4 py-2 w-1/2" wire:model.live="search">
+            <div class="w-1/2 flex gap-2 justify-end">
+                <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-48" wire:model.live="designation">
+                    <option value="">All Designations</option>
+                    @foreach ($designations as $desig)
+                        <option value="{{ $desig }}">{{ $desig }}</option>
+                    @endforeach
+                </select>
+                <select wire:model.live="sortOrder" class="shadow-sm border rounded border-gray-200 px-4 py-2 w-32">
+                    <option value="">Sort By</option>
+                    <option value="asc">A-Z</option>
+                    <option value="desc">Z-A</option>
+                </select>
+            </div>
         </div>
 
         <div class="overflow-auto mt-6">
-            <table class="min-w-full table-auto text-sm">
+            <table class="min-w-full table-auto text-xs">
                 <thead class="bg-gray-100 text-left">
                     <tr class="border-b border-t border-gray-200 text-gray-700">
                         <th class="px-4 py-2">Last Name</th>
@@ -30,7 +36,12 @@
                             <td class="px-4 py-2">
                                 {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
                             </td>
-                            <td class="px-4 py-2">{{ $employee->middle_initial }}</td>
+                            <td class="px-4 py-2">
+                                {{ $employee->middle_initial }}
+                                @if (!empty($employee->middle_initial))
+                                    .
+                                @endif
+                            </td>
                             <td class="px-4 py-2">{{ $employee->designation }}</td>
                             <td class="px-4 py-2">
                                 <button wire:click="employeeSelected({{ $employee->id }})"
@@ -43,9 +54,71 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-auto">
-            {{ $employees->links() }}
-        </div>
+        @if ($employees->hasPages())
+            <div class="w-full flex justify-between items-end">
+                <div class="flex justify-center text-gray-600 mt-2 text-xs select-none">
+                    @php
+                        $from = $employees->firstItem();
+                        $to = $employees->lastItem();
+                        $total = $employees->total();
+                    @endphp
+                    Showing {{ $from }} to {{ $to }} of {{ number_format($total) }} results
+                </div>
+                <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-center mt-4 text-xs">
+                    <ul class="inline-flex items-center space-x-1 select-none">
+                        @if ($employees->onFirstPage())
+                            <li class="text-gray-400 cursor-not-allowed px-4 py-2 rounded ">&lt;</li>
+                        @else
+                            <li>
+                                <button wire:click="previousPage"
+                                    class="px-4 py-2 rounded hover:bg-gray-200 cursor-pointer bg-white shadow-sm">&lt;</button>
+                            </li>
+                        @endif
+
+                        @php
+                            $current = $employees->currentPage();
+                            $last = $employees->lastPage();
+
+                            if ($current == 1) {
+                                $start = 1;
+                                $end = min(3, $last);
+                            } elseif ($current == $last) {
+                                $start = max($last - 2, 1);
+                                $end = $last;
+                            } else {
+                                $start = max($current - 1, 1);
+                                $end = min($current + 1, $last);
+                            }
+                        @endphp
+                        @for ($page = $start; $page <= $end; $page++)
+                            @if ($page == $current)
+                                <li class="bg-blue-600 text-white px-4 py-2 rounded cursor-default">{{ $page }}
+                                </li>
+                            @else
+                                <li>
+                                    <button wire:click="gotoPage({{ $page }})"
+                                        class="px-4 py-2 rounded hover:bg-gray-200 cursor-pointer">{{ $page }}</button>
+                                </li>
+                            @endif
+                        @endfor
+
+                        @if ($employees->hasMorePages())
+                            <li>
+                                <button wire:click="nextPage"
+                                    class="px-4 py-2 rounded hover:bg-gray-200 cursor-pointer bg-white shadow-sm">&gt;</button>
+                            </li>
+                        @else
+                            <li class="text-gray-400 cursor-not-allowed px-4 py-2 rounded ">&gt;</li>
+                        @endif
+
+                    </ul>
+                </nav>
+
+            </div>
+        @endif
+
+
+
     </div>
 
     <div class="w-1/2 flex flex-col gap-10 bg-white rounded-xl p-6">
@@ -240,47 +313,66 @@
             {{-- MP2 ------------------------------------------------------ --}}
             @if (in_array('hdmf_mp2', $selectedContributions))
                 <div class="mt-6">
-                    <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-MP2</h1>
-                    <div class="w-full flex gap-2 mb-2">
-                        <div class="flex flex-col flex-1">
-                            <label class="block text-xs text-gray-700">Account Number</label>
-                            <input type="text" wire:model="mp2_account_number"
-                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                        </div>
-                        <div class="flex flex-col flex-1">
-                            <label class="block text-xs text-gray-700">Membership Program</label>
-                            <input type="text" wire:model="mp2_mem_program"
-                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                        </div>
+                    <div class="w-full bg-gray-300 flex justify-between items-center">
+                        <h1 class="py-1 px-2 text-gray-700 font-bold ">HMDF-MP2</h1>
+                        <button
+                            class="bg-green-700 text-white py-1 px-4 rounded flex items-center space-x-2 cursor-pointer text-xs mr-1"
+                            wire:click.prevent="addMp2Entry" type="button">
+                            <i class="fas fa-plus"></i>
+                            <span>Add</span>
+                        </button>
                     </div>
-                    <div class="w-full flex gap-2 mb-2">
-                        <div class="flex flex-col flex-1">
-                            <label class="block text-xs text-gray-700">PERCOV</label>
-                            <input type="text" min="0" step="0.01" wire:model="mp2_percov"
-                                class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                                disabled>
+
+                    @foreach ($mp2Entries as $index => $entry)
+                        <div class="w-full mt-4 ">
+                            <div class="w-full flex gap-2 mb-2">
+                                <div class="flex flex-col flex-1">
+                                    <label class="block text-xs text-gray-700">Account Number</label>
+                                    <input type="text"
+                                        wire:model.defer="mp2Entries.{{ $index }}.account_number"
+                                        class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                                </div>
+                                <div class="flex flex-col flex-1">
+                                    <label class="block text-xs text-gray-700">Membership Program</label>
+                                    <input type="text"
+                                        wire:model.defer="mp2Entries.{{ $index }}.mem_program"
+                                        class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                                </div>
+                            </div>
+
+                            <div class="w-full flex gap-2 mb-2">
+                                <div class="flex flex-col flex-1">
+                                    <label class="block text-xs text-gray-700">PERCOV</label>
+                                    <input type="text" wire:model.defer="mp2Entries.{{ $index }}.percov"
+                                        class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                        disabled>
+                                </div>
+                                <div class="flex flex-col flex-1">
+                                    <label class="block text-xs text-gray-700">EE SHARE</label>
+                                    <input type="number" min="0" step="0.01"
+                                        wire:model.defer="mp2Entries.{{ $index }}.ee_share"
+                                        class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                                </div>
+                                <div class="flex flex-col flex-1">
+                                    <label class="block text-xs text-gray-700">ER SHARE</label>
+                                    <input type="number" min="0" step="0.01"
+                                        wire:model.defer="mp2Entries.{{ $index }}.er_share"
+                                        class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col">
+                                <label class="block text-xs text-gray-700">Remarks</label>
+                                <input type="text" wire:model.defer="mp2Entries.{{ $index }}.remarks"
+                                    class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                    {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                            </div>
                         </div>
-                        <div class="flex flex-col flex-1">
-                            <label class="block text-xs text-gray-700">EE SHARE</label>
-                            <input type="number" min="0" step="0.01" wire:model="ee_share"
-                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                        </div>
-                        <div class="flex flex-col flex-1">
-                            <label class="block text-xs text-gray-700">ER SHARE</label>
-                            <input type="number" min="0" step="0.01" wire:model="er_share"
-                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                        </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="block text-xs text-gray-700">Remarks</label>
-                        <input type="text" wire:model="mp2_remarks"
-                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
+                    @endforeach
                 </div>
             @endif
 
