@@ -4,8 +4,7 @@
         <input type="text" placeholder="Search by name..."
             class="border border-gray-300 bg-gray-50 rounded px-4 py-2 w-full sm:w-1/2" wire:model.live="search">
 
-        <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-full sm:w-1/4"
-            wire:model.live="designation">
+        <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-full sm:w-1/4" wire:model.live="designation">
             <option value="">All Designations</option>
             @foreach ($designations as $desig)
                 <option value="{{ $desig }}">{{ $desig }}</option>
@@ -38,8 +37,14 @@
                         <td class="px-4 py-2">
                             {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
                         </td>
+                        <td class="px-4 py-2">
+                            @if (!empty($employee->middle_initial))
+                                {{ strtoupper(substr($employee->middle_initial, 0, 1)) }}.
+                            @else
+                                
+                            @endif
+                        </td>
 
-                        <td class="px-4 py-2">{{ $employee->middle_initial }}</td>
                         <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
                         <td class="px-4 py-2">{{ number_format($employee->gross, 2) }}</td>
                         <td class="px-4 py-2">{{ $employee->designation }}</td>

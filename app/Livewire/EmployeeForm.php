@@ -16,8 +16,6 @@ class EmployeeForm extends Component
     public $designation = '';
     public $office_code = '';
     public $office_name = '';
-
-
     public $monthly_rate = '';
     public $gross;
 
@@ -72,6 +70,7 @@ class EmployeeForm extends Component
             'TOS - Broodstock Production and Maintenance' => '310102100001000',
             'TOS - Freshwater Fingerlings / Seed Production' => '310102100001000',
             'General Management and Supervision' => '100000100001000',
+            'BASIL' => '',
             'WATCHMAN' => '',
         ],
         'PFO DAVAO DE ORO' => [
@@ -169,6 +168,9 @@ class EmployeeForm extends Component
     {
         $this->office_code = $this->officeOptions[$this->designation][$value] ?? '';
     }
+
+
+
     public function updatedMonthlyRate()
     {
         $this->gross = $this->monthly_rate ? number_format($this->monthly_rate / 2, 2, '.', '') : null;
@@ -178,7 +180,7 @@ class EmployeeForm extends Component
         $validatedData = $this->validate([
             'last_name' => 'required|string|max:100',
             'first_name' => 'required|string|max:100',
-            'middle_initial' => 'nullable|string|max:1',
+            'middle_initial' => 'nullable|string|max:100',
             'suffix' => 'nullable|string|max:5',
             'designation' => 'required|string',
             'office_name' => 'nullable|string',
@@ -194,9 +196,6 @@ class EmployeeForm extends Component
 
         return redirect()->route('employee.new');
     }
-
-
-
     public function render()
     {
 

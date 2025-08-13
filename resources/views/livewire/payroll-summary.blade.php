@@ -45,18 +45,38 @@
     <div class="bg-white p-6 min-h-100 rounded-xl">
         @if (count($selectedEmployees) > 0)
             <div class="flex items-center gap-2 justify-end mb-10 ">
-                <select wire:model="selectedDesignation" class="shadow-sm border rounded border-gray-200 px-4 py-2">
-                    <option value="" disabled>Select Voucher</option>
-                    @foreach ($designations as $desig)
-                        <option value="{{ $desig }}">{{ $desig }}</option>
+
+                <select id="newDesignation" wire:model.live="newDesignation"
+                    class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                    <option value="" disabled>Select designation</option>
+                    @foreach ($designations as $designationOption)
+                        <option value="{{ $designationOption }}">{{ $designationOption }}</option>
                     @endforeach
                 </select>
+
+                <select id="office_name" wire:model.live="office_name"
+                    class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
+                    {{ !$newDesignation ? 'disabled' : '' }}>
+                    <option value="" disabled>Select office</option>
+                    @if ($newDesignation)
+                        @foreach ($officeOptions[$newDesignation] ?? [] as $office => $code)
+                            <option value="{{ $office }}">{{ $office }}</option>
+                        @endforeach
+                    @endif
+                </select>
+
+                <input type="text" id="office_code" wire:model="office_code" readonly
+                    class="mt-1 w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+
+
                 <button wire:click="confirmSelected"
-                    class="bg-blue-700 text-white font-semibold px-2 py-1 rounded cursor-pointer hover:bg-blue-600">
+                    class="bg-blue-700 text-white font-semibold px-2 h-9 shadow rounded cursor-pointer hover:bg-blue-600">
                     Confirm
                 </button>
             </div>
         @endif
+
+
 
         @if (session()->has('success'))
             <div class="text-green-600">{{ session('success') }}</div>
@@ -119,292 +139,419 @@
                 </thead>
                 <tbody>
                     @forelse($groupedEmployees as $designation => $offices)
-                                    <tr class="bg-green-200 font-bold border border-gray-300">
-                                        <td></td>
-                                        <td></td>
-                                        {{-- <td>{{ ($office_code) }}</td> --}}
-                                        <td>{{ $offices[0]['office_code'] ?? '-' }}</td>
-                                        <td colspan="18" class="px-2 py-1">{{ strtoupper($designation) }}</td>
-                                    </tr>
+                        {{-- DESIGNATION  --}}
+                        <tr class="bg-green-200 font-bold border border-gray-300">
+                            <td></td>
+                            <td></td>
+                            <td  style="font-size: 10px">{{ $offices[0]['office_code'] ?? '-' }}</td>
+                            <td class="px-2 py-1"  style="font-size: 10px">{{ strtoupper($designation) }}</td>
+                            <td></td>
+                            <td class=" py-1 text-right ">
+                                {{ number_format($totalPerVoucher[$designation]['totalGross'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalAbsent'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalAbsent'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalLateUndertime'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalLateUndertime'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalAbsentLate'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalAbsentLate'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalNetLateAbsences'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetLateAbsences'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalTax'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalTax'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalNetTax'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetTax'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfPi'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfPi'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfMpl'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfMpl'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfMp2'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfMp2'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfCl'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfCl'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalDareco'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalDareco'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalTotalDeduction'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalTotalDeduction'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalNetPay'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetPay'], 2) }}
+                            </td>
+                        </tr>
 
 
-                                    {{-- OFFICE  --}}
-                                    @foreach($offices as $office => $employees)
-                                        @if($employees['employees']->filter(fn($employee) => !empty($employee->office_code))->isNotEmpty())
-                                            <tr class="bg-gray-200 font-semibold border border-gray-300">
-                                                <td></td>
-                                                <td></td>
-                                                <td class="px-2 py-2 font-bold">{{ $employees['employees']->first()->office_code }}</td>
-                                                <td colspan="18" class="px-2 py-2 font-bold">{{ $office }}</td>
-                                            </tr>
-                                        @endif
-                                        @foreach($employees['employees'] as $index => $employee)
-                                                @php
-                                                    $rc = $employee->rawCalculation;
-                                                @endphp
-                                                <tr>
-                                                    <td class="border border-gray-300 px-2 py-1 text-center"><input type="checkbox"
-                                                            wire:model.live="selectedEmployees" value="{{ $employee->id }}"></td>
-                                                    <td class="border border-gray-300 px-2 py-1">{{ $loop->iteration }}</td>
-                                                    <td class="border border-gray-300 px-2 py-1"></td>
-                                                    <td class="border border-gray-300 px-2 py-2" width="300">
-                                                        {{ $employee->first_name }} {{ $employee->middle_initial }} {{ $employee->last_name }} {{
-                                            $employee->suffix }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">{{
-                                            number_format($employee->monthly_rate, 2)
-                                                                                                                                    }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">{{ number_format($employee->gross, 2) }}
-                                                    </td>
+                        {{-- OFFICE  --}}
+                        @foreach ($offices as $office => $employees)
+                            @if ($employees['employees']->filter(fn($employee) => !empty($employee->office_code))->isNotEmpty())
+                                <tr class="bg-gray-200 font-semibold border border-gray-300">
+                                    <td></td>
+                                    <td></td>
+                                    <td class="px-2 py-2 font-bold"  style="font-size: 10px">
+                                        {{ $employees['employees']->first()->office_code }}
+                                    </td>
+                                    <td colspan="" class="px-2 py-2 font-bold"  style="font-size: 10px">{{ $office }}</td>
+                                    <td></td>
+                                    <td class="text-right">{{ number_format($employees['totalGross'], 2) }}</td>
+                                    <td class="text-right">{{ number_format($employees['totalAbsent'], 2) }}</td>
+                                    <td class="text-right">{{ number_format($employees['totalLateUndertime'], 2) }}
+                                    </td>
+                                    <td class="text-right">{{ number_format($employees['totalAbsentLate'], 2) }}</td>
+                                    <td class="text-right">{{ number_format($employees['totalNetLateAbsences'], 2) }}
+                                    </td>
+                                    <td class="text-right">{{ number_format($employees['totalTax'] ?: 0, 2) }}</td>
+                                    <td class="text-right">{{ number_format($employees['totalNetTax'], 2) }}</td>
+                                    <td class="text-right">{{ number_format($employees['totalHdmfPi'] ?: 0, 2) }}</td>
+                                    <td class="text-right">{{ number_format($employees['totalHdmfMpl'] ?: 0, 2) }}
+                                    </td>
+                                    <td class="text-right">{{ number_format($employees['totalHdmfMp2'] ?: 0, 2) }}
+                                    </td>
+                                    <td class="text-right">{{ number_format($employees['totalHdmfCl'] ?: 0, 2) }}</td>
+                                    <td class="text-right">{{ number_format($employees['totalDareco'] ?: 0, 2) }}</td>
+                                    {{-- <td>{{ number_format($employees['totalSsCon'] ?: 0, 2) }}</td>
+                                    <td>{{ number_format($employees['totalEcCon'] ?: 0, 2) }}</td>
+                                    <td>{{ number_format($employees['totalWisp'] ?: 0, 2) }}</td> --}}
+                                    <td class="text-right">
+                                        {{ number_format($employees['totalTotalDeduction'] ?: 0, 2) }}</td>
+                                    <td class="text-right">{{ number_format($employees['totalNetPay'], 2) }}</td>
+                                </tr>
+                            @endif
 
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->absent == null || $rc->absent == 0 ? '-' : number_format($rc->absent, 2) }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->late_undertime == null || $rc->late_undertime == 0 ? '-' :
-                                            number_format($rc->late_undertime, 2) }}
-                                                    </td>
+                            {{-- OFFICE DATA  --}}
+                            @foreach ($employees['employees'] as $index => $employee)
+                                @php
+                                    $rc = $employee->rawCalculation;
+                                @endphp
+                                <tr>
+                                    <td class="border border-gray-300 px-2 py-1 text-center"><input type="checkbox"
+                                            wire:model.live="selectedEmployees" value="{{ $employee->id }}"></td>
+                                    <td class="border border-gray-300 px-2 py-1">{{ $loop->iteration }}</td>
+                                    <td class="border border-gray-300 px-2 py-1"></td>
+                                    <td class="border border-gray-300 px-2 py-2" width="300">
+                                        {{ $employee->first_name }} {{ $employee->middle_initial }}
+                                        {{ $employee->last_name }} {{ $employee->suffix }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ number_format($employee->monthly_rate, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ number_format($employee->gross, 2) }}
+                                    </td>
 
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->total_absent_late == null || $rc->total_absent_late == 0 ? '-' :
-                                            number_format($rc->total_absent_late, 2) }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->net_late_absences == null || $rc->net_late_absences == 0 ? '-' :
-                                            number_format($rc->net_late_absences, 2) }}
-                                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->absent == null || $rc->absent == 0 ? '-' : number_format($rc->absent, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->late_undertime == null || $rc->late_undertime == 0 ? '-' : number_format($rc->late_undertime, 2) }}
+                                    </td>
 
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->tax == null || $rc->tax == 0 ? '-' : number_format($rc->tax, 2) }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->net_tax == null || $rc->net_tax == 0 ? '-' : number_format($rc->net_tax, 2) }}
-                                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->total_absent_late == null || $rc->total_absent_late == 0
+                                            ? '-'
+                                            : number_format($rc->total_absent_late, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->net_late_absences == null || $rc->net_late_absences == 0
+                                            ? '-'
+                                            : number_format($rc->net_late_absences, 2) }}
+                                    </td>
 
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->hdmf_pi == null || $rc->hdmf_pi == 0 ? '-' : number_format($rc->hdmf_pi, 2) }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->hdmf_mpl == null || $rc->hdmf_mpl == 0 ? '-' : number_format($rc->hdmf_mpl, 2) }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->hdmf_mp2 == null || $rc->hdmf_mp2 == 0 ? '-' : number_format($rc->hdmf_mp2, 2) }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->hdmf_cl == null || $rc->hdmf_cl == 0 ? '-' : number_format($rc->hdmf_cl, 2) }}
-                                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->tax == null || $rc->tax == 0 ? '-' : number_format($rc->tax, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->net_tax == null || $rc->net_tax == 0 ? '-' : number_format($rc->net_tax, 2) }}
+                                    </td>
 
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->dareco == null || $rc->dareco == 0 ? '-' : number_format($rc->dareco, 2) }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->total_deduction == null || $rc->total_deduction == 0 ? '-' :
-                                            number_format($rc->total_deduction, 2) }}
-                                                    </td>
-                                                    <td class="border border-gray-300 px-2 py-1 text-right">
-                                                        {{ $rc->net_pay == null || $rc->net_pay == 0 ? '-' : number_format($rc->net_pay, 2) }}
-                                                    </td>
-                                                </tr>
-                                        @endforeach
-                                    @endforeach
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->hdmf_pi == null || $rc->hdmf_pi == 0 ? '-' : number_format($rc->hdmf_pi, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->hdmf_mpl == null || $rc->hdmf_mpl == 0 ? '-' : number_format($rc->hdmf_mpl, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->hdmf_mp2 == null || $rc->hdmf_mp2 == 0 ? '-' : number_format($rc->hdmf_mp2, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->hdmf_cl == null || $rc->hdmf_cl == 0 ? '-' : number_format($rc->hdmf_cl, 2) }}
+                                    </td>
 
-
-
-                                    {{-- ENDLOOP   --}}
-                                    <tr class="bg-yellow-300 font-bold border border-gray-300">
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2 py-1 text-center text-red-600">Total</td>
-                                        <td></td>
-                                        <td class="px-2 py-1 text-right text-red-600">{{ number_format($employees['totalGross'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalAbsent'] == 0 || $employees['totalAbsent'] == null ? '-' :
-                        number_format($employees['totalAbsent'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalLateUndertime'] == 0 || $employees['totalLateUndertime'] == null ? '-' :
-                        number_format($employees['totalLateUndertime'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalAbsentLate'] == 0 || $employees['totalAbsentLate'] == null ? '-' :
-                        number_format($employees['totalAbsentLate'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalNetLateAbsences'] == 0 || $employees['totalNetLateAbsences'] == null ?
-                        '-' :
-                        number_format($employees['totalNetLateAbsences'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalTax'] == 0 || $employees['totalTax'] == null ? '-' :
-                        number_format($employees['totalTax'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalNetTax'] == 0 || $employees['totalNetTax'] == null ? '-' :
-                        number_format($employees['totalNetTax'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalHdmfPi'] == 0 || $employees['totalHdmfPi'] == null ? '-' :
-                        number_format($employees['totalHdmfPi'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalHdmfMpl'] == 0 || $employees['totalHdmfMpl'] == null ? '-' :
-                        number_format($employees['totalHdmfMpl'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalHdmfMp2'] == 0 || $employees['totalHdmfMp2'] == null ? '-' :
-                        number_format($employees['totalHdmfMp2'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalHdmfCl'] == 0 || $employees['totalHdmfCl'] == null ? '-' :
-                        number_format($employees['totalHdmfCl'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalDareco'] == 0 || $employees['totalDareco'] == null ? '-' :
-                        number_format($employees['totalDareco'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalTotalDeduction'] == 0 || $employees['totalTotalDeduction'] == null ? '-'
-                        :
-                        number_format($employees['totalTotalDeduction'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right text-red-600">
-                                            {{ $employees['totalNetPay'] == 0 || $employees['totalNetPay'] == null ? '-' :
-                        number_format($employees['totalNetPay'], 2) }}
-                                        </td>
-                                    </tr>
-                                    <tr class="border-x border-gray-300">
-                                        <td class="invisible">space</td>
-                                    </tr>
-                                    <tr class="bg-blue-400 font-bold border border-gray-300">
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2 py-3 text-left ">GRAND</td>
-                                        <td></td>
-                                        <td class="px-2 py-1 text-right">{{ number_format($employees['totalGross'], 2) }}</td>
-                                        <td class="px-2 py-1 text-right">
-                                            {{ $employees['totalAbsent'] == 0 || $employees['totalAbsent'] == null ? '-' :
-                        number_format($employees['totalAbsent'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right">
-                                            {{ $employees['totalLateUndertime'] == 0 || $employees['totalLateUndertime'] == null ? '-' :
-                        number_format($employees['totalLateUndertime'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right">
-                                            {{ $employees['totalAbsentLate'] == 0 || $employees['totalAbsentLate'] == null ? '-' :
-                        number_format($employees['totalAbsentLate'], 2) }}
-                                        </td>
-
-                                        <td class="px-2 py-1 text-right">
-                                            {{ $employees['totalNetLateAbsences'] == 0 || $employees['totalNetLateAbsences'] == null ?
-                        '-' :
-                        number_format($employees['totalNetLateAbsences'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right ">
-                                            {{ $employees['totalTax'] == 0 || $employees['totalTax'] == null ? '-' :
-                        number_format($employees['totalTax'], 2) }}
-                                        </td>
-
-                                        <td class="px-2 py-1 text-right">
-                                            {{ $employees['totalNetTax'] == 0 || $employees['totalNetTax'] == null ? '-' :
-                        number_format($employees['totalNetTax'], 2) }}
-                                        </td>
-
-                                        <td class="px-2 py-1 text-right ">
-                                            {{ $employees['totalHdmfPi'] == 0 || $employees['totalHdmfPi'] == null ? '-' :
-                        number_format($employees['totalHdmfPi'], 2) }}
-                                        </td>
-
-                                        <td class="px-2 py-1 text-right ">
-                                            {{ $employees['totalHdmfMpl'] == 0 || $employees['totalHdmfMpl'] == null ? '-' :
-                        number_format($employees['totalHdmfMpl'], 2) }}
-                                        </td>
-
-                                        <td class="px-2 py-1 text-right ">
-                                            {{ $employees['totalHdmfMp2'] == 0 || $employees['totalHdmfMp2'] == null ? '-' :
-                        number_format($employees['totalHdmfMp2'], 2) }}
-                                        </td>
-
-                                        <td class="px-2 py-1 text-right ">
-                                            {{ $employees['totalHdmfCl'] == 0 || $employees['totalHdmfCl'] == null ? '-' :
-                        number_format($employees['totalHdmfCl'], 2) }}
-                                        </td>
-
-                                        <td class="px-2 py-1 text-right ">
-                                            {{ $employees['totalDareco'] == 0 || $employees['totalDareco'] == null ? '-' :
-                        number_format($employees['totalDareco'], 2) }}
-                                        </td>
-                                        <td class="px-2 py-1 text-right ">
-                                            {{ $employees['totalTotalDeduction'] == 0 || $employees['totalTotalDeduction'] == null ? '-'
-                        :
-                        number_format($employees['totalTotalDeduction'], 2) }}
-                                        </td>
-
-                                        <td class="px-2 py-1 text-right ">
-                                            {{ $employees['totalNetPay'] == 0 || $employees['totalNetPay'] == null ? '-' :
-                        number_format($employees['totalNetPay'], 2) }}
-                                        </td>
-                                    </tr>
-                                    <tr class="border-x border-t border-gray-300">
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2 ">Prepared:</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2" colspan="2">Checked and Noted by:</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2" colspan="3">Funds Availability:</td>
-                                        <td></td>
-                                        <td class="px-2" colspan="2">Approved:</td>
-                                    </tr>
-                                    <tr class="border-x border-gray-300">
-                                        <td class="invisible">space</td>
-                                    </tr>
-                                    <tr class="border-x border-gray-300">
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2 pt-3 pb-2 font-bold" colspan="2"><u>{{ $assigned->prepared->name ?? '-' }}</u>
-                                        </td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2 pt-3 pb-2 font-bold" colspan="2"><u>{{ $assigned->noted->name ?? '-' }}</u></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2 pt-3 pb-2 font-bold" colspan="4"><u>{{ $assigned->funds->name ?? '-' }}</u></td>
-                                        <td class="px-2 pt-3 pb-2 font-bold" colspan="3"><u>{{ $assigned->approved->name ?? '-' }}</u>
-                                        </td>
-                                    </tr>
-                                    <tr class="border-x border-gray-300">
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2">{{ $assigned->prepared->designation ?? '-' }}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2" colspan="2">{{ $assigned->noted->designation ?? '-' }}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td class="px-2" colspan="4">{{ $assigned->funds->designation ?? '-' }}</td>
-                                        <td class="px-2" colspan="2">{{ $assigned->approved->designation ?? '-' }}</td>
-                                    </tr>
-                                    <tr class="border-x border-b border-gray-300">
-                                        <td class="invisible">space</td>
-                                    </tr>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->dareco == null || $rc->dareco == 0 ? '-' : number_format($rc->dareco, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->total_deduction == null || $rc->total_deduction == 0 ? '-' : number_format($rc->total_deduction, 2) }}
+                                    </td>
+                                    <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{ $rc->net_pay == null || $rc->net_pay == 0 ? '-' : number_format($rc->net_pay, 2) }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endforeach
 
 
 
-                                    {{-- total --}}
+                        {{-- ENDLOOP   --}}
+                        <tr class="bg-yellow-300 font-bold border border-gray-300">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="px-2 py-1 text-center text-red-600">Total</td>
+                            <td></td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ number_format($totalPerVoucher[$designation]['totalGross'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalAbsent'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalAbsent'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalLateUndertime'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalLateUndertime'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalAbsentLate'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalAbsentLate'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalNetLateAbsences'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetLateAbsences'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalTax'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalTax'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalNetTax'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetTax'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfPi'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfPi'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfMpl'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfMpl'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfMp2'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfMp2'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfCl'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfCl'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalDareco'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalDareco'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalTotalDeduction'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalTotalDeduction'], 2) }}
+                            </td>
+                            <td class="px-2 py-1 text-right text-red-600">
+                                {{ ($totalPerVoucher[$designation]['totalNetPay'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetPay'], 2) }}
+                            </td>
+                        </tr>
+
+
+
+                        <tr class="border-x border-gray-300">
+                            <td class="invisible">space</td>
+                        </tr>
+
+
+
+
+
+                        <tr class="bg-blue-400 font-bold border border-gray-300">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="px-2 py-3 text-left ">GRAND</td>
+                            <td></td>
+                            <td class=" py-1 text-right ">
+                                {{ number_format($totalPerVoucher[$designation]['totalGross'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalAbsent'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalAbsent'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalLateUndertime'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalLateUndertime'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalAbsentLate'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalAbsentLate'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalNetLateAbsences'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetLateAbsences'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalTax'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalTax'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalNetTax'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetTax'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfPi'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfPi'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfMpl'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfMpl'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfMp2'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfMp2'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalHdmfCl'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalHdmfCl'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalDareco'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalDareco'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalTotalDeduction'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalTotalDeduction'], 2) }}
+                            </td>
+                            <td class=" py-1 text-right ">
+                                {{ ($totalPerVoucher[$designation]['totalNetPay'] ?? 0) == 0
+                                    ? '-'
+                                    : number_format($totalPerVoucher[$designation]['totalNetPay'], 2) }}
+                            </td>
+                        </tr>
+                        <tr class="border-x border-t border-gray-300">
+                            <td></td>
+                            <td></td>
+                            <td class="px-2 ">Prepared:</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="px-2" colspan="2">Checked and Noted by:</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="px-2" colspan="3">Funds Availability:</td>
+                            <td></td>
+                            <td class="px-2" colspan="2">Approved:</td>
+                        </tr>
+                        <tr class="border-x border-gray-300">
+                            <td class="invisible">space</td>
+                        </tr>
+                        <tr class="border-x border-gray-300">
+                            <td></td>
+                            <td></td>
+                            <td class="px-2 pt-3 pb-2 font-bold" colspan="2">
+                                <u>{{ $assigned->prepared->name ?? '-' }}</u>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="px-2 pt-3 pb-2 font-bold" colspan="2">
+                                <u>{{ $assigned->noted->name ?? '-' }}</u>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="px-2 pt-3 pb-2 font-bold" colspan="4">
+                                <u>{{ $assigned->funds->name ?? '-' }}</u>
+                            </td>
+                            <td class="px-2 pt-3 pb-2 font-bold" colspan="3">
+                                <u>{{ $assigned->approved->name ?? '-' }}</u>
+                            </td>
+                        </tr>
+                        <tr class="border-x border-gray-300">
+                            <td></td>
+                            <td></td>
+                            <td class="px-2">{{ $assigned->prepared->designation ?? '-' }}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="px-2" colspan="2">{{ $assigned->noted->designation ?? '-' }}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="px-2" colspan="4">{{ $assigned->funds->designation ?? '-' }}</td>
+                            <td class="px-2" colspan="2">{{ $assigned->approved->designation ?? '-' }}</td>
+                        </tr>
+                        <tr class="border-x border-b border-gray-300">
+                            <td class="invisible">space</td>
+                        </tr>
+
+
+
+                        {{-- total --}}
                     @empty
                         <tr>
                             <td colspan="18" class="text-center py-4">No payroll data available.</td>
@@ -450,19 +597,25 @@
                         <td class="px-2  py-2 text-center"></td>
                         <td class="px-2 py-2 text-center"></td>
 
-                        <td class="font-bold text-right">{{ number_format($overallTotal['totalAbsentLate'], 2) }}</td>
+                        <td class="font-bold text-right">{{ number_format($overallTotal['totalAbsentLate'], 2) }}
+                        </td>
                         <td></td>
                         <td class="font-bold text-right">{{ number_format($overallTotal['totalTax'], 2) }}</td>
 
-                        @if($cutoff == '1st')
-                            <td class="font-bold text-right">{{ number_format($overallTotal['totalHdmfPi'], 2) }}</td>
-                            <td class="font-bold text-right">{{ number_format($overallTotal['totalHdmfMpl'], 2) }}</td>
-                            <td class="font-bold text-right">{{ number_format($overallTotal['totalHdmfMp2'], 2) }}</td>
-                            <td class="font-bold text-right">{{ number_format($overallTotal['totalHdmfCl'], 2) }}</td>
-                            <td class="font-bold text-right">{{ number_format($overallTotal['totalDareco'], 2) }}</td>
+                        @if ($cutoff == '1st')
+                            <td class="font-bold text-right">{{ number_format($overallTotal['totalHdmfPi'], 2) }}
+                            </td>
+                            <td class="font-bold text-right">{{ number_format($overallTotal['totalHdmfMpl'], 2) }}
+                            </td>
+                            <td class="font-bold text-right">{{ number_format($overallTotal['totalHdmfMp2'], 2) }}
+                            </td>
+                            <td class="font-bold text-right">{{ number_format($overallTotal['totalHdmfCl'], 2) }}
+                            </td>
+                            <td class="font-bold text-right">{{ number_format($overallTotal['totalDareco'], 2) }}
+                            </td>
                         @endif
 
-                        @if($cutoff == '2nd')
+                        @if ($cutoff == '2nd')
                             <td class="font-bold text-right">{{ number_format($overallTotal['totalSsCon'], 2) }}</td>
                             <td class="font-bold text-right">{{ number_format($overallTotal['totalEcCon'], 2) }}</td>
                             <td class="font-bold text-right">{{ number_format($overallTotal['totalWisp'], 2) }}</td>
@@ -476,7 +629,8 @@
                         <td class="font-bold text-right">{{ number_format($overallTotal['totalTotalDeduction'], 2) }}
                         </td>
 
-                        <td class="font-bold text-right px-2">{{ number_format($overallTotal['totalNetPay'], 2) }}</td>
+                        <td class="font-bold text-right px-2">{{ number_format($overallTotal['totalNetPay'], 2) }}
+                        </td>
 
                     </tr>
                     </tr>
@@ -511,7 +665,7 @@
                     </tr>
 
 
-                    @foreach($voucherNetPays as $voucher => $netPay)
+                    @foreach ($voucherNetPays as $voucher => $netPay)
                     <tr class="border border-gray-300">
                         <td></td>
                         <td></td>
@@ -532,6 +686,5 @@
         </div>
     </div>
 </div> @push('scripts')
-    <script src="{{ asset('js/printPayroll.js') }}">
-    </script>
+    <script src="{{ asset('js/printPayroll.js') }}"></script>
 @endpush

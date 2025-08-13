@@ -27,12 +27,22 @@
                 </thead>
                 <tbody>
                     @foreach ($employees as $employee)
-                        <tr class="border-b border-gray-200 hover:bg-gray-100 cursor-pointer">
+                        <tr @class([
+                            'border-b border-gray-200 hover:bg-gray-100 cursor-pointer',
+                            'font-bold bg-green-700' =>
+                                isset($employeeSelectedId) && $employeeSelectedId === $employee->id,
+                        ])>
                             <td class="px-4 py-2">{{ $employee->last_name }}</td>
                             <td class="px-4 py-2">
                                 {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
                             </td>
-                            <td class="px-4 py-2">{{ $employee->middle_initial }}</td>
+                            <td class="px-4 py-2">
+                                {{ $employee->middle_initial }}
+                                @if (!empty($employee->middle_initial))
+                                    .
+                                @endif
+                            </td>
+
                             <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
                             <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
                             <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
@@ -49,30 +59,32 @@
         </div>
 
         <div class="mt-auto">
-            {{-- <div class="text-sm text-gray-600 mb-2">
-                Page {{ $employees->currentPage() }} of {{ $employees->lastPage() }}
-            </div>
-            {{ $employees->links('pagination::simple-tailwind') }} --}}
             {{ $employees->links() }}
         </div>
     </div>
 
     <div class="flex flex-col gap-10">
         <form class="flex-1 flex flex-col bg-white rounded-xl p-6" wire:submit.prevent="saveCalculation">
+            @if ($employeeName)
+                <div class="px-2 py-1 rounded bg-gray-500 ">
+                    <p class="font-semibold text-white uppercase"> {{ $employeeName }} </p>
+                </div>
+            @endif
             <h2 class="text-2xl text-gray-700 font-bold">Deduction</h2>
+
             <p>
                 @if ($selectedEmployee)
                     @if ($matchedRate)
-                        <span class="mr-2">Monthly Rate : {{ number_format($monthly_rate, 2) }}</span>
-                        <span class="mr-2">Daily: {{ number_format($matchedRate['daily'], 2) }}</span>
-                        <span class="mr-2">Halfday: {{ number_format($matchedRate['halfday'], 2) }}</span>
-                        <span class="mr-2">Hourly: {{ number_format($matchedRate['hourly'], 2) }}</span>
-                        <span class="mr-2">Per Minute: {{ number_format($matchedRate['per_min'], 2) }}</span>
+                        <span class="mr-2 text-sm">Monthly Rate : {{ number_format($monthly_rate, 2) }}</span>
+                        <span class="mr-2 text-sm">Daily: {{ number_format($matchedRate['daily'], 2) }}</span>
+                        <span class="mr-2 text-sm">Halfday: {{ number_format($matchedRate['halfday'], 2) }}</span>
+                        <span class="mr-2 text-sm">Hourly: {{ number_format($matchedRate['hourly'], 2) }}</span>
+                        <span class="mr-2 text-sm">Per Minute: {{ number_format($matchedRate['per_min'], 2) }}</span>
                     @else
-                        No rate matched.
+                        <span class="mr-2 text-sm">No rate matched.</span>
                     @endif
                 @else
-                    Please select an employee.
+                    <span class="mr-2 text-sm">Please select an employee.</span>
                 @endif
             </p>
 
@@ -84,8 +96,8 @@
                         Daily
                     </label>
                     <input id="daily" wire:model.live="daily" type="number" min="0" step="0.01"
-                        class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-    is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
 
                 <div class="flex flex-col">
@@ -101,8 +113,8 @@
                         Minutes
                     </label>
                     <input id="minutes" wire:model.live="minutes" type="number" min="0"
-                        class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-    is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
 
                 <div class="flex flex-col">
@@ -136,16 +148,16 @@
                         ADJUSTMENTS
                     </label>
                     <input id="adjustment" wire:model.live="adjustment" type="number"
-                        class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-    is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
                 <div class="flex flex-col">
                     <label for="tax" class="block text-sm text-gray-700">
                         TAX
                     </label>
                     <input id="tax" wire:model.live="tax" type="number"
-                        class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-    is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
             </div>
 
@@ -156,30 +168,31 @@
                         Remarks
                     </label>
                     <input id="remarks" wire:model.live="remarks" type="text"
-                        class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" {{
-    is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
+                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                 </div>
             </div>
 
             <div class="flex justify-between mt-4">
                 <h2 class="text-2xl text-gray-700 font-bold">Contribution</h2>
-                <select wire:model.live="cutoff" class="h-10 border border-gray-200 shadow-sm rounded-md px-2">
+                {{-- <select wire:model.live="cutoff" class="h-10 border border-gray-200 shadow-sm rounded-md px-2">
                     <option value="" disabled>Select Cutoff</option>
                     <option value="1-15">1st Cutoff (1-15)</option>
                     <option value="16-31">2nd Cutoff (16-31)</option>
-                </select>
+                </select> --}}
             </div>
 
             @if ($cutoff)
                 <div class="">
                     @foreach ($fields as $field)
-                            <div class="flex items-center">
-                                <label for="{{ $field['model'] }}" class="text-sm text-gray-700 w-24">
-                                    {{ $field['label'] }}
-                                </label>
-                                <input type="number" step="0.01" id="{{ $field['model'] }}" wire:model.live="{{ $field['model'] }}"
-                                    class="flex-1 mt-2 h-9 border border-gray-200 bg-gray-50 rounded-md px-2" disabled>
-                            </div>
+                        <div class="flex items-center">
+                            <label for="{{ $field['model'] }}" class="text-sm text-gray-700 w-24">
+                                {{ $field['label'] }}
+                            </label>
+                            <input type="number" step="0.01" id="{{ $field['model'] }}"
+                                wire:model.live="{{ $field['model'] }}"
+                                class="flex-1 mt-2 h-9 border border-gray-200 bg-gray-50 rounded-md px-2" disabled>
+                        </div>
                     @endforeach
                 </div>
             @endif
@@ -215,3 +228,15 @@
     </div>
 </div>
 </div>
+@if ($showSaveModal)
+    <div class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white p-6 rounded shadow-md w-full max-w-sm">
+            <h2 class="text-lg font-semibold mb-2">Saved Successfully</h2>
+            <p class="text-sm text-gray-700 mb-4">Your calculation has been saved.</p>
+            <button wire:click="$set('showSaveModal', false)"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 text-sm">
+                Close
+            </button>
+        </div>
+    </div>
+@endif

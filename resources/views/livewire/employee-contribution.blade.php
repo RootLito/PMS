@@ -76,313 +76,352 @@
 
             {{-- PAG-IBIG ID/RTN ------------------------------------------------------ --}}
 
-            <div class="flex flex-col mt-6">
-                <label class="block text-xs text-gray-700">Pag-IBIG ID/RTN</label>
-                <div class="w-full flex justify-between items-center">
-                    <input type="text" wire:model.live="pag_ibig_id_rtn"
-                        class="block w-1/2 h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+            <div class="w-full flex justify-between">
+                <div class="flex flex-col mt-6">
+                    <label class="block text-xs text-gray-700">Pag-IBIG ID/RTN</label>
+                    <div class="w-full flex justify-between items-center">
+                        <input type="text" wire:model.live="pag_ibig_id_rtn"
+                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                    </div>
                 </div>
+                <div class="relative mt-6" style="width: 200px;"> <!-- fixed width -->
+                    <label class="block text-xs text-gray-700 mb-1">Add Contribution</label>
+
+                    <div class="h-9 flex items-center px-4 rounded border border-gray-300 shadow-sm cursor-pointer text-sm truncate whitespace-nowrap overflow-hidden"
+                        wire:click="toggleContributions" style="width: 200px;">
+                        @if (count($selectedContributions))
+                            {{ implode(', ', array_map(fn($val) => $contributionLabels[$val] ?? $val, $selectedContributions)) }}
+                        @else
+                            Select Contributions
+                        @endif
+                    </div>
+
+                    @if ($showContributions)
+                        <div class="w-full absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded shadow p-2 z-10 max-h-60 overflow-y-auto"
+                            style="width: 200px;">
+                            @foreach ($contributionLabels as $value => $label)
+                                <label class="block text-sm cursor-pointer mb-1">
+                                    <input type="checkbox" value="{{ $value }}"
+                                        wire:model="selectedContributions" class="cursor-pointer mr-2">
+                                    {{ $label }}
+                                </label>
+                            @endforeach
+
+                            <button wire:click.prevent="confirmContributions"
+                                class="mt-2 w-full bg-blue-700 text-white font-semibold py-1 rounded hover:bg-blue-600 text-sm">
+                                Confirm
+                            </button>
+                        </div>
+                    @endif
+                </div>
+
+
+
+
             </div>
 
 
             {{-- PI/MC ------------------------------------------------------ --}}
-            <div class="mt-6">
-                <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-PI/MC</h1>
-                <div class="w-full flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Account Number</label>
-                        <input type="text" wire:model="account_number"
-                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+            @if (in_array('hdmf_pi', $selectedContributions))
+                <div class="mt-6">
+                    <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-PI/MC</h1>
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Account Number</label>
+                            <input type="text" wire:model="account_number"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Membership Program</label>
+                            <input type="text" wire:model="mem_program"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
                     </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Membership Program</label>
-                        <input type="text" wire:model="mem_program"
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">PERCOV</label>
+                            <input type="text" min="0" step="0.01" wire:model="pi_mc_percov"
+                                class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                disabled>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">EE SHARE</label>
+                            <input type="number" min="0" step="0.01" wire:model="pi_mc_ee_share"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">ER SHARE</label>
+                            <input type="number" min="0" step="0.01" wire:model="pi_mc_er_share"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="block text-xs text-gray-700">Remarks</label>
+                        <input type="text" wire:model="pi_mc_remarks"
                             class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
                             {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                     </div>
                 </div>
-
-                <div class="w-full flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">PERCOV</label>
-                        <input type="text" min="0" step="0.01" wire:model="pi_mc_percov"
-                            class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" disabled>
-                    </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">EE SHARE</label>
-                        <input type="number" min="0" step="0.01" wire:model="pi_mc_ee_share"
-                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">ER SHARE</label>
-                        <input type="number" min="0" step="0.01" wire:model="pi_mc_er_share"
-                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                </div>
-
-                <div class="flex flex-col">
-                    <label class="block text-xs text-gray-700">Remarks</label>
-                    <input type="text" wire:model="pi_mc_remarks"
-                        class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                </div>
-            </div>
+            @endif
 
 
             {{-- MPL ------------------------------------------------------ --}}
-
-            <div class="mt-6">
-                <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-MPL</h1>
-                <div class="w-full flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Application Number</label>
-                        <input type="text" wire:model="application_number"
-                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+            @if (in_array('hdmf_mpl', $selectedContributions))
+                <div class="mt-6">
+                    <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-MPL</h1>
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Application Number</label>
+                            <input type="text" wire:model="application_number"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Loan Type</label>
+                            <input type="text" wire:model="loan_type"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Amount</label>
+                            <input type="number" min="0" step="0.01" wire:model="mpl_amount"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
                     </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Loan Type</label>
-                        <input type="text" wire:model="loan_type"
-                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Status</label>
+                            <select wire:model="status"
+                                class="text-sm block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                                <option value="" selected disabled> - - Select Status- - </option>
+                                <option value="existing loan">Existing Loan</option>
+                                <option value="new loan">New Loan</option>
+                                <option value="reloan">Reloan</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Start Term</label>
+                            <input type="date" wire:model="start_te"
+                                class="text-sm block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">End Term</label>
+                            <input type="date" wire:model="end_te"
+                                class="text-sm block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
                     </div>
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Amount</label>
-                        <input type="number" min="0" step="0.01" wire:model="mpl_amount"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                </div>
-
-                <div class="w-full flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Status</label>
-                        <select wire:model="status"
-                            class="text-sm block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                            <option value="" selected disabled> - - Select Status- - </option>
-                            <option value="existing loan">Existing Loan</option>
-                            <option value="new loan">New Loan</option>
-                            <option value="reloan">Reloan</option>
-                        </select>
-                    </div>
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Start Term</label>
-                        <input type="date" wire:model="start_te"
-                            class="text-sm block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">End Term</label>
-                        <input type="date" wire:model="end_te"
-                            class="text-sm block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                </div>
-
-                <div class="w-full flex gap-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Remarks</label>
-                        <input type="text" wire:model="mpl_remarks"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Note</label>
-                        <input type="text" wire:model="notes"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                    <div class="w-full flex gap-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Remarks</label>
+                            <input type="text" wire:model="mpl_remarks"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Note</label>
+                            <input type="text" wire:model="notes"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
                     </div>
                 </div>
-            </div>
-
+            @endif
 
 
             {{-- MP2 ------------------------------------------------------ --}}
-            <div class="mt-6">
-                <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-MP2</h1>
-                <div class="w-full flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Account Number</label>
-                        <input type="text" wire:model="mp2_account_number"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+            @if (in_array('hdmf_mp2', $selectedContributions))
+                <div class="mt-6">
+                    <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-MP2</h1>
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Account Number</label>
+                            <input type="text" wire:model="mp2_account_number"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Membership Program</label>
+                            <input type="text" wire:model="mp2_mem_program"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
                     </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Membership Program</label>
-                        <input type="text" wire:model="mp2_mem_program"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">PERCOV</label>
+                            <input type="text" min="0" step="0.01" wire:model="mp2_percov"
+                                class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                disabled>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">EE SHARE</label>
+                            <input type="number" min="0" step="0.01" wire:model="ee_share"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">ER SHARE</label>
+                            <input type="number" min="0" step="0.01" wire:model="er_share"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="block text-xs text-gray-700">Remarks</label>
+                        <input type="text" wire:model="mp2_remarks"
+                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
                             {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                     </div>
                 </div>
-
-                <div class="w-full flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">PERCOV</label>
-                        <input type="text" min="0" step="0.01" wire:model="mp2_percov"
-                            class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            disabled>
-                    </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">EE SHARE</label>
-                        <input type="number" min="0" step="0.01" wire:model="ee_share"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">ER SHARE</label>
-                        <input type="number" min="0" step="0.01" wire:model="er_share"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                </div>
-                <div class="flex flex-col">
-                    <label class="block text-xs text-gray-700">Remarks</label>
-                    <input type="text" wire:model="mp2_remarks"
-                        class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                </div>
-            </div>
-
-
+            @endif
 
 
             {{-- CL ------------------------------------------------------ --}}
-            <div class="mt-6">
-                <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-CL</h1>
-                <div class="w-full flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Application No./Agreement No.</label>
-                        <input type="text" wire:model="cl_app_no"
+            @if (in_array('hdmf_cl', $selectedContributions))
+                <div class="mt-6">
+                    <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">HMDF-CL</h1>
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Account Number</label>
+                            <input type="text" wire:model="cl_account_number"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Membership Program</label>
+                            <input type="text" wire:model="cl_mem_program"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                    </div>
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">PERCOV</label>
+                            <input type="text" min="0" step="0.01" wire:model="cl_percov"
+                                class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                disabled>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">EE SHARE</label>
+                            <input type="number" min="0" step="0.01" wire:model="cl_ee_share"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">ER SHARE</label>
+                            <input type="number" min="0" step="0.01" wire:model="cl_er_share"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="block text-xs text-gray-700">Remarks</label>
+                        <input type="text" wire:model="cl_remarks"
                             class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
                             {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                     </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Loan Type</label>
-                        <input type="text" wire:model="cl_loan_type"
-                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Amount</label>
-                        <input type="text" min="0" step="0.01" wire:model="cl_amount"
-                            class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2">
-                    </div>
                 </div>
+            @endif
 
-                <div class="w-full flex gap-2 mb-2">
-
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Start Term</label>
-                        <input type="date" wire:model="cl_start_term"
-                            class="text-sm block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">End Term</label>
-                        <input type="date" wire:model="cl_end_term"
-                            class="text-sm block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                </div>
-
-                <div class="flex flex-col">
-                    <label class="block text-xs text-gray-700">Remarks</label>
-                    <input type="text" wire:model="cl_remarks"
-                        class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                </div>
-            </div>
 
             {{-- DARECO ------------------------------------------------------ --}}
-            <div class="mt-6">
-                <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">DARECO</h1>
-
-                <div class="w-full flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">Amount</label>
-                        <input type="number" min="0" step="0.01" wire:model="dareco_amount"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+            @if (in_array('dareco', $selectedContributions))
+                <div class="mt-6">
+                    <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">DARECO</h1>
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Account Number</label>
+                            <input type="text" wire:model="dareco_account_number"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">Membership Program</label>
+                            <input type="text" wire:model="dareco_mem_program"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
                     </div>
-
-                    <div class="flex flex-col flex-1">
+                    <div class="w-full flex gap-2 mb-2">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">PERCOV</label>
+                            <input type="text" min="0" step="0.01" wire:model="dareco_percov"
+                                class="text-xs block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                disabled>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">EE SHARE</label>
+                            <input type="number" min="0" step="0.01" wire:model="dareco_ee_share"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">ER SHARE</label>
+                            <input type="number" min="0" step="0.01" wire:model="dareco_er_share"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
                         <label class="block text-xs text-gray-700">Remarks</label>
                         <input type="text" wire:model="dareco_remarks"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                            class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
                             {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                     </div>
                 </div>
-
-            </div>
+            @endif
 
 
             {{-- SSS | EC | WISP ------------------------------------------------------ --}}
-            <div class="w-full mt-6">
-                <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">SSS | EC | WISP</h1>
-                <div class="flex gap-2 mb-2">
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">SSS</label>
-                        <input type="number" min="0" step="0.01" wire:model="contributions.sss.amount"
-                            class="my-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">EC</label>
-                        <input type="number" min="0" step="0.01" wire:model="contributions.ec.amount"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-
-
-                </div>
-
-                <div class="flex gap-2 mb-2">
-
-
-
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700">WISP</label>
-                        <input type="number" min="0" step="0.01" wire:model="contributions.wisp.amount"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                    <div class="flex flex-col flex-1">
-                        <label class="block text-xs text-gray-700"> Difference </label>
-                        <input type="number" min="0" step="0.01" wire:model="difference"
-                            class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+            @if (in_array('sss_ec_wisp', $selectedContributions))
+                <div class="w-full mt-6">
+                    <h1 class="py-1 px-2 bg-gray-300 text-gray-700 font-bold mb-2">SSS | EC | WISP</h1>
+                    <div class="flex gap-4">
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">SSS Number</label>
+                            <input type="text" wire:model="sss_number"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">EC Number</label>
+                            <input type="text" wire:model="ec_number"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block text-xs text-gray-700">WISP Number</label>
+                            <input type="text" wire:model="wisp_number"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                        </div>
                     </div>
                 </div>
+            @endif
 
-                <div class="flex flex-col">
-                    <label class="block text-xs text-gray-700">Remarks</label>
-                    <input type="text" wire:model="remarks"
-                        class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                        {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                </div>
-            </div>
 
-            <button type="submit"
-                class="mt-4 mb-4 w-full h-10 bg-slate-700 rounded-md text-white {{ is_null($selectedEmployee) ? 'cursor-default opacity-50' : 'cursor-pointer' }}"
-                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                CONFIRM
-            </button>
+            @if (is_null($selectedEmployee))
+            @elseif (empty($selectedContributions))
+                <p
+                    class="text-gray-600 text-sm mt-4 mb-4 w-full h-10 flex items-center justify-center bg-gray-300 rounded-md font-semibold">
+                    Please select contribution(s)
+                </p>
+            @else
+                <button type="submit"
+                    class="mt-4 mb-4 w-full h-10 bg-slate-700 rounded-md text-white cursor-pointer">
+                    CONFIRM
+                </button>
+            @endif
+
         </form>
     </div>
 </div>

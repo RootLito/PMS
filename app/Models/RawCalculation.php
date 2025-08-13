@@ -27,6 +27,9 @@ class RawCalculation extends Model
         'net_pay',
         'remarks',
         'voucher_include',
+        'office_code',
+        'office_name',
+        'employee_id',
     ];
 
     public function employee()

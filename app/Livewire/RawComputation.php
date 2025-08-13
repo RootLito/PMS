@@ -18,6 +18,8 @@ class RawComputation extends Component
     public $cutoff = '';
     public $search = '';
     public $designation = '';
+    public $employeeSelectedId = null;
+    public $employeeName = '';
     public $selectedEmployee = null;
     public $monthly_rate = null;
     public $matchedRate;
@@ -42,6 +44,8 @@ class RawComputation extends Component
     public $dareco = null;
     public $total_cont = null;
     public $currentCutoffLabel = '';
+    public bool $showSaveModal = false;
+
     public $fields = [];
 
 
@@ -82,30 +86,6 @@ class RawComputation extends Component
             ['label' => 'WISP', 'model' => 'wisp'],
         ],
     ];
-
-
-
-    // protected $deductionRates = [];
-
-    // protected $deductionRates = [
-    //     13378 => ['daily' => 608.09, 'halfday' => 304.04, 'hourly' => 76.01, 'per_min' => 1.26],
-    //     15275 => ['daily' => 694.31, 'halfday' => 347.15, 'hourly' => 86.78, 'per_min' => 1.44],
-    //     15368 => ['daily' => 698.54, 'halfday' => 349.27, 'hourly' => 87.31, 'per_min' => 1.45],
-    //     15738 => ['daily' => 715.36, 'halfday' => 357.68, 'hourly' => 89.42, 'per_min' => 1.49],
-    //     16458 => ['daily' => 748.09, 'halfday' => 374.04, 'hourly' => 93.51, 'per_min' => 1.55],
-    //     16758 => ['daily' => 761.72, 'halfday' => 380.86, 'hourly' => 95.21, 'per_min' => 1.58],
-    //     17179 => ['daily' => 780.86, 'halfday' => 390.43, 'hourly' => 97.60, 'per_min' => 1.62],
-    //     17505 => ['daily' => 795.68, 'halfday' => 397.84, 'hourly' => 99.46, 'per_min' => 1.65],
-    //     18251 => ['daily' => 829.59, 'halfday' => 414.79, 'hourly' => 103.69, 'per_min' => 1.72],
-    //     18784 => ['daily' => 853.81, 'halfday' => 426.90, 'hourly' => 106.72, 'per_min' => 1.77],
-    //     20572 => ['daily' => 935.09, 'halfday' => 467.54, 'hourly' => 116.88, 'per_min' => 1.94],
-    //     21205 => ['daily' => 963.86, 'halfday' => 481.93, 'hourly' => 120.48, 'per_min' => 2.00],
-    //     23877 => ['daily' => 1085.31, 'halfday' => 542.65, 'hourly' => 135.66, 'per_min' => 2.26],
-    //     25232 => ['daily' => 1146.90, 'halfday' => 573.45, 'hourly' => 143.36, 'per_min' => 2.38],
-    //     25439 => ['daily' => 1156.31, 'halfday' => 578.15, 'hourly' => 144.53, 'per_min' => 2.40],
-    //     35097 => ['daily' => 1595.31, 'halfday' => 797.65, 'hourly' => 199.41, 'per_min' => 3.32],
-    //     75359 => ['daily' => 3425.40, 'halfday' => 1712.70, 'hourly' => 428.17, 'per_min' => 7.13],
-    // ];
 
     public function mount()
     {
@@ -166,6 +146,10 @@ class RawComputation extends Component
             $this->net_late_absences = $employee->gross;
             $this->net_pay = $employee->gross;
 
+            $this->employeeSelectedId = $employee->id;
+            $this->employeeName = $employee->first_name . ', ' . $employee->middle_initial . ' ' . $employee->last_name;
+
+
             $this->monthly_rate = round((float) $employee->monthly_rate, 2);
 
             $this->matchedRate = $this->deductionRates[$this->monthly_rate] ?? null;
@@ -205,13 +189,14 @@ class RawComputation extends Component
             $this->wisp = $wisp['amount'] ?? null;
 
             if ($this->cutoff === '1-15') {
-                $this->total_cont = $this->hdmf_pi + $this->hdmf_mp2 + $this->hdmf_mpl
-                    + $this->hdmf_cl + $this->dareco;
+                $this->total_cont = (float) $this->hdmf_pi + (float) $this->hdmf_mp2 + (float) $this->hdmf_mpl
+                    + (float) $this->hdmf_cl + (float) $this->dareco;
                 $this->net_pay = $this->net_pay - $this->total_cont;
             } elseif ($this->cutoff === '16-31') {
-                $this->total_cont = $this->ss_con + $this->ec_con + $this->wisp;
+                $this->total_cont = (float) $this->ss_con + (float) $this->ec_con + (float) $this->wisp;
                 $this->net_pay = $this->net_pay - $this->total_cont;
             }
+
         } else {
             $this->resetContributionAmounts();
         }
@@ -456,6 +441,7 @@ class RawComputation extends Component
 
         session()->flash('success', 'Calculation saved successfully.');
         $this->resetCalculation();
+        $this->showSaveModal = true;
     }
 
 

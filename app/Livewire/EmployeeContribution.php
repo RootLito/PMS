@@ -279,42 +279,53 @@ class EmployeeContribution extends Component
         );
         $this->selectedEmployee = null;
     }
+
+
+    public array $selectedContributions = [];
+    public bool $showContributions = false;
+
+    public array $contributionLabels = [
+        'hdmf_pi' => 'HDMF - PI',
+        'hdmf_mp2' => 'HDMF - MP2',
+        'hdmf_mpl' => 'HDMF - MPL',
+        'hdmf_cl' => 'HDMF - CL',
+        'dareco' => 'DARECO',
+        'sss_ec_wisp' => 'SSS, EC, WISP',
+    ];
+
+    public function toggleContributions()
+    {
+        $this->showContributions = !$this->showContributions;
+    }
+    public function confirmContributions()
+    {
+        $this->showContributions = false;
+    }
+    
     //EXPORT CONTRIBUTION ----------------------------------------------------------------
     public function exportContribution()
     {
 
         switch ($this->selectedContribution) {
             case 'hdmf_pi':
-                // Handle HDMF - PI contribution logic
-                // ...
                 break;
 
             case 'hdmf_mp2':
-                // Handle HDMF - MP2 contribution logic
-                // ...
                 break;
 
             case 'hdmf_mpl':
                 $year = (String) Carbon::now()->year;
                 return Excel::download(new HmdfMpl, "COS-MPL {$year}.xlsx");
             case 'hdmf_cl':
-                // Handle HDMF - CL contribution logic
-                // ...
                 break;
 
             case 'dareco':
-                // Handle DARECO contribution logic
-                // ...
                 break;
 
             case 'sss_ec_wisp':
-                // Handle SSS, EC, WISP contribution logic
-                // ...
                 break;
 
             default:
-                // Handle default case (e.g., no contribution selected)
-                // ...
                 break;
         }
 

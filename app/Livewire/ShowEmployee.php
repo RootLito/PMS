@@ -70,6 +70,7 @@ class ShowEmployee extends Component
             ->when($this->designation, function ($query) {
                 $query->where('designation', $this->designation);
             })
+            ->latest()
             ->paginate(10);
 
 
