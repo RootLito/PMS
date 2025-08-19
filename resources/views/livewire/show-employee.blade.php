@@ -122,7 +122,7 @@
                     @endphp
                     @for ($page = $start; $page <= $end; $page++)
                         @if ($page == $current)
-                            <li class="bg-blue-600 text-white px-4 py-2 rounded cursor-default">{{ $page }}
+                            <li class="bg-slate-700 text-white px-4 py-2 rounded cursor-default">{{ $page }}
                             </li>
                         @else
                             <li>

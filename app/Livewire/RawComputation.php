@@ -19,7 +19,6 @@ class RawComputation extends Component
     public $search = '';
     public $designation = '';
     public $sortOrder = '';
-
     public $employeeSelectedId = null;
     public $employeeName = '';
     public $selectedEmployee = null;
@@ -119,7 +118,7 @@ class RawComputation extends Component
         }
     }
 
-
+    public $mp2Entries = [];
     public function employeeSelected($employeeId)
     {
         $this->deductionRates = [];
@@ -149,7 +148,14 @@ class RawComputation extends Component
             $this->net_pay = $employee->gross;
 
             $this->employeeSelectedId = $employee->id;
-            $this->employeeName = $employee->first_name . ', ' . $employee->middle_initial . ' ' . $employee->last_name;
+            $this->employeeName = $employee->last_name . ', ' . $employee->first_name;
+            if (!empty($employee->suffix)) {
+                $this->employeeName .= ' ' . $employee->suffix;
+            }
+
+            if (!empty($employee->middle_initial)) {
+                $this->employeeName .= ' ' . strtoupper(substr($employee->middle_initial, 0, 1)) . '.';
+            }
 
 
             $this->monthly_rate = round((float) $employee->monthly_rate, 2);
@@ -175,14 +181,22 @@ class RawComputation extends Component
             $hdmf_cl = json_decode($contribution->hdmf_cl, true);
             $dareco = json_decode($contribution->dareco, true);
 
+            $this->mp2Entries = json_decode($contribution->hdmf_mp2, true) ?? [];
+            // $eeShares = array_column($hdmf_mp2, 'ee_share'); 
+            // $totalEeShare = array_sum(array_column($hdmf_mp2, 'ee_share'));
+            if (is_array($hdmf_mp2)) {
+                $totalEeShare = array_sum(array_column($hdmf_mp2, 'ee_share'));
+            } else {
+                $totalEeShare = null;
+            }
 
 
 
             // 1st cutoff 
             $this->hdmf_pi = $hdmf_pi['ee_share'] ?? null;
-            $this->hdmf_mp2 = $hdmf_mp2['ee_share'] ?? null;
+            $this->hdmf_mp2 = $totalEeShare ?? null;
             $this->hdmf_mpl = $hdmf_mpl['amount'] ?? null;
-            $this->hdmf_cl = $hdmf_cl['ee_share'] ?? null;
+            $this->hdmf_cl = $hdmf_cl['cl_amount'] ?? null;
             $this->dareco = $dareco['amount'] ?? null;
 
             // 2nd cutoff 
@@ -205,7 +219,6 @@ class RawComputation extends Component
 
     }
 
-
     public function resetContributionAmounts()
     {
         $this->ss_con = null;
@@ -217,11 +230,6 @@ class RawComputation extends Component
         $this->hdmf_cl = null;
         $this->dareco = null;
     }
-
-
-
-
-
 
     public function resetCalculation()
     {
@@ -440,10 +448,19 @@ class RawComputation extends Component
                 'remarks' => $this->remarks,
             ]
         );
+        $this->dispatchBrowserEvent('alert', ['type' => 'success', 'message' => 'Operation completed']);
+
+
+
+
 
         session()->flash('success', 'Payroll Added.');
         $this->resetCalculation();
-        $this->showSaveModal = true;
+        // $this->showSaveModal = true;
+
+
+
+
     }
 
 

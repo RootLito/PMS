@@ -205,6 +205,8 @@ class PayrollSummary extends Component
         $year = $today->year;
         $month = strtoupper($today->format('F'));
 
+
+        
         if ($day <= 15) {
             $this->cutoff = '1st';
             $this->dateRange = "{$month} 1-15, {$year}";
@@ -370,7 +372,7 @@ $groupedEmployees = $filteredEmployees
                 'totalDareco' => $offices->sum('totalDareco'),
                 'totalSsCon' => $offices->sum('totalSsCon'),
                 'totalEcCon' => $offices->sum('totalEcCon'),
-                'totalWisp' => $offices->sum('totalWisp'),
+                'totalWi sp' => $offices->sum('totalWisp'),
                 'totalTotalDeduction' => $offices->sum('totalTotalDeduction'),
                 'totalNetPay' => $offices->sum('totalNetPay'),
             ];

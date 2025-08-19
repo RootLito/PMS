@@ -4,8 +4,7 @@
             <input type="text" placeholder="Search by name..."
                 class="border border-gray-300 bg-gray-50 rounded px-4 py-2 w-1/2" wire:model.live="search">
             <div class="w-1/2 flex gap-2 justify-end">
-                <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-48"
-                    wire:model.live="designation">
+                <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-48" wire:model.live="designation">
                     <option value="">All Designations</option>
                     @foreach ($designations as $desig)
                         <option value="{{ $desig }}">{{ $desig }}</option>
@@ -34,11 +33,8 @@
                 </thead>
                 <tbody>
                     @foreach ($employees as $employee)
-                        <tr @class([
-                            'border-b border-gray-200 hover:bg-gray-100 cursor-pointer',
-                            'font-bold bg-green-700' =>
-                                isset($employeeSelectedId) && $employeeSelectedId === $employee->id,
-                        ])>
+                        <tr
+                            class="border-b border-gray-200 cursor-pointer {{ $selectedEmployee === $employee->id ? 'bg-gray-300' : '' }}">
                             <td class="px-4 py-2">{{ $employee->last_name }}</td>
                             <td class="px-4 py-2">
                                 {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
@@ -54,9 +50,14 @@
                             <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
                             <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
                             <td class="px-4 py-2">
-                                <button wire:click="employeeSelected({{ $employee->id }})"
+                                {{-- <button wire:click="employeeSelected({{ $employee->id }})"
                                     class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer">
                                     Select
+                                </button> --}}
+
+                                <button wire:click="employeeSelected({{ $employee->id }})"
+                                    class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer">
+                                    {{ $selectedEmployee === $employee->id ? 'Selected' : 'Select' }}
                                 </button>
                             </td>
                         </tr>
@@ -103,7 +104,7 @@
                         @endphp
                         @for ($page = $start; $page <= $end; $page++)
                             @if ($page == $current)
-                                <li class="bg-blue-600 text-white px-4 py-2 rounded cursor-default">{{ $page }}
+                                <li class="bg-slate-700 text-white px-4 py-2 rounded cursor-default">{{ $page }}
                                 </li>
                             @else
                                 <li>
@@ -292,7 +293,7 @@
             </div>
         </form>
     </div>
-    @if ($showSaveModal)
+    {{-- @if ($showSaveModal)
         <div class="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
             <div class="bg-white p-6 rounded shadow-sm w-full max-w-sm">
                 <h2 class="text-lg font-semibold mb-2">Payroll Added Successfully</h2>
@@ -303,5 +304,7 @@
                 </button>
             </div>
         </div>
-    @endif
+    @endif --}}
 </div>
+
+
