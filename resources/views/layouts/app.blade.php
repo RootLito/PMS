@@ -47,29 +47,32 @@
     </div>
 
 
-    <script>
-        $(document).ready(function() {
-            toastr.options = {
-                "progressBar": true,
-                "positionClass": "toast-top-right"
-            };
-        });
+    @once
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                toastr.options = {
+                    "progressBar": true,
+                    "positionClass": "toast-bottom-right"
+                };
 
-        window.addEventListener('success', event => {
-            toastr.success(event.detail.message);
-        });
+                window.addEventListener('success', event => {
+                    toastr.success(event.detail.message);
+                });
 
-        window.addEventListener('warning', event => {
-            toastr.warning(event.detail.message);
-        });
+                window.addEventListener('warning', event => {
+                    toastr.warning(event.detail.message);
+                });
 
-        window.addEventListener('error', event => {
-            toastr.error(event.detail.message);
-        });
-    </script>
+                window.addEventListener('error', event => {
+                    toastr.error(event.detail.message);
+                });
+            });
+        </script>
+    @endonce
+
+
 
     @livewireScripts
     @stack('scripts')
 </body>
-
 </html>

@@ -74,3 +74,9 @@ Route::get('/salary', function () {
 Route::get('/contribution', function () {
     return view('jocos.contribution');
 })->name('contribution');
+
+
+//CONTRIBUTION ROUTE
+Route::get('/designation', function () {
+    return view('jocos.designation');
+})->name('designation');

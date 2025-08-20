@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\WithPagination;
 use Livewire\Component;
 use App\Models\Employee;
+use App\Models\Designation;
+
 
 class ShowEmployee extends Component
 {
@@ -12,28 +14,14 @@ class ShowEmployee extends Component
     public $search = '';
     public $designation = '';
     public $sortOrder = '';
-    public $designations = [
-        "CFO DAVAO CITY",
-        "Development of Organizational Policies, Plans & Procedures",
-        "Extension, Support, Education and Training Services (ESETS)",
-        "Fisheries Inspection and Quarantine Unit",
-        "Fisheries Laboratory Section",
-        "FPSSD",
-        "FPSSD (LGU Assisted)",
-        "General Management and Supervision - ORD",
-        "General Management and Supervision-PFO DAVAO DEL NORTE",
-        "Monitoring, Control and Surveillance - FMRED",
-        "MULTI-SPECIES HATCHERY- BATO",
-        "Operation and Management of Production Facilities - TOS TAGABULI",
-        "PFO DAVAO DE ORO",
-        "PFO DAVAO DEL SUR",
-        "PFO DAVAO OCCIDENTAL",
-        "PFO DAVAO ORIENTAL",
-        "Regional Adjudication and Committee Secretariat",
-        "Regional Fisheries Information Management Unit - RFIMU",
-        "SAAD",
-        "TOS NABUNTURAN"
-    ];
+    public $deletingId = null;
+
+    public $designations = [];
+
+    public function mount()
+    {
+        $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
+    }
 
     public function updatingSearch()
     {
@@ -46,16 +34,21 @@ class ShowEmployee extends Component
     }
 
 
-    public function deleteEmployee($employeeId)
+    public function confirmDelete($id)
     {
-        $employee = Employee::find($employeeId);
+        $this->deletingId = $id;
+    }
 
-        if ($employee) {
-            $employee->delete();
-            session()->flash('message', 'Employee successfully deleted.');
-        } else {
-            session()->flash('error', 'Employee not found.');
-        }
+    public function cancelDelete()
+    {
+        $this->deletingId = null;
+    }
+
+    public function deleteEmployeeConfirmed()
+    {
+        Employee::findOrFail($this->deletingId)->delete();
+        $this->deletingId = null;
+        $this->dispatch('success', message: 'Employee deleted.');
     }
 
 

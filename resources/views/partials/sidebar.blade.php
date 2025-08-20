@@ -1,11 +1,8 @@
 <div class="h-screen flex flex-col p-6 border-r border-gray-200">
     <div class="w-full flex flex-col gap-4">
-        <div class="mx-auto w-32 h-32 rounded-full overflow-hidden">
-            <img src="{{ asset('images/bfar.png') }}" alt="BFAR Logo" class="mx-auto w-auto h-32">
+        <img src="{{ asset('images/bfar.png') }}" alt="BFAR Logo" class="mx-auto w-auto h-32">
 
-        </div>
-
-        <h2 class="text-3xl text-center font-black text-slate-700">PMS</h2>
+        <h2 class="text-5xl text-center font-black text-slate-700">P.M.S.</h2>
     </div>
 
 
@@ -57,6 +54,12 @@
                {{ request()->is('contribution*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-money-bill-wave ml-5 text-lg"></i>
             Contribution
+        </a>
+        <a href="/designation"
+            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('designation*') ? 'bg-gray-300 text-gray-700' : '' }}">
+           <i class="fa-solid fa-address-card ml-5 text-lg"></i>
+            Designation
         </a>
     </div>
 

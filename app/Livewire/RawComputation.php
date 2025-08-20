@@ -448,19 +448,8 @@ class RawComputation extends Component
                 'remarks' => $this->remarks,
             ]
         );
-        $this->dispatchBrowserEvent('alert', ['type' => 'success', 'message' => 'Operation completed']);
-
-
-
-
-
-        session()->flash('success', 'Payroll Added.');
+        $this->dispatch('success', message: 'Payroll added!');
         $this->resetCalculation();
-        // $this->showSaveModal = true;
-
-
-
-
     }
 
 

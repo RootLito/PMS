@@ -104,7 +104,8 @@
                         @endphp
                         @for ($page = $start; $page <= $end; $page++)
                             @if ($page == $current)
-                                <li class="bg-slate-700 text-white px-4 py-2 rounded cursor-default">{{ $page }}
+                                <li class="bg-slate-700 text-white px-4 py-2 rounded cursor-default">
+                                    {{ $page }}
                                 </li>
                             @else
                                 <li>
@@ -285,26 +286,11 @@
                     $isDisabled = is_null($selectedEmployee);
                 @endphp
 
-                <button
-                    class="w-full h-10 bg-slate-700 rounded-md text-white {{ $isDisabled ? 'cursor-default opacity-50' : 'cursor-pointer' }}"
-                    {{ $isDisabled ? 'disabled' : '' }}>
+                <button class="w-full h-10 bg-slate-700 rounded-md text-white {{ $isDisabled ? 'cursor-default opacity-50' : 'cursor-pointer' }}"
+                    @disabled($isDisabled)>
                     CONFIRM
                 </button>
             </div>
         </form>
     </div>
-    {{-- @if ($showSaveModal)
-        <div class="absolute inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-            <div class="bg-white p-6 rounded shadow-sm w-full max-w-sm">
-                <h2 class="text-lg font-semibold mb-2">Payroll Added Successfully</h2>
-                <p class="text-sm text-gray-700 mb-4">Your calculation has been saved.</p>
-                <button wire:click.prevent="$set('showSaveModal', false)"
-                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 text-sm cursor-pointer">
-                    Close
-                </button>
-            </div>
-        </div>
-    @endif --}}
 </div>
-
-

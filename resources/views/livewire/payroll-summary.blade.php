@@ -612,7 +612,7 @@
 
                         {{-- total --}}
                         @empty
-                            <tr>
+                            <tr class="border-x border-gray-300">
                                 <td colspan="18" class="text-center py-4">No payroll data available.</td>
                             </tr>
                         @endforelse

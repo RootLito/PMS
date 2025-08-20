@@ -282,46 +282,6 @@ class PayrollSummary extends Component
         });
 
 
-        // $voucherNetPays = collect($this->designation)->mapWithKeys(function ($voucher) use ($filteredEmployees) {
-        //     $totalNetPay = $filteredEmployees
-        //         ->filter(function ($e) use ($voucher) {
-        //             $effectiveDesignation = $e->rawCalculation->voucher_include ?? $e->designation;
-        //             return $effectiveDesignation === $voucher;
-        //         })
-        //         ->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0));
-
-        //     return [$voucher => $totalNetPay];
-        // });
-
-        // $groupedEmployees = $filteredEmployees
-        //     ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
-        //     ->map(
-        //         fn($group) =>
-        //         $group->groupBy(
-        //             fn($e) => $e->rawCalculation->office_name ?? $e->office_name
-        //         )->map(fn($officeGroup) => [
-        //                 'employees' => $officeGroup,
-        //                 'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code,
-        //                 'totalGross' => $officeGroup->sum('gross'),
-        //                 'totalAbsent' => $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0),
-        //                 'totalLateUndertime' => $officeGroup->sum(fn($e) => $e->rawCalculation->late_undertime ?? 0),
-        //                 'totalAbsentLate' => $officeGroup->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
-        //                 'totalNetLateAbsences' => $officeGroup->sum(fn($e) => $e->rawCalculation->net_late_absences ?? 0),
-        //                 'totalTax' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0)),
-        //                 'totalNetTax' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_tax ?? 0)),
-        //                 'totalHdmfPi' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0)),
-        //                 'totalHdmfMpl' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0)),
-        //                 'totalHdmfMp2' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0)),
-        //                 'totalHdmfCl' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0)),
-        //                 'totalDareco' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0)),
-        //                 'totalSsCon' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0)),
-        //                 'totalEcCon' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0)),
-        //                 'totalWisp' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0)),
-        //                 'totalTotalDeduction' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->total_deduction ?? 0)),
-        //                 'totalNetPay' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
-        //             ])
-        //     );
-
 
 
 $groupedEmployees = $filteredEmployees
@@ -380,7 +340,6 @@ $groupedEmployees = $filteredEmployees
 
 
 
-
         $overallTotal = [
             'totalGross' => $filteredEmployees->sum('gross'),
             'totalAbsentLate' => $filteredEmployees->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
@@ -396,38 +355,7 @@ $groupedEmployees = $filteredEmployees
             'totalTotalDeduction' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->total_deduction ?? 0)),
             'totalNetPay' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
         ];
-        // $groupedVoucherEmployees = $filteredEmployees
-        //     ->filter(fn($e) => !is_null($e->rawCalculation->voucher_include))
-        //     ->groupBy(fn($e) => $e->rawCalculation->voucher_include)
-        //     ->map(function ($voucherGroup) {
-        //         return $voucherGroup->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
-        //             ->map(function ($officeGroup) {
-        //                 return [
-        //                     'employeeList' => $officeGroup,
-        //                     'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code,
-        //                     'office_name' => $officeGroup->first()->rawCalculation->office_name ?? $officeGroup->first()->office_name,
-        //                     'totalGross' => $officeGroup->sum('gross'),
-        //                     'totalAbsent' => $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0),
-        //                     'totalLateUndertime' => $officeGroup->sum(fn($e) => $e->rawCalculation->late_undertime ?? 0),
-        //                     'totalAbsentLate' => $officeGroup->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
-        //                     'totalNetLateAbsences' => $officeGroup->sum(fn($e) => $e->rawCalculation->net_late_absences ?? 0),
-        //                     'totalTax' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0)),
-        //                     'totalNetTax' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_tax ?? 0)),
-        //                     'totalHdmfPi' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0)),
-        //                     'totalHdmfMpl' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0)),
-        //                     'totalHdmfMp2' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0)),
-        //                     'totalHdmfCl' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0)),
-        //                     'totalDareco' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0)),
-        //                     'totalSsCon' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0)),
-        //                     'totalEcCon' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0)),
-        //                     'totalWisp' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0)),
-        //                     'totalTotalDeduction' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->total_deduction ?? 0)),
-        //                     'totalNetPay' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
-        //                 ];
-        //             });
-        //     });
-
-
+      
 
         $cutoffFields = $this->cutoff === '1st'
             ? $this->cutoffFields['1-15']
@@ -439,7 +367,6 @@ $groupedEmployees = $filteredEmployees
             [
                 'groupedEmployees' => $groupedEmployees,
                 'cutoffFields' => $cutoffFields,
-                // 'voucherNetPays' => $voucherNetPays,
                 'overallTotal' => $overallTotal,
                 'totalPerVoucher' => $totalPerVoucher
             ]

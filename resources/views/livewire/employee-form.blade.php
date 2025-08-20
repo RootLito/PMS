@@ -15,7 +15,9 @@
             </label>
             <input type="text" id="last_name" wire:model="last_name"
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
-            @error('last_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            @error('last_name')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
         </div>
 
         <div>
@@ -24,7 +26,9 @@
             </label>
             <input type="text" id="first_name" wire:model="first_name"
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
-            @error('first_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            @error('first_name')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
         </div>
 
         <div class="w-full grid grid-cols-2 gap-2">
@@ -32,19 +36,21 @@
                 <label for="middle_initial" class="block text-sm text-gray-700">Middle Name</label>
                 <input type="text" id="middle_initial" wire:model="middle_initial"
                     class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
-                @error('middle_initial') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                @error('middle_initial')
+                    <span class="text-red-500 text-xs">{{ $message }}</span>
+                @enderror
             </div>
             <div>
                 <label for="suffix" class="block text-sm text-gray-700">Suffix</label>
                 <input type="text" id="suffix" wire:model="suffix" maxlength="5" placeholder="e.g. Jr., Sr., III"
                     class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
-                @error('suffix') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                @error('suffix')
+                    <span class="text-red-500 text-xs">{{ $message }}</span>
+                @enderror
             </div>
         </div>
     </div>
 
-
-    
 
     <div class="w-full grid grid-cols-3 gap-2">
         <div>
@@ -58,13 +64,16 @@
                     <option value="{{ $designationOption }}">{{ $designationOption }}</option>
                 @endforeach
             </select>
-            @error('designation') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            @error('designation')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
         </div>
 
         <div>
             <label for="office_name" class="block text-sm text-gray-700">Office Name</label>
             <select id="office_name" wire:model.live="office_name"
-                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" {{ !$designation ? 'disabled' : '' }}>
+                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
+                {{ !$designation ? 'disabled' : '' }}>
                 <option value="" disabled>Select office</option>
                 @if ($designation)
                     @foreach ($officeOptions[$designation] ?? [] as $office => $code)
@@ -72,14 +81,18 @@
                     @endforeach
                 @endif
             </select>
-            @error('office_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            @error('office_name')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
         </div>
 
         <div>
             <label for="office_code" class="block text-sm text-gray-700">PAP</label>
             <input type="text" id="office_code" wire:model="office_code" readonly
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
-            @error('office_code') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            @error('office_code')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
         </div>
     </div>
 
@@ -98,7 +111,9 @@
                 <option value="JO">JO</option>
                 <option value="COS">COS</option>
             </select>
-            @error('employment_status') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            @error('employment_status')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
         </div>
 
         <div>
@@ -109,7 +124,7 @@
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
                 <option value="" disabled selected>- - Select - -</option>
 
-                @foreach($salaries as $salary)
+                @foreach ($salaries as $salary)
                     <option value="{{ $salary->monthly_rate }}">
                         {{ number_format($salary->monthly_rate, 2) }}
                     </option>
@@ -124,7 +139,9 @@
 
 
 
-            @error('monthly_rate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            @error('monthly_rate')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
         </div>
 
         <div>
@@ -133,7 +150,9 @@
             </label>
             <input type="number" id="gross" wire:model="gross" step="0.01" readonly
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
-            @error('gross') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            @error('gross')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
         </div>
     </div>
 

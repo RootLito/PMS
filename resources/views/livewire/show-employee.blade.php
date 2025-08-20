@@ -4,8 +4,7 @@
         <input type="text" placeholder="Search by name..."
             class="border border-gray-300 bg-gray-50 rounded px-4 py-2 w-full sm:w-1/2" wire:model.live="search">
         <div class="flex gap-2">
-            <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-full w-52"
-                wire:model.live="designation">
+            <select class="shadow-sm border rounded border-gray-200 px-4 py-2 w-full" wire:model.live="designation">
                 <option value="">All Designations</option>
                 @foreach ($designations as $desig)
                     <option value="{{ $desig }}">{{ $desig }}</option>
@@ -17,10 +16,7 @@
                 <option value="desc">Z-A</option>
             </select>
         </div>
-
-
     </div>
-
     <div class="overflow-auto mt-6 mb-2">
         <table class="min-w-full table-auto text-sm">
             <thead class="bg-gray-100 text-left">
@@ -50,25 +46,34 @@
                             @else
                             @endif
                         </td>
-
                         <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
                         <td class="px-4 py-2">{{ number_format($employee->gross, 2) }}</td>
                         <td class="px-4 py-2">{{ $employee->designation }}</td>
                         <td class="px-4 py-2">{{ $employee->office_name }}</td>
                         <td class="px-4 py-2 flex gap-2">
-                            <a href="{{ url('/employee/update', ['id' => $employee->id]) }}"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
-                                title="Edit">
-                                <i class="fas fa-edit"></i> Edit
-                            </a>
-
-
-                            <button
-                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
-                                title="Delete" wire:click="deleteEmployee({{ $employee->id }})">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </button>
-
+                            @if ($deletingId === $employee->id)
+                                <button wire:click="cancelDelete"
+                                    class="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 cursor-pointer"
+                                    title="Cancel Delete">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button wire:click="deleteEmployeeConfirmed"
+                                    class="bg-green-500 text-white py-1 px-2 rounded hover:bg-green-600 cursor-pointer"
+                                    title="Confirm Delete">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            @else
+                                <a href="{{ url('/employee/update', ['id' => $employee->id]) }}"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
+                                    title="Edit">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button wire:click="confirmDelete({{ $employee->id }})"
+                                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer"
+                                    title="Delete">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            @endif
                         </td>
 
                     </tr>
@@ -79,10 +84,6 @@
                 @endforelse
             </tbody>
         </table>
-
-
-
-
     </div>
     @if ($employees->hasPages())
         <div class="w-full flex justify-between items-end">
