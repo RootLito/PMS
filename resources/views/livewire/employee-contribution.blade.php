@@ -57,7 +57,7 @@
         </div>
         @if ($employees->hasPages())
             <div class="w-full flex justify-between items-end">
-                <div class="flex justify-center text-gray-600 mt-2  select-none">
+                <div class="flex justify-center text-gray-600 mt-2 text-xs select-none">
                     @php
                         $from = $employees->firstItem();
                         $to = $employees->lastItem();
@@ -65,7 +65,7 @@
                     @endphp
                     Showing {{ $from }} to {{ $to }} of {{ number_format($total) }} results
                 </div>
-                <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-center mt-4 ">
+                <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-center mt-4 text-xs">
                     <ul class="inline-flex items-center space-x-1 select-none">
                         @if ($employees->onFirstPage())
                             <li class="text-gray-400 cursor-not-allowed px-4 py-2 rounded ">&lt;</li>
@@ -75,7 +75,6 @@
                                     class="px-4 py-2 rounded hover:bg-gray-200 cursor-pointer bg-white shadow-sm">&lt;</button>
                             </li>
                         @endif
-
                         @php
                             $current = $employees->currentPage();
                             $last = $employees->lastPage();
@@ -103,7 +102,6 @@
                                 </li>
                             @endif
                         @endfor
-
                         @if ($employees->hasMorePages())
                             <li>
                                 <button wire:click="nextPage"
@@ -112,10 +110,8 @@
                         @else
                             <li class="text-gray-400 cursor-not-allowed px-4 py-2 rounded ">&gt;</li>
                         @endif
-
                     </ul>
                 </nav>
-
             </div>
         @endif
     </div>
@@ -223,8 +219,7 @@
                         <div class="flex flex-col flex-1">
                             <label class="block  text-gray-700">PERCOV</label>
                             <input type="text" min="0" step="0.01" wire:model="pi_mc_percov"
-                                class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
-                                disabled>
+                                class=" block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2" disabled>
                         </div>
                         <div class="flex flex-col flex-1">
                             <label class="block  text-gray-700">EE SHARE</label>
@@ -328,8 +323,7 @@
                     <div class="w-full flex justify-between bg-gray-300 px-2 item-center mb-2">
                         <h1 class="py-1 text-gray-700 font-bold">HMDF-MP2</h1>
                         <div class="flex gap-2 items-center py-1 items-center">
-                            <button
-                                class="bg-green-700 text-white py-1 px-4 rounded flex items-center cursor-pointer "
+                            <button class="bg-green-700 text-white py-1 px-4 rounded flex items-center cursor-pointer "
                                 wire:click.prevent="addMp2Entry" type="button">
                                 <i class="fas fa-plus"></i>
                                 <span>Add</span>
@@ -347,10 +341,10 @@
                                 <div class="w-full mt-4">
                                     <div class="w-full flex justify-end px-2">
                                         <button
-                                        wire:click.prevent="deleteAccount({{ $selectedEmployee }}, '{{ $entry['account_number'] }}')"
-                                        class="text-red-500 cursor-pointer">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                            wire:click.prevent="deleteAccount({{ $selectedEmployee }}, '{{ $entry['account_number'] }}')"
+                                            class="text-red-500 cursor-pointer">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
                                     </div>
 
                                     <div class="w-full flex gap-2 mb-2">

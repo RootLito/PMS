@@ -15,43 +15,33 @@ class ShowEmployee extends Component
     public $designation = '';
     public $sortOrder = '';
     public $deletingId = null;
-
     public $designations = [];
-
     public function mount()
     {
         $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
     }
-
     public function updatingSearch()
     {
         $this->resetPage();
     }
-
     public function updatingDesignation()
     {
         $this->resetPage();
     }
-
-
     public function confirmDelete($id)
     {
         $this->deletingId = $id;
     }
-
     public function cancelDelete()
     {
         $this->deletingId = null;
     }
-
     public function deleteEmployeeConfirmed()
     {
         Employee::findOrFail($this->deletingId)->delete();
         $this->deletingId = null;
         $this->dispatch('success', message: 'Employee deleted.');
     }
-
-
     public function render()
     {
         $employees = Employee::query()
@@ -69,9 +59,6 @@ class ShowEmployee extends Component
             })
             ->latest()
             ->paginate(10);
-
-
-
         return view('livewire.show-employee', [
             'employees' => $employees
         ]);

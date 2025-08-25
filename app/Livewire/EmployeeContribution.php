@@ -8,7 +8,7 @@ use App\Models\Employee;
 use App\Models\Contribution;
 use Livewire\Component;
 use Carbon\Carbon;
-
+use App\Models\Designation;
 use App\Exports\HmdfMpl;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -22,11 +22,9 @@ class EmployeeContribution extends Component
     public $selectedEmployee = null;
     public $employeeName = '';
     public array $selectedContributions = [];
+    public string $selectedContribution = '';
     public bool $showContributions = false;
     public $pag_ibig_id_rtn;
-
-
-
 
     // MPL ------------------------------------------
     public $application_number;
@@ -37,8 +35,6 @@ class EmployeeContribution extends Component
     public $end_te;
     public $mpl_remarks;
     public $notes;
-
-
 
     // MP2 -------------------------------------------
     public $mp2Entries = [];
@@ -55,9 +51,6 @@ class EmployeeContribution extends Component
         ];
     }
 
-
-
-
     // PI/MC -------------------------------------------
     public $account_number;
     public $mem_program;
@@ -67,7 +60,6 @@ class EmployeeContribution extends Component
     public $pi_mc_remarks;
     public $pi_mc_amount;
 
-
     // CL -------------------------------------------
     public $cl_app_no;
     public $cl_loan_type;
@@ -76,12 +68,9 @@ class EmployeeContribution extends Component
     public $cl_start_term;
     public $cl_end_term;
 
-
-
     // DARECO -------------------------------------------
     public $dareco_amount;
     public $dareco_remarks;
-
 
     // SSS | EC | WESP -------------------------------------------
     public $sss_number;
@@ -90,37 +79,25 @@ class EmployeeContribution extends Component
     public $difference;
     public $remarks;
 
-
-
-
+    public $designations = [];
+    public array $contributionLabels = [
+        'hdmf_pi' => 'HDMF - PI',
+        'hdmf_mp2' => 'HDMF - MP2',
+        'hdmf_mpl' => 'HDMF - MPL',
+        'hdmf_cl' => 'HDMF - CL',
+        'dareco' => 'DARECO',
+        'sss_ec_wisp' => 'SSS, EC, WISP',
+    ];
     public $contributions = [
         'sss' => ['amount' => null],
         'ec' => ['amount' => null],
         'wisp' => ['amount' => null],
     ];
-    public $designations = [
-        "CFO DAVAO CITY",
-        "Development of Organizational Policies, Plans & Procedures",
-        "Extension, Support, Education and Training Services (ESETS)",
-        "Fisheries Inspection and Quarantine Unit",
-        "Fisheries Laboratory Section",
-        "FPSSD",
-        "FPSSD (LGU Assisted)",
-        "General Management and Supervision - ORD",
-        "General Management and Supervision-PFO DAVAO DEL NORTE",
-        "Monitoring, Control and Surveillance - FMRED",
-        "MULTI-SPECIES HATCHERY- BATO",
-        "Operation and Management of Production Facilities - TOS TAGABULI",
-        "PFO DAVAO DE ORO",
-        "PFO DAVAO DEL SUR",
-        "PFO DAVAO OCCIDENTAL",
-        "PFO DAVAO ORIENTAL",
-        "Regional Adjudication and Committee Secretariat",
-        "Regional Fisheries Information Management Unit - RFIMU",
-        "SAAD",
-        "TOS NABUNTURAN"
-    ];
-
+    public function mount()
+    {
+        $this->percov = Carbon::now()->format('Y-m');
+        $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
+    }
     public function resetContributionData()
     {
         $this->selectedContributions = [];
@@ -157,33 +134,20 @@ class EmployeeContribution extends Component
             'sss_number',
         ]);
     }
-
     // SELECT EMPLOYEE X FETCH DATA  ----------------------------------------------------------------
     public function employeeSelected($employeeId)
     {
         $this->resetContributionData();
-
         $this->selectedEmployee = $employeeId;
         $contribution = Contribution::where('employee_id', $employeeId)->first();
-
-
-
         $employee = Employee::find($employeeId);
-
         $this->employeeName = $employee->last_name . ', ' . $employee->first_name;
-
         if (!empty($employee->suffix)) {
             $this->employeeName .= ' ' . $employee->suffix;
         }
-
         if (!empty($employee->middle_initial)) {
             $this->employeeName .= ' ' . strtoupper(substr($employee->middle_initial, 0, 1)) . '.';
         }
-
-
-
-
-
         if (!$contribution) {
             $this->selectedContributions = [];
             return;
@@ -198,7 +162,6 @@ class EmployeeContribution extends Component
             'ec',
             'wisp',
         ];
-
         $selectedContributions = [];
         $sssEcWispGroup = [
             'sss' => false,
@@ -308,16 +271,12 @@ class EmployeeContribution extends Component
             $this->difference = $sss['difference'] ?? $ec['difference'] ?? $wisp['difference'] ?? null;
         }
     }
-
-
-
     // SAVE CONTRIBUTION ----------------------------------------------------------------
     public function saveContributions()
     {
         Contribution::updateOrCreate(
             ['employee_id' => $this->selectedEmployee],
             [
-                // Save HDMF PI only if selected
                 'hdmf_pi' => in_array('hdmf_pi', $this->selectedContributions) ? json_encode([
                     'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
                     'app_no' => $this->account_number,
@@ -328,10 +287,8 @@ class EmployeeContribution extends Component
                     'remarks' => $this->pi_mc_remarks,
                 ]) : null,
 
-                // Save HDMF MP2 only if selected
                 'hdmf_mp2' => in_array('hdmf_mp2', $this->selectedContributions) ? json_encode($this->mp2Entries) : null,
 
-                // Save HDMF MPL only if selected
                 'hdmf_mpl' => in_array('hdmf_mpl', $this->selectedContributions) ? json_encode([
                     'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
                     'status' => $this->status,
@@ -344,7 +301,6 @@ class EmployeeContribution extends Component
                     'end_te' => $this->end_te,
                 ]) : null,
 
-                // Save HDMF CL only if selected
                 'hdmf_cl' => in_array('hdmf_cl', $this->selectedContributions) ? json_encode([
                     'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
                     'cl_app_no' => $this->cl_app_no,
@@ -355,13 +311,11 @@ class EmployeeContribution extends Component
                     'cl_end_term' => $this->cl_end_term,
                 ]) : null,
 
-                // Save DARECO only if selected
                 'dareco' => in_array('dareco', $this->selectedContributions) ? json_encode([
                     'amount' => $this->dareco_amount,
                     'remarks' => $this->dareco_remarks,
                 ]) : null,
 
-                // Save SSS, EC, and WISP only if 'sss_ec_wisp' is selected
                 'sss' => in_array('sss_ec_wisp', $this->selectedContributions) ? json_encode([
                     'amount' => $this->sss_number,
                     'remarks' => $this->remarks,
@@ -382,10 +336,40 @@ class EmployeeContribution extends Component
 
             ]
         );
-        session()->flash('success', 'Contribution data saved successfully!');
+        $this->dispatch('success', message: 'Contribution added.');
+        // $this->reset([
+        //     'selectedContributions',
+        //     'pag_ibig_id_rtn',
+        //     'account_number',
+        //     'mem_program',
+        //     'pi_mc_percov',
+        //     'pi_mc_ee_share',
+        //     'pi_mc_er_share',
+        //     'pi_mc_remarks',
+        //     'mp2Entries',
+        //     'status',
+        //     'application_number',
+        //     'loan_type',
+        //     'mpl_amount',
+        //     'mpl_remarks',
+        //     'notes',
+        //     'start_te',
+        //     'end_te',
+        //     'cl_app_no',
+        //     'cl_loan_type',
+        //     'cl_amount',
+        //     'cl_remarks',
+        //     'cl_start_term',
+        //     'cl_end_term',
+        //     'dareco_amount',
+        //     'dareco_remarks',
+        //     'sss_number',
+        //     'ec_number',
+        //     'wisp_number',
+        //     'remarks',
+        //     'difference'
+        // ]);
     }
-
-
     // DELETE---------------------------------------------------------------------------
     public function deleteContribution($contribution)
     {
@@ -404,9 +388,9 @@ class EmployeeContribution extends Component
         Contribution::where('employee_id', $this->selectedEmployee)
             ->update($updateData);
 
-        session()->flash('message', ucfirst(str_replace('_', ', ', $contribution)) . ' contribution(s) have been deleted.');
+        $this->dispatch('success', message: 'Contribution deleted.');
     }
-
+    // DELETE ACCOUNT---------------------------------------------------------------------------
     public function deleteAccount($employeeId, $accountNumber)
     {
         $employee = Contribution::where('employee_id', $employeeId)->firstOrFail();
@@ -428,21 +412,8 @@ class EmployeeContribution extends Component
         $employee->save();
 
         $this->mp2Entries = $filtered;
+        $this->dispatch('success', message: 'Account deleted.');
     }
-
-
-
-
-
-    public array $contributionLabels = [
-        'hdmf_pi' => 'HDMF - PI',
-        'hdmf_mp2' => 'HDMF - MP2',
-        'hdmf_mpl' => 'HDMF - MPL',
-        'hdmf_cl' => 'HDMF - CL',
-        'dareco' => 'DARECO',
-        'sss_ec_wisp' => 'SSS, EC, WISP',
-    ];
-
     public function toggleContributions()
     {
         $this->showContributions = !$this->showContributions;
@@ -451,7 +422,6 @@ class EmployeeContribution extends Component
     {
         $this->showContributions = false;
     }
-
     //EXPORT CONTRIBUTION ----------------------------------------------------------------
     public function exportContribution()
     {
@@ -478,10 +448,7 @@ class EmployeeContribution extends Component
             default:
                 break;
         }
-
     }
-
-
     public function updatingSearch()
     {
         $this->resetPage();
@@ -489,10 +456,6 @@ class EmployeeContribution extends Component
     public function updatingDesignation()
     {
         $this->resetPage();
-    }
-    public function mount()
-    {
-        $this->percov = Carbon::now()->format('Y-m');
     }
     public function render()
     {

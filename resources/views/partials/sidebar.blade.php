@@ -22,27 +22,7 @@
             Employee
         </a>
 
-        <a href="/computation"
-            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
-               {{ request()->is('computation*') ? 'bg-gray-300 text-gray-700' : '' }}">
-            <i class="fa-solid fa-file-pen  ml-5 text-lg"></i>
-            Computation
-        </a>
 
-
-        <a href="/payroll"
-            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
-               {{ request()->is('payroll*') ? 'bg-gray-300 text-gray-700' : '' }}">
-            <i class="fa-solid fa-money-check ml-5 text-lg"></i>
-            Payroll
-        </a>
-
-        <a href="/signatory"
-            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
-               {{ request()->is('signatory*') ? 'bg-gray-300 text-gray-700' : '' }}">
-            <i class="fa-solid fa-pen-nib ml-5 text-lg"></i>
-            Signatory
-        </a>
         <a href="/salary"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('salary*') ? 'bg-gray-300 text-gray-700' : '' }}">
@@ -58,8 +38,30 @@
         <a href="/designation"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('designation*') ? 'bg-gray-300 text-gray-700' : '' }}">
-           <i class="fa-solid fa-address-card ml-5 text-lg"></i>
+            <i class="fa-solid fa-address-card ml-5 text-lg"></i>
             Designation
+        </a>
+
+        <a href="/signatory"
+            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('signatory*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-pen-nib ml-5 text-lg"></i>
+            Signatory
+        </a>
+
+        <a href="/computation"
+            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('computation*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-file-pen  ml-5 text-lg"></i>
+            Computation
+        </a>
+
+
+        <a href="/payroll"
+            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('payroll*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-money-check ml-5 text-lg"></i>
+            Payroll
         </a>
     </div>
 

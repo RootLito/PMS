@@ -8,6 +8,7 @@ use App\Models\RawCalculation;
 use App\Models\Contribution;
 use Livewire\Component;
 use Carbon\Carbon;
+use App\Models\Designation;
 
 use Livewire\WithPagination;
 
@@ -20,6 +21,7 @@ class RawComputation extends Component
     public $designation = '';
     public $sortOrder = '';
     public $employeeSelectedId = null;
+    protected $queryString = ['employeeSelectedId' => ['as' => 'employee_id']];
     public $employeeName = '';
     public $selectedEmployee = null;
     public $monthly_rate = null;
@@ -46,33 +48,9 @@ class RawComputation extends Component
     public $total_cont = null;
     public $currentCutoffLabel = '';
     public bool $showSaveModal = false;
-
     public $fields = [];
-
-
-
-    public $designations = [
-        "CFO DAVAO CITY",
-        "Development of Organizational Policies, Plans & Procedures",
-        "Extension, Support, Education and Training Services (ESETS)",
-        "Fisheries Inspection and Quarantine Unit",
-        "Fisheries Laboratory Section",
-        "FPSSD",
-        "FPSSD (LGU Assisted)",
-        "General Management and Supervision - ORD",
-        "General Management and Supervision-PFO DAVAO DEL NORTE",
-        "Monitoring, Control and Surveillance - FMRED",
-        "MULTI-SPECIES HATCHERY- BATO",
-        "Operation and Management of Production Facilities - TOS TAGABULI",
-        "PFO DAVAO DE ORO",
-        "PFO DAVAO DEL SUR",
-        "PFO DAVAO OCCIDENTAL",
-        "PFO DAVAO ORIENTAL",
-        "Regional Adjudication and Committee Secretariat",
-        "Regional Fisheries Information Management Unit - RFIMU",
-        "SAAD",
-        "TOS NABUNTURAN"
-    ];
+    public $mp2Entries = [];
+    public $designations = [];
     protected $cutoffFields = [
         '1-15' => [
             ['label' => 'HDMF-PI', 'model' => 'hdmf_pi'],
@@ -87,9 +65,42 @@ class RawComputation extends Component
             ['label' => 'WISP', 'model' => 'wisp'],
         ],
     ];
-
+    public function goToEmployeePage()
+    {
+        if (!$this->employeeSelectedId)
+            return;
+        $perPage = 10;
+        $query = Employee::query();
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('last_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('first_name', 'like', '%' . $this->search . '%');
+            });
+        }
+        if ($this->designation) {
+            $query->where('designation', $this->designation);
+        }
+        if (in_array(strtolower($this->sortOrder), ['asc', 'desc'])) {
+            $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
+        }
+        $allEmployeeIds = $query->pluck('id')->toArray();
+        $index = array_search($this->employeeSelectedId, $allEmployeeIds);
+        if ($index === false) {
+            $this->dispatch('error', message: 'Employee not found in the current listing.');
+            return;
+        }
+        $page = (int) ceil(($index + 1) / $perPage);
+        $this->setPage($page);
+    }
     public function mount()
     {
+        $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
+
+        if ($this->employeeSelectedId) {
+            $this->goToEmployeePage();
+            $this->employeeSelected($this->employeeSelectedId);
+        }
+
         $day = Carbon::now()->day;
         if ($day >= 1 && $day <= 15) {
             $this->cutoff = '1-15';
@@ -99,10 +110,6 @@ class RawComputation extends Component
         $this->fields = $this->cutoffFields[$this->cutoff] ?? [];
         $this->currentCutoffLabel = $this->cutoffLabels[$this->cutoff] ?? '';
     }
-
-
-
-
     protected $cutoffLabels = [
         '1-15' => '1st Cutoff (1-15)',
         '16-31' => '2nd Cutoff (16-31)',
@@ -117,8 +124,6 @@ class RawComputation extends Component
             }
         }
     }
-
-    public $mp2Entries = [];
     public function employeeSelected($employeeId)
     {
         $this->deductionRates = [];
@@ -182,8 +187,6 @@ class RawComputation extends Component
             $dareco = json_decode($contribution->dareco, true);
 
             $this->mp2Entries = json_decode($contribution->hdmf_mp2, true) ?? [];
-            // $eeShares = array_column($hdmf_mp2, 'ee_share'); 
-            // $totalEeShare = array_sum(array_column($hdmf_mp2, 'ee_share'));
             if (is_array($hdmf_mp2)) {
                 $totalEeShare = array_sum(array_column($hdmf_mp2, 'ee_share'));
             } else {
@@ -218,7 +221,6 @@ class RawComputation extends Component
         }
 
     }
-
     public function resetContributionAmounts()
     {
         $this->ss_con = null;
@@ -230,7 +232,6 @@ class RawComputation extends Component
         $this->hdmf_cl = null;
         $this->dareco = null;
     }
-
     public function resetCalculation()
     {
         $this->daily = null;
@@ -260,8 +261,6 @@ class RawComputation extends Component
         $this->calculateMinuteAmount();
         $this->calculateDeduction();
     }
-
-
     public function fetchDeductionRates()
     {
         $this->deductionRates = [];
@@ -279,17 +278,12 @@ class RawComputation extends Component
             ];
         }
     }
-
-
     protected function getRate()
     {
         $this->fetchDeductionRates();
         $key = round((float) $this->monthly_rate, 2);
         return $this->deductionRates[$key] ?? null;
     }
-
-
-
     public function calculateDailyAmount()
     {
         $rate = $this->getRate();
@@ -300,7 +294,6 @@ class RawComputation extends Component
             $this->amount = null;
         }
     }
-
     public function calculateMinuteAmount()
     {
         $rate = $this->getRate();
@@ -311,7 +304,6 @@ class RawComputation extends Component
             $this->min_amount = null;
         }
     }
-
     public function calculateDeduction($applyLateAbsences = true)
     {
         if ($this->monthly_rate) {
@@ -342,14 +334,12 @@ class RawComputation extends Component
             }
         }
     }
-
     public function updatedTax($value)
     {
         if (!is_null($value)) {
             $this->calculateTax();
         }
     }
-
     public function calculateTax()
     {
         $this->net_pay -= (float) $this->tax;
@@ -359,15 +349,12 @@ class RawComputation extends Component
             $this->net_pay = null;
         }
     }
-
-
     public function updatedAdjustment($value)
     {
         if (!is_null($value)) {
             $this->calculateAdjustment();
         }
     }
-
     public function calculateAdjustment()
     {
         $this->net_pay += (float) $this->adjustment;
@@ -376,18 +363,12 @@ class RawComputation extends Component
             $this->net_pay = null;
         }
     }
-
-
-
-
     public function updated($propertyName)
     {
         $this->calculateDeduction();
         $this->calculateNetPay();
 
     }
-
-
     public function calculateNetPay()
     {
         $deductions = 0;
@@ -401,11 +382,6 @@ class RawComputation extends Component
             $this->net_pay = null;
         }
     }
-
-
-
-
-    //SAVE RAW CALCULATION
     public function saveCalculation()
     {
         $totalDeduction =
@@ -451,20 +427,14 @@ class RawComputation extends Component
         $this->dispatch('success', message: 'Payroll added!');
         $this->resetCalculation();
     }
-
-
     public function updatingSearch()
     {
         $this->resetPage();
     }
-
     public function updatingDesignation()
     {
         $this->resetPage();
     }
-
-
-
     public function render()
     {
         $employees = Employee::query()
@@ -481,9 +451,6 @@ class RawComputation extends Component
                 $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
             })
             ->paginate(10);
-
-
-
         return view('livewire.raw-computation', [
             'employees' => $employees
         ]);

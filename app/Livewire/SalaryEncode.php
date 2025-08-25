@@ -9,32 +9,18 @@ use Livewire\WithPagination;
 class SalaryEncode extends Component
 {
     use WithPagination;
-
     public $salaryId, $monthly_rate, $daily_rate, $halfday_rate, $hourly_rate, $per_min_rate;
     public $isUpdating = false;
-
-// public function updatedMonthlyRate($value)
-// {
-//     if ($value) {
-//         $this->daily_rate = floor((float)$value / 22, 2);  
-//         $this->halfday_rate = floor($this->daily_rate / 2, 2);  
-//         $this->hourly_rate = floor($this->halfday_rate / 4, 2);  
-//         $this->per_min_rate = floor($this->hourly_rate / 60, 2);  
-//     }
-// }
-
-
-public function updatedMonthlyRate($value)
-{
-    if ($value) {
-        $this->daily_rate = floor((float)$value / 22 * 100) / 100;  
-        $this->halfday_rate = floor($this->daily_rate / 2 * 100) / 100;  
-        $this->hourly_rate = floor($this->halfday_rate /4 * 100) / 100; 
-        $this->per_min_rate = floor($this->hourly_rate /60 * 100) / 100; 
+    public $deletingId = null;
+    public function updatedMonthlyRate($value)
+    {
+        if ($value) {
+            $this->daily_rate = floor((float) $value / 22 * 100) / 100;
+            $this->halfday_rate = floor($this->daily_rate / 2 * 100) / 100;
+            $this->hourly_rate = floor($this->halfday_rate / 4 * 100) / 100;
+            $this->per_min_rate = floor($this->hourly_rate / 60 * 100) / 100;
+        }
     }
-}
-
-
     public function save()
     {
         $this->validate([
@@ -54,7 +40,7 @@ public function updatedMonthlyRate($value)
                 'hourly_rate' => $this->hourly_rate,
                 'per_min_rate' => $this->per_min_rate,
             ]);
-            session()->flash('message', 'Salary record updated successfully!');
+            $this->dispatch('success', message: 'Salary updated!');
         } else {
             Salary::create([
                 'monthly_rate' => $this->monthly_rate,
@@ -63,12 +49,11 @@ public function updatedMonthlyRate($value)
                 'hourly_rate' => $this->hourly_rate,
                 'per_min_rate' => $this->per_min_rate,
             ]);
-            session()->flash('message', 'Salary record created successfully!');
-        }
+            $this->dispatch('success', message: 'New salary saved!');
 
+        }
         $this->resetFields();
     }
-
     public function edit($id)
     {
         $salary = Salary::find($id);
@@ -82,11 +67,36 @@ public function updatedMonthlyRate($value)
         $this->isUpdating = true;
     }
 
-    public function delete($id)
+
+    public function confirmDelete($id)
     {
-        Salary::find($id)->delete();
-        session()->flash('message', 'Salary record deleted successfully!');
+        $this->deletingId = $id;
     }
+    public function cancelDelete()
+    {
+        $this->deletingId = null;
+    }
+    public function deleteConfirmed()
+    {
+        $salary = Salary::find($this->deletingId);
+
+        if ($salary) {
+            $salary->delete();
+            $this->dispatch('success', message: 'Salary deleted.');
+        } else {
+            $this->dispatch('error', message: 'Salary not found.');
+        }
+
+        $this->deletingId = null;
+    }
+
+
+
+
+
+
+
+
 
     public function resetFields()
     {
@@ -98,10 +108,9 @@ public function updatedMonthlyRate($value)
         $this->per_min_rate = null;
         $this->isUpdating = false;
     }
-
     public function render()
     {
-        $salaries = Salary::latest()->paginate(10);
+        $salaries = Salary::latest()->paginate(13);
         return view('livewire.salary-encode', compact('salaries'));
     }
 }

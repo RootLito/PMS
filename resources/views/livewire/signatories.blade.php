@@ -35,9 +35,6 @@
         </h2>
         <div>
 
-            {{-- @if(session()->has('message'))
-            <div class="text-green-500 mb-4">{{ session('message') }}</div>
-            @endif --}}
 
             <table class="min-w-full table-auto text-sm">
                 <thead class="bg-gray-100 text-left">

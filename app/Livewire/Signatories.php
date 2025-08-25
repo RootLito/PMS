@@ -19,29 +19,19 @@ class Signatories extends Component
     public $approved_by = '';
     public $allSignatories;
     public $assigned;
-
-
     public $editingId = null;
     public $deletingId = null;
     public $editName = '';
     public $editDesignation = '';
-
-
-
-
-
-
     public function mount()
     {
         $this->allSignatories = Signatory::latest()->get();
         $this->assigned = Assigned::with(['prepared', 'noted', 'funds', 'approved'])->latest()->first();
     }
-
     protected $rules = [
         'name' => 'required|string|min:5|max:255',
         'designation' => 'required|string|min:5|max:255',
     ];
-
     public function save()
     {
         $this->validate();
@@ -51,13 +41,11 @@ class Signatories extends Component
             'designation' => $this->designation,
         ]);
 
-        session()->flash('message', 'Signatory added successfully.');
-
+        $this->dispatch('success', message: 'Signatory added!');
         $this->reset(['name', 'designation']);
         $this->resetPage();
         $this->allSignatories = Signatory::latest()->get();
     }
-
     public function startEdit($id)
     {
         $signatory = Signatory::findOrFail($id);
@@ -65,13 +53,11 @@ class Signatories extends Component
         $this->editName = $signatory->name;
         $this->editDesignation = $signatory->designation;
     }
-
     public function cancelEdit()
     {
         $this->editingId = null;
         $this->reset(['editName', 'editDesignation']);
     }
-
     public function updateSignatory()
     {
         $this->validate([
@@ -87,7 +73,7 @@ class Signatories extends Component
 
         $this->editingId = null;
         $this->reset(['editName', 'editDesignation']);
-        session()->flash('message', 'Signatory updated successfully.');
+        $this->dispatch('success', message: 'Signatory updated!');
 
         $this->allSignatories = Signatory::latest()->get();
         $this->resetPage();
@@ -96,28 +82,21 @@ class Signatories extends Component
     {
         $this->deletingId = $id;
     }
-
     public function cancelDelete()
     {
         $this->deletingId = null;
     }
-
     public function deleteSignatoryConfirmed()
     {
         Signatory::findOrFail($this->deletingId)->delete();
-
-        session()->flash('message', 'Signatory deleted successfully.');
-
+        $this->dispatch('success', message: 'Signatory deleted!');
         $this->deletingId = null;
-
         $this->allSignatories = Signatory::latest()->get();
         $this->resetPage();
-
         if ($this->editingId === $this->deletingId) {
             $this->cancelEdit();
         }
     }
-
     public function saveSignatory()
     {
         $this->validate([
@@ -126,18 +105,14 @@ class Signatories extends Component
             'funds_availability' => 'required|string',
             'approved_by' => 'required|string',
         ]);
-
         Assigned::create([
             'prapared_by' => $this->prapared_by,
             'noted_by' => $this->noted_by,
             'funds_availability' => $this->funds_availability,
             'approved_by' => $this->approved_by,
         ]);
-
-        session()->flash('message', 'Signatories assigned successfully.');
-
+        $this->dispatch('success', message: 'New signatory assigned!');
         $this->assigned = Assigned::with(['prepared', 'noted', 'funds', 'approved'])->latest()->first();
-
         $this->reset([
             'prapared_by',
             'noted_by',
@@ -145,7 +120,6 @@ class Signatories extends Component
             'approved_by',
         ]);
     }
-
     public function render()
     {
         $signatories = Signatory::latest()->paginate(5);
