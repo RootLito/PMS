@@ -29,6 +29,7 @@ class RawCalculation extends Model
         'voucher_include',
         'office_code',
         'office_name',
+        'cutoff',
     ];
 
     public function employee()

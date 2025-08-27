@@ -80,3 +80,9 @@ Route::get('/contribution', function () {
 Route::get('/designation', function () {
     return view('jocos.designation');
 })->name('designation');
+
+
+//ARCHIVE ROUTE
+Route::get('/archive', function () {
+    return view('jocos.show-archive');
+})->name('archive');

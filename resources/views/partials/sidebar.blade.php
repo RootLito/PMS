@@ -63,6 +63,16 @@
             <i class="fa-solid fa-money-check ml-5 text-lg"></i>
             Payroll
         </a>
+
+
+        <a href="/archive"
+            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+      {{ request()->is('archive*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-box-archive ml-5 text-lg"></i>
+            Archive
+        </a>
+
+
     </div>
 
     <form action="" class="mt-auto">

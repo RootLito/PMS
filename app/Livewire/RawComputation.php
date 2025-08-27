@@ -401,32 +401,47 @@ class RawComputation extends Component
 
         $this->net_tax = $netLateAbsences - $tax;
 
-        RawCalculation::updateOrCreate(
-            ['employee_id' => $this->selectedEmployee],
-            [
-                'is_completed' => true,
-                'absent' => $this->amount,
-                'late_undertime' => $this->min_amount,
-                'total_absent_late' => $this->total,
-                'net_late_absences' => $this->net_late_absences,
-                'tax' => $this->tax,
-                'net_tax' => $this->net_tax,
-                'hdmf_pi' => $this->hdmf_pi,
-                'hdmf_mpl' => $this->hdmf_mpl,
-                'hdmf_mp2' => $this->hdmf_mp2,
-                'hdmf_cl' => $this->hdmf_cl,
-                'dareco' => $this->dareco,
-                'ss_con' => $this->ss_con,
-                'ec_con' => $this->ec_con,
-                'wisp' => $this->wisp,
-                'total_deduction' => $totalDeduction,
-                'net_pay' => $this->net_pay,
-                'remarks' => $this->remarks,
-            ]
-        );
-        $this->dispatch('success', message: 'Payroll added!');
+        // Check if a record exists for the employee + selected cutoff
+        $existing = RawCalculation::where('employee_id', $this->selectedEmployee)
+            ->where('cutoff', $this->cutoff)
+            ->first();
+
+        $data = [
+            'is_completed' => true,
+            'absent' => $this->amount,
+            'late_undertime' => $this->min_amount,
+            'total_absent_late' => $this->total,
+            'net_late_absences' => $this->net_late_absences,
+            'tax' => $this->tax,
+            'net_tax' => $this->net_tax,
+            'hdmf_pi' => $this->hdmf_pi,
+            'hdmf_mpl' => $this->hdmf_mpl,
+            'hdmf_mp2' => $this->hdmf_mp2,
+            'hdmf_cl' => $this->hdmf_cl,
+            'dareco' => $this->dareco,
+            'ss_con' => $this->ss_con,
+            'ec_con' => $this->ec_con,
+            'wisp' => $this->wisp,
+            'total_deduction' => $totalDeduction,
+            'net_pay' => $this->net_pay,
+            'remarks' => $this->remarks,
+            'cutoff' => $this->cutoff,
+        ];
+
+        if ($existing) {
+            // Update existing
+            $existing->update($data);
+        } else {
+            // Create new
+            RawCalculation::create(array_merge($data, [
+                'employee_id' => $this->selectedEmployee,
+            ]));
+        }
+
+        $this->dispatch('success', message: 'Payroll saved!');
         $this->resetCalculation();
     }
+
     public function updatingSearch()
     {
         $this->resetPage();

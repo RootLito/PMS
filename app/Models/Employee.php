@@ -15,6 +15,7 @@ class Employee extends Model
         'middle_initial',
         'suffix',
         'designation',
+        'designation_pap',
         'office_name',
         'office_code',
         'employment_status',
@@ -22,8 +23,14 @@ class Employee extends Model
         'gross',
     ];
 
-    public function rawCalculation()
+    // public function rawCalculation()
+    // {
+    //     return $this->hasOne(RawCalculation::class);
+    // }
+
+    public function rawCalculations()
     {
-        return $this->hasOne(RawCalculation::class);
+        return $this->hasMany(RawCalculation::class);
     }
+
 }

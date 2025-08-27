@@ -8,14 +8,14 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('employees', function (Blueprint $table) {
-            $table->string('designation_pap')->nullable()->after('designation');
+            $table->string('cutoff')->nullable()->after('gross'); // or choose the correct column position
         });
     }
 
     public function down(): void
     {
         Schema::table('employees', function (Blueprint $table) {
-            $table->dropColumn('designation_pap');
+            $table->dropColumn('cutoff');
         });
     }
 };

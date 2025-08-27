@@ -44,13 +44,10 @@
                                     {{ strtoupper(substr($employee->middle_initial, 0, 1)) }}.
                                 @endif
                             </td>
-
-
                             <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
                             <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
                             <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
                             <td class="px-4 py-2">
-
                                 <button wire:click="employeeSelected({{ $employee->id }})"
                                     class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer">
                                     {{ $selectedEmployee === $employee->id ? 'Selected' : 'Select' }}
@@ -134,7 +131,15 @@
                     <p class="font-semibold text-white uppercase"> {{ $employeeName }} </p>
                 </div>
             @endif
-            <h2 class="text-2xl text-gray-700 font-bold">Deduction</h2>
+            {{-- <h2 class="text-2xl text-gray-700 font-bold">Deduction</h2> --}}
+            <div class="flex justify-between mt-2">
+                <h2 class="text-2xl text-gray-700 font-bold">Deduction</h2>
+                <select wire:model.live="cutoff" class="h-10 border border-gray-200 shadow-sm rounded-md px-2">
+                    <option value="" disabled>Select Cutoff</option>
+                    <option value="1-15">1st Cutoff (1-15)</option>
+                    <option value="16-31">2nd Cutoff (16-31)</option>
+                </select>
+            </div>
 
             <p>
                 @if ($selectedEmployee)
@@ -239,11 +244,11 @@
 
             <div class="flex justify-between mt-4">
                 <h2 class="text-2xl text-gray-700 font-bold">Contribution</h2>
-                <select wire:model.live="cutoff" class="h-10 border border-gray-200 shadow-sm rounded-md px-2">
+                {{-- <select wire:model.live="cutoff" class="h-10 border border-gray-200 shadow-sm rounded-md px-2">
                     <option value="" disabled>Select Cutoff</option>
                     <option value="1-15">1st Cutoff (1-15)</option>
                     <option value="16-31">2nd Cutoff (16-31)</option>
-                </select>
+                </select> --}}
             </div>
 
             @if ($cutoff)

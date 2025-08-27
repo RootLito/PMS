@@ -69,10 +69,10 @@ class PayrollSummary extends Component
         $year = $today->year;
         $month = strtoupper($today->format('F'));
         if ($day <= 15) {
-            $this->cutoff = '1st';
+            $this->cutoff = '1-15';
             $this->dateRange = "{$month} 1-15, {$year}";
         } else {
-            $this->cutoff = '2nd';
+            $this->cutoff = '16-31';
             $this->dateRange = "{$month} 16-31, {$year}";
         }
         $designationsData = Designation::all();
@@ -93,14 +93,15 @@ class PayrollSummary extends Component
         $year = $today->year;
         $month = strtoupper($today->format('F'));
 
-        if ($value == '1st') {
+        if ($value == '1-15') {
             $this->dateRange = "{$month} 1-15, {$year}";
-        } elseif ($value == '2nd') {
+        } elseif ($value == '16-31') {
             $this->dateRange = "{$month} 16-31, {$year}";
         } else {
             $this->dateRange = '';
         }
     }
+
     //SAVE--------------------------------------
     public function confirmSelected()
     {
@@ -158,8 +159,16 @@ class PayrollSummary extends Component
 
         $filteredEmployees = $this->employees->filter(function ($employee) {
             $effectiveDesignation = $employee->rawCalculation->voucher_include ?? $employee->designation;
-            return empty($this->designation) ? true : in_array($effectiveDesignation, $this->designation);
+
+            // Filter by designation
+            $designationMatch = empty($this->designation) || in_array($effectiveDesignation, $this->designation);
+
+            // Filter by cutoff
+            $cutoffMatch = empty($this->cutoff) || ($employee->rawCalculation?->cutoff === $this->cutoff);
+
+            return $designationMatch && $cutoffMatch;
         });
+
 
         $groupedEmployees = $filteredEmployees->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
             ->map(fn($group) => $group->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
@@ -201,28 +210,49 @@ class PayrollSummary extends Component
 
         return Excel::download(new PayrollExport($exportData), 'payroll.xlsx');
     }
+
+
+
+
     public function render()
     {
-        $this->employees = Employee::with('rawCalculation')
-            ->whereHas('rawCalculation', fn($q) => $q->where('is_completed', true))
-            ->get();
-        $filteredEmployees = $this->employees->filter(function ($employee) {
-            $effectiveDesignation = $employee->rawCalculation->voucher_include ?? $employee->designation;
+        // Load all employees with their multiple rawCalculations
+        $this->employees = Employee::with([
+            'rawCalculations' => function ($q) {
+                $q->where('is_completed', true);
+            }
+        ])->get();
 
-            return empty($this->designation)
-                ? true
-                : in_array($effectiveDesignation, $this->designation);
-        });
+        // Flatten employees with multiple rawCalculations based on selected cutoff and designation
+        $filteredEmployees = collect();
+
+        foreach ($this->employees as $employee) {
+            foreach ($employee->rawCalculations as $calculation) {
+                $cutoffMatch = empty($this->cutoff) || $calculation->cutoff === $this->cutoff;
+                $effectiveDesignation = $calculation->voucher_include ?? $employee->designation;
+
+                $designationMatch = empty($this->designation) || in_array($effectiveDesignation, $this->designation);
+
+                if ($cutoffMatch && $designationMatch) {
+                    $empClone = clone $employee;
+                    $empClone->rawCalculation = $calculation;
+                    $filteredEmployees->push($empClone);
+                }
+            }
+        }
+
+        // Group by Designation or Voucher Include
         $groupedEmployees = $filteredEmployees
             ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
-            ->map(
-                fn($group) =>
-                $group->groupBy(
-                    fn($e) => $e->rawCalculation->office_name ?? $e->office_name
-                )->map(fn($officeGroup) => [
+            ->map(function ($group) {
+                $designationPap = $group->first()->rawCalculation->designation_pap ?? $group->first()->designation_pap ?? null;
+
+                $offices = $group
+                    ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
+                    ->map(fn($officeGroup) => [
                         'employees' => $officeGroup,
-                        'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code,
-                        'office_name' => $officeGroup->first()->rawCalculation->office_name ?? $officeGroup->first()->office_name,
+                        'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code ?? null,
+                        'office_name' => $officeGroup->first()->rawCalculation->office_name ?? $officeGroup->first()->office_name ?? null,
                         'totalGross' => $officeGroup->sum('gross'),
                         'totalAbsent' => $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0),
                         'totalLateUndertime' => $officeGroup->sum(fn($e) => $e->rawCalculation->late_undertime ?? 0),
@@ -240,9 +270,18 @@ class PayrollSummary extends Component
                         'totalWisp' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0)),
                         'totalTotalDeduction' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->total_deduction ?? 0)),
                         'totalNetPay' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
-                    ])
-            );
-        $totalPerVoucher = $groupedEmployees->map(function ($offices) {
+                    ]);
+
+                return [
+                    'designation_pap' => $designationPap,
+                    'offices' => $offices,
+                ];
+            });
+
+        // Per-designation totals
+        $totalPerVoucher = $groupedEmployees->map(function ($group) {
+            $offices = collect($group['offices']);
+
             return [
                 'totalGross' => $offices->sum('totalGross'),
                 'totalAbsent' => $offices->sum('totalAbsent'),
@@ -258,11 +297,13 @@ class PayrollSummary extends Component
                 'totalDareco' => $offices->sum('totalDareco'),
                 'totalSsCon' => $offices->sum('totalSsCon'),
                 'totalEcCon' => $offices->sum('totalEcCon'),
-                'totalWi sp' => $offices->sum('totalWisp'),
+                'totalWisp' => $offices->sum('totalWisp'),
                 'totalTotalDeduction' => $offices->sum('totalTotalDeduction'),
                 'totalNetPay' => $offices->sum('totalNetPay'),
             ];
         });
+
+        // Overall totals across all filtered employees
         $overallTotal = [
             'totalGross' => $filteredEmployees->sum('gross'),
             'totalAbsentLate' => $filteredEmployees->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
@@ -278,17 +319,18 @@ class PayrollSummary extends Component
             'totalTotalDeduction' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->total_deduction ?? 0)),
             'totalNetPay' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
         ];
-        $cutoffFields = $this->cutoff === '1st'
+
+        // Determine cutoff fields
+        $cutoffFields = $this->cutoff === '1-15'
             ? $this->cutoffFields['1-15']
-            : ($this->cutoff === '2nd' ? $this->cutoffFields['16-31'] : []);
-        return view(
-            'livewire.payroll-summary',
-            [
-                'groupedEmployees' => $groupedEmployees,
-                'cutoffFields' => $cutoffFields,
-                'overallTotal' => $overallTotal,
-                'totalPerVoucher' => $totalPerVoucher
-            ]
-        );
+            : ($this->cutoff === '16-31' ? $this->cutoffFields['16-31'] : []);
+
+        return view('livewire.payroll-summary', [
+            'groupedEmployees' => $groupedEmployees,
+            'cutoffFields' => $cutoffFields,
+            'overallTotal' => $overallTotal,
+            'totalPerVoucher' => $totalPerVoucher,
+        ]);
     }
+
 }

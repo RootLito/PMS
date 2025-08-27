@@ -26,6 +26,12 @@ class EmployeeForm extends Component
 
     public function mount()
     {
+        $this->runDesignation();
+    }
+
+
+    public function runDesignation()
+    {
         $designationsData = Designation::all();
         $this->designations = [];
         $this->designationMap = [];
@@ -40,6 +46,10 @@ class EmployeeForm extends Component
             }
         }
     }
+
+
+
+
     public function updatedDesignation($value)
     {
         $this->office_name = '';
@@ -50,6 +60,8 @@ class EmployeeForm extends Component
     {
         $this->officePap = $this->officeOptions[$this->designation][$value] ?? '';
     }
+
+
     public function updatedMonthlyRate()
     {
         $this->gross = $this->monthly_rate ? number_format($this->monthly_rate / 2, 2, '.', '') : null;
@@ -63,7 +75,7 @@ class EmployeeForm extends Component
             'suffix' => 'nullable|string|max:20',
             'designation' => 'required|string',
             'designationPap' => 'nullable|string',
-            'office_name' => 'required|string',
+            'office_name' => 'nullable|string',
             'officePap' => 'nullable|string',
             'employment_status' => 'required|string',
             'monthly_rate' => 'required|numeric',
@@ -77,6 +89,8 @@ class EmployeeForm extends Component
 
         $this->dispatch('success', message: 'Employee added.');
         $this->reset();
+        $this->runDesignation();
+
     }
 
 

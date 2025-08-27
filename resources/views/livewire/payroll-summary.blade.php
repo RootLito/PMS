@@ -30,9 +30,10 @@
             </div>
             <select wire:model.live="cutoff" class="px-2 py-1 rounded border border-gray-300 shadow-sm cursor-pointer">
                 <option value="" disabled>Select Cutoff</option>
-                <option value="1st">1st Cutoff (1-15)</option>
-                <option value="2nd">2nd Cutoff (16-31)</option>
+                <option value="1-15">1st Cutoff (1-15)</option>
+                <option value="16-31">2nd Cutoff (16-31)</option>
             </select>
+
             <button class="bg-green-700 text-white font-semibold px-2 py-1 rounded cursor-pointer hover:bg-green-600"><i
                     class="fa-solid fa-floppy-disk mr-1"></i> Save to Archive</button>
             <button wire:click.prevent="exportPayroll"
@@ -70,6 +71,7 @@
                 </button>
             </div>
         @endif
+
         <div id="payrollContent">
             <div class="w-full flex justify-center items-center gap-6 mb-2">
                 <div class="flex gap-2">
@@ -102,7 +104,6 @@
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">PAP</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Name of Employee</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Monthly Rate</th>
-                        {{-- <th rowspan="2" class="border border-gray-300 px-2 py-1">No. of Working Days</th> --}}
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Gross</th>
                         <th colspan="2" class="border border-gray-300 px-2 py-1 text-center">Late/Absences</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Total</th>
@@ -122,132 +123,149 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($groupedEmployees as $designation => $offices)
+                    @forelse ($groupedEmployees as $designation => $group)
                         {{-- DESIGNATION  --}}
                         <tr class="bg-green-200 font-bold border border-gray-300">
                             <td></td>
                             <td></td>
-                            <td style="font-size: 10px">{{ $offices[0]['office_code'] ?? '-' }}</td>
+                            <td style="font-size: 10px">
+                                {{ $group['designation_pap'] ?? '' }}
+                            </td>
                             <td class="px-2 py-1" style="font-size: 10px">{{ strtoupper($designation) }}</td>
                             <td></td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ number_format($totalPerVoucher[$designation]['totalGross'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalAbsent'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalAbsent'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalLateUndertime'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalLateUndertime'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalAbsentLate'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalAbsentLate'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalNetLateAbsences'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetLateAbsences'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalTax'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalTax'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalNetTax'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetTax'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalHdmfPi'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalHdmfPi'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalHdmfMpl'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalHdmfMpl'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalHdmfMp2'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalHdmfMp2'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalHdmfCl'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalHdmfCl'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalDareco'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalDareco'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalTotalDeduction'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalTotalDeduction'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalNetPay'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetPay'], 2) }}
                             </td>
                         </tr>
+
+
                         {{-- OFFICE  --}}
-                        @foreach ($offices as $office => $employees)
-                            @if ($employees['employees']->filter(fn($employee) => !empty($employee->office_code))->isNotEmpty())
-                                <tr class="bg-gray-200 font-semibold border border-gray-300">
-                                    <td></td>
-                                    <td></td>
-                                    <td class="px-2 py-2 font-bold" style="font-size: 10px">
-                                        {{ $employees['office_code'] }}
-                                    </td>
-                                    <td colspan="" class="px-2 py-2 font-bold" style="font-size: 10px">
-                                        {{ $employees['office_name'] }}</td>
-                                    <td></td>
-                                    <td class="text-right">{{ number_format($employees['totalGross'], 2) }}</td>
-                                    <td class="text-right">{{ number_format($employees['totalAbsent'], 2) }}</td>
-                                    <td class="text-right">{{ number_format($employees['totalLateUndertime'], 2) }}
-                                    </td>
-                                    <td class="text-right">{{ number_format($employees['totalAbsentLate'], 2) }}</td>
-                                    <td class="text-right">{{ number_format($employees['totalNetLateAbsences'], 2) }}
-                                    </td>
-                                    <td class="text-right">{{ number_format($employees['totalTax'] ?: 0, 2) }}</td>
-                                    <td class="text-right">{{ number_format($employees['totalNetTax'], 2) }}</td>
-                                    @if ($cutoff === '1st')
-                                        <td class="text-right">{{ number_format($employees['totalHdmfPi'] ?: 0, 2) }}
-                                        </td>
-                                        <td class="text-right">{{ number_format($employees['totalHdmfMpl'] ?: 0, 2) }}
-                                        </td>
-                                        <td class="text-right">{{ number_format($employees['totalHdmfMp2'] ?: 0, 2) }}
-                                        </td>
-                                        <td class="text-right">{{ number_format($employees['totalHdmfCl'] ?: 0, 2) }}
-                                        </td>
-                                        <td class="text-right">{{ number_format($employees['totalDareco'] ?: 0, 2) }}
-                                        </td>
-                                    @elseif($cutoff === '2nd')
-                                        <td class="text-right">{{ number_format($employees['totalSsCon'] ?: 0, 2) }}
-                                        </td>
-                                        <td class="text-right">{{ number_format($employees['totalEcCon'] ?: 0, 2) }}
-                                        </td>
-                                        <td class="text-right">{{ number_format($employees['totalWisp'] ?: 0, 2) }}
-                                        </td>
+                        @foreach ($group['offices'] as $officeName => $officeGroup)
+                            @foreach ($officeGroup['employees'] as $employee)
+                                @if (!empty($employee['office_name']))
+                                    <tr class="bg-gray-200 font-semibold border border-gray-300">
                                         <td></td>
                                         <td></td>
-                                    @endif
-                                    <td class="text-right">
-                                        {{ number_format($employees['totalTotalDeduction'] ?: 0, 2) }}</td>
-                                    <td class="text-right">{{ number_format($employees['totalNetPay'], 2) }}</td>
-                                </tr>
-                            @endif
+                                        <td class="px-2 py-2 font-bold" style="font-size: 10px">
+                                            {{ $employee['office_code'] }}
+                                        </td>
+                                        <td colspan="" class="px-2 py-2 font-bold" style="font-size: 10px">
+                                            {{ $employee['office_name'] }}</td>
+                                        <td></td>
+                                        <td class="text-right">{{ number_format($employee['totalGross'], 2) }}</td>
+                                        <td class="text-right">{{ number_format($employee['totalAbsent'], 2) }}</td>
+                                        <td class="text-right">{{ number_format($employee['totalLateUndertime'], 2) }}
+                                        </td>
+                                        <td class="text-right">{{ number_format($employee['totalAbsentLate'], 2) }}
+                                        </td>
+                                        <td class="text-right">
+                                            {{ number_format($employee['totalNetLateAbsences'], 2) }}
+                                        </td>
+                                        <td class="text-right">{{ number_format($employee['totalTax'] ?: 0, 2) }}</td>
+                                        <td class="text-right">{{ number_format($employee['totalNetTax'], 2) }}</td>
+                                        @if ($cutoff === '1-15')
+                                            <td class="text-right">
+                                                {{ number_format($employee['totalHdmfPi'] ?: 0, 2) }}
+                                            </td>
+                                            <td class="text-right">
+                                                {{ number_format($employee['totalHdmfMpl'] ?: 0, 2) }}
+                                            </td>
+                                            <td class="text-right">
+                                                {{ number_format($employee['totalHdmfMp2'] ?: 0, 2) }}
+                                            </td>
+                                            <td class="text-right">
+                                                {{ number_format($employee['totalHdmfCl'] ?: 0, 2) }}
+                                            </td>
+                                            <td class="text-right">
+                                                {{ number_format($employee['totalDareco'] ?: 0, 2) }}
+                                            </td>
+                                        @elseif($cutoff === '16-31')
+                                            <td class="text-right">
+                                                {{ number_format($employee['totalSsCon'] ?: 0, 2) }}
+                                            </td>
+                                            <td class="text-right">
+                                                {{ number_format($employee['totalEcCon'] ?: 0, 2) }}
+                                            </td>
+                                            <td class="text-right">{{ number_format($employee['totalWisp'] ?: 0, 2) }}
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                        @endif
+                                        <td class="text-right">
+                                            {{ number_format($employee['totalTotalDeduction'] ?: 0, 2) }}</td>
+                                        <td class="text-right">{{ number_format($employee['totalNetPay'], 2) }}</td>
+                                    </tr>
+                                @endif
+                            @endforeach
+
+
                             {{-- OFFICE DATA  --}}
-                            @foreach ($employees['employees'] as $index => $employee)
+                            @foreach ($officeGroup['employees'] as $index => $employee)
                                 @php
                                     $rc = $employee->rawCalculation;
                                 @endphp
@@ -294,7 +312,7 @@
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ $rc->net_tax == null || $rc->net_tax == 0 ? '-' : number_format($rc->net_tax, 2) }}
                                     </td>
-                                    @if ($cutoff === '1st')
+                                    @if ($cutoff === '1-15')
                                         <td class="border border-gray-300 px-2 py-1 text-right">
                                             {{ $rc->hdmf_pi == null || $rc->hdmf_pi == 0 ? '-' : number_format($rc->hdmf_pi, 2) }}
                                         </td>
@@ -311,7 +329,7 @@
                                         <td class="border border-gray-300 px-2 py-1 text-right">
                                             {{ $rc->dareco == null || $rc->dareco == 0 ? '-' : number_format($rc->dareco, 2) }}
                                         </td>
-                                    @elseif($cutoff === '2nd')
+                                    @elseif($cutoff === '16-31')
                                         <td class="border border-gray-300 px-2 py-1 text-right">
                                             {{ $rc->ss_con == null || $rc->ss_con == 0 ? '-' : number_format($rc->ss_con, 2) }}
                                         </td>
@@ -334,6 +352,11 @@
                                 </tr>
                             @endforeach
                         @endforeach
+
+
+
+
+
                         {{-- ENDLOOP   --}}
                         <tr class="bg-yellow-300 font-bold border border-gray-300">
                             <td></td>
@@ -419,70 +442,70 @@
                             <td></td>
                             <td class="px-2 py-3 text-left ">GRAND</td>
                             <td></td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ number_format($totalPerVoucher[$designation]['totalGross'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalAbsent'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalAbsent'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalLateUndertime'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalLateUndertime'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalAbsentLate'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalAbsentLate'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalNetLateAbsences'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetLateAbsences'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalTax'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalTax'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalNetTax'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetTax'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalHdmfPi'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalHdmfPi'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalHdmfMpl'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalHdmfMpl'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalHdmfMp2'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalHdmfMp2'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalHdmfCl'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalHdmfCl'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalDareco'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalDareco'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalTotalDeduction'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalTotalDeduction'], 2) }}
                             </td>
-                            <td class=" py-1 text-right ">
+                            <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalNetPay'] ?? 0) == 0
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalNetPay'], 2) }}
@@ -547,20 +570,27 @@
                         <tr class="border-x border-b border-gray-300">
                             <td class="invisible">space</td>
                         </tr>
-                    {{-- TOTAL --}}
+
+
+                        {{-- TOTAL --}}
                     @empty
                         <tr class="border-x border-gray-300">
                             <td colspan="18" class="text-center py-4">No payroll data available.</td>
                         </tr>
                     @endforelse
-                    <tr class="border-x border-b border-gray-300">
+
+
+                    <tr class="border-x border-gray-300">
                         <td class="invisible">space</td>
                     </tr>
-                    <tr class="border-x border-b border-gray-300">
+                    <tr class="border-x border-gray-300">
                         <td class="invisible">space</td>
                     </tr>
+
+
+
                     {{-- OVERALL --}}
-                    <tr class="border-x border-b border-gray-300 font-bold">
+                    <tr class="border-x border-gray-300 font-bold">
                         <td></td>
                         <td></td>
                         <td></td>
@@ -576,10 +606,10 @@
                         <td class="px-2 bg-orange-300 py-2 text-center">Total Ded</td>
                         <td class="px-2 bg-orange-300 py-2 text-center">NET</td>
                     </tr>
-                    <tr class="border-x border-b border-gray-300">
+                    <tr class="border-x border-gray-300">
                         <td class="invisible">space</td>
                     </tr>
-                    <tr class="border-x border-b border-gray-300">
+                    <tr class="border-x  border-gray-300">
                         <td></td>
                         <td></td>
                         <td class="text-right">COS/JO</td>
@@ -617,13 +647,13 @@
                         </td>
                     </tr>
                     </tr>
-                    <tr class="border-x border-b border-gray-300">
+                    <tr class="border-x border-gray-300">
                         <td></td>
                         <td></td>
                         <td class="text-right">IMEMS</td>
                         <td class="px-2 text-right"></td>
                     </tr>
-                    <tr class="border-x border-b border-gray-300">
+                    <tr class="border-x border-gray-300">
                         <td></td>
                         <td></td>
                         <td class="text-right">NEW</td>
@@ -642,7 +672,7 @@
             </table>
         </div>
     </div>
-</div> 
+</div>
 @push('scripts')
     <script src="{{ asset('js/printPayroll.js') }}"></script>
 @endpush
