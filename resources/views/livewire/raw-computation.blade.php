@@ -40,11 +40,11 @@
                                 {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
                             </td>
                             <td class="px-4 py-2">
-                                {{ $employee->middle_initial }}
                                 @if (!empty($employee->middle_initial))
-                                    .
+                                    {{ strtoupper(substr($employee->middle_initial, 0, 1)) }}.
                                 @endif
                             </td>
+
 
                             <td class="px-4 py-2">{{ number_format($employee->monthly_rate, 2) }}</td>
                             <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}</td>
@@ -282,7 +282,8 @@
                     $isDisabled = is_null($selectedEmployee);
                 @endphp
 
-                <button class="w-full h-10 bg-slate-700 rounded-md text-white {{ $isDisabled ? 'cursor-default opacity-50' : 'cursor-pointer' }}"
+                <button
+                    class="w-full h-10 bg-slate-700 rounded-md text-white {{ $isDisabled ? 'cursor-default opacity-50' : 'cursor-pointer' }}"
                     @disabled($isDisabled)>
                     CONFIRM
                 </button>

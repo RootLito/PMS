@@ -17,38 +17,38 @@ class EmployeeForm extends Component
     public $monthly_rate = '';
     public $gross;
     public $designation = '';
-    public $office_code = '';
     public $office_name = '';
+    public $designationPap = '';
+    public $officePap = '';
     public $designations = [];
     public $officeOptions = [];
+    public $designationMap = [];
 
     public function mount()
     {
         $designationsData = Designation::all();
-
-        $this->designations = $designationsData
-            ->pluck('designation')
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        $this->designations = [];
+        $this->designationMap = [];
+        $this->officeOptions = [];
 
         foreach ($designationsData as $item) {
-            $this->officeOptions[$item->designation][$item->office] = $item->pap;
+            $this->designations[$item->designation] = $item->designation;
+            $this->designationMap[$item->designation] = $item->pap;
+
+            if (!empty($item->office)) {
+                $this->officeOptions[$item->designation][$item->office] = $item->office_pap;
+            }
         }
     }
     public function updatedDesignation($value)
     {
         $this->office_name = '';
-        $this->office_code = '';
+        $this->officePap = '';
+        $this->designationPap = $this->designationMap[$value] ?? '';
     }
-    public function updatedOfficeName()
+    public function updatedOfficeName($value)
     {
-        if (isset($this->officeOptions[$this->designation][$this->office_name])) {
-            $this->office_code = $this->officeOptions[$this->designation][$this->office_name];
-        } else {
-            $this->office_code = '';
-        }
+        $this->officePap = $this->officeOptions[$this->designation][$value] ?? '';
     }
     public function updatedMonthlyRate()
     {
@@ -60,18 +60,27 @@ class EmployeeForm extends Component
             'last_name' => 'required|string|max:100',
             'first_name' => 'required|string|max:100',
             'middle_initial' => 'nullable|string|max:100',
-            'suffix' => 'nullable|string|max:5',
+            'suffix' => 'nullable|string|max:20',
             'designation' => 'required|string',
-            'office_name' => 'nullable|string',
-            'office_code' => 'nullable|string',
+            'designationPap' => 'nullable|string',
+            'office_name' => 'required|string',
+            'officePap' => 'nullable|string',
             'employment_status' => 'required|string',
             'monthly_rate' => 'required|numeric',
             'gross' => 'required|numeric',
         ]);
+
+        $validatedData['designation_pap'] = $this->designationPap;
+        $validatedData['office_code'] = $this->officePap;
+
         Employee::create($validatedData);
+
         $this->dispatch('success', message: 'Employee added.');
         $this->reset();
     }
+
+
+
     public function render()
     {
         $salaries = Salary::latest()->get();

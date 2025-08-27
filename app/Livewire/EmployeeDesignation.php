@@ -9,12 +9,13 @@ class EmployeeDesignation extends Component
 {
     use WithPagination;
 
-    public $pap, $designation, $office;
+    public $pap, $designation, $office, $officePap;
     public $editId = null;
     public $editingId = null;
     public $editPap = '';
     public $editDesignation = '';
     public $editOffice = '';
+    public $editOfficePap = '';
     public $deletingId = null;
     public $search = '';
 
@@ -22,31 +23,35 @@ class EmployeeDesignation extends Component
         'pap' => 'nullable|string',
         'designation' => 'required|string',
         'office' => 'nullable|string',
+        'officePap' => 'nullable|string',
     ];
 
 
 
     public function save()
     {
-        $this->pap = trim($this->pap);
-        $this->designation = trim($this->designation);
-        $this->office = trim($this->office);
-
-        $this->validate();
+        $this->validate([
+            'designation' => 'required|string',
+            'pap' => 'nullable|string',
+            'office' => 'nullable|string',
+            'officePap' => 'nullable|string',
+        ]);
 
         if ($this->editId) {
             Designation::findOrFail($this->editId)->update([
-                'pap' => $this->pap,
                 'designation' => $this->designation,
+                'pap' => $this->pap,
                 'office' => $this->office,
+                'office_pap' => $this->officePap,
             ]);
 
             $this->dispatch('success', message: 'Designation updated!');
         } else {
             Designation::create([
-                'pap' => $this->pap,
                 'designation' => $this->designation,
+                'pap' => $this->pap,
                 'office' => $this->office,
+                'office_pap' => $this->officePap,
             ]);
 
             $this->dispatch('success', message: 'Designation added!');
@@ -57,6 +62,7 @@ class EmployeeDesignation extends Component
 
 
 
+
     public function edit($id)
     {
         $designation = Designation::findOrFail($id);
@@ -64,11 +70,12 @@ class EmployeeDesignation extends Component
         $this->editPap = $designation->pap;
         $this->editDesignation = $designation->designation;
         $this->editOffice = $designation->office;
+        $this->editOfficePap = $designation->office_pap;
     }
 
     public function cancelEdit()
     {
-        $this->reset(['editingId', 'editPap', 'editDesignation', 'editOffice']);
+        $this->reset(['editingId', 'editPap', 'editDesignation', 'editOffice', 'editOfficePap']);
     }
 
     public function updateDesignation()
@@ -77,12 +84,14 @@ class EmployeeDesignation extends Component
             'editPap' => 'nullable|string|max:255',
             'editDesignation' => 'required|string|max:255',
             'editOffice' => 'nullable|string|max:255',
+            'editOfficePap' => 'nullable|string|max:255',  
         ]);
 
         Designation::where('id', $this->editingId)->update([
             'pap' => $this->editPap,
             'designation' => $this->editDesignation,
             'office' => $this->editOffice,
+            'office_pap' => $this->editOfficePap,  
         ]);
 
         $this->dispatch('success', message: 'Designation updated!');
@@ -122,6 +131,7 @@ class EmployeeDesignation extends Component
             ->where('pap', 'like', '%' . $this->search . '%')
             ->orWhere('designation', 'like', '%' . $this->search . '%')
             ->orWhere('office', 'like', '%' . $this->search . '%')
+            ->orWhere('office_pap', 'like', '%' . $this->search . '%')
             ->latest()
             ->paginate(7);
 

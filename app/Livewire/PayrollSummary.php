@@ -149,12 +149,6 @@ class PayrollSummary extends Component
         $employeeId = $this->selectedEmployees[0];
         return redirect()->to('/computation?employee_id=' . $employeeId);
     }
-    // public function exportPayroll()
-    // {
-    //     return Excel::download(new PayrollExport, 'payroll.xlsx');
-    // }
-
-
     public function exportPayroll()
     {
 
@@ -207,8 +201,6 @@ class PayrollSummary extends Component
 
         return Excel::download(new PayrollExport($exportData), 'payroll.xlsx');
     }
-
-
     public function render()
     {
         $this->employees = Employee::with('rawCalculation')

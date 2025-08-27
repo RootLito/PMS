@@ -134,7 +134,7 @@ class EmployeeContribution extends Component
             'sss_number',
         ]);
     }
-    // SELECT EMPLOYEE X FETCH DATA  ----------------------------------------------------------------
+    // SELECT EMPLOYEE X FETCH DATA  ---------------------------------------------------
     public function employeeSelected($employeeId)
     {
         $this->resetContributionData();
@@ -271,7 +271,7 @@ class EmployeeContribution extends Component
             $this->difference = $sss['difference'] ?? $ec['difference'] ?? $wisp['difference'] ?? null;
         }
     }
-    // SAVE CONTRIBUTION ----------------------------------------------------------------
+    // SAVE CONTRIBUTION ---------------------------------------------------------------
     public function saveContributions()
     {
         Contribution::updateOrCreate(
@@ -390,7 +390,7 @@ class EmployeeContribution extends Component
 
         $this->dispatch('success', message: 'Contribution deleted.');
     }
-    // DELETE ACCOUNT---------------------------------------------------------------------------
+    // DELETE ACCOUNT-------------------------------------------------------------------
     public function deleteAccount($employeeId, $accountNumber)
     {
         $employee = Contribution::where('employee_id', $employeeId)->firstOrFail();
@@ -422,7 +422,7 @@ class EmployeeContribution extends Component
     {
         $this->showContributions = false;
     }
-    //EXPORT CONTRIBUTION ----------------------------------------------------------------
+    //EXPORT CONTRIBUTION --------------------------------------------------------------
     public function exportContribution()
     {
 

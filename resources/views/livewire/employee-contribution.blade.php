@@ -38,11 +38,11 @@
                                 {{ $employee->first_name }}{{ $employee->suffix ? ' ' . $employee->suffix . '.' : '' }}
                             </td>
                             <td class="px-4 py-2">
-                                {{ $employee->middle_initial }}
-                                @if (!empty($employee->middle_initial))
-                                    .
-                                @endif
-                            </td>
+    @if (!empty($employee->middle_initial))
+        {{ strtoupper(substr($employee->middle_initial, 0, 1)) }}.
+    @endif
+</td>
+
                             <td class="px-4 py-2">{{ $employee->designation }}</td>
                             <td class="px-4 py-2">
                                 <button wire:click="employeeSelected({{ $employee->id }})"
