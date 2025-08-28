@@ -23,10 +23,11 @@ class Employee extends Model
         'gross',
     ];
 
-    // public function rawCalculation()
-    // {
-    //     return $this->hasOne(RawCalculation::class);
-    // }
+
+    public function rawCalculation()
+    {
+        return $this->hasOne(RawCalculation::class);
+    }
 
     public function rawCalculations()
     {

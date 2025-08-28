@@ -17,107 +17,61 @@
         </div>
     </div>
     <div class="overflow-auto mt-6 mb-2">
-        @php
-            $files = [
-                (object) [
-                    'id' => 1,
-                    'filename' => '',
-                    'cutoff' => '2025-01-31',
-                    'date_saved' => '2025-02-01 10:30:00',
-                ],
-                (object) [
-                    'id' => 2,
-                    'filename' => '',
-                    'cutoff' => '2025-02-28',
-                    'date_saved' => '2025-03-01 11:15:00',
-                ],
-                (object) [
-                    'id' => 3,
-                    'filename' => '',
-                    'cutoff' => '2025-03-31',
-                    'date_saved' => '2025-04-01 09:45:00',
-                ],
-            ];
-        @endphp
 
         <table class="min-w-full table-auto text-sm">
             <thead class="bg-gray-100 text-left">
                 <tr class="border-b border-t border-gray-200">
                     <th class="px-4 py-3 text-nowrap" width="45%">Filename</th>
                     <th class="px-4 py-3 text-nowrap" width="20%">Cut-off</th>
+                    <th class="px-4 py-3 text-nowrap" width="10%">Month</th>
+                    <th class="px-4 py-3 text-nowrap" width="10%">Year</th>
                     <th class="px-4 py-2 text-nowrap" width="20%">Date Saved</th>
                     <th class="px-4 py-2 text-nowrap" width="15%">Action</th>
                 </tr>
             </thead>
             <tbody>
-                <tr class="border-b border-gray-200">
-                    <td class="px-4 py-2">1 COS Payroll 2025 - Region XI_February.xlsx</td>
-                    <td class="px-4 py-2">1-15</td>
-                    <td class="px-4 py-2">2025-02-01 10:30:00</td>
-                    <td class="px-4 py-2 flex gap-2">
-                        <a href="{{ url('/files/view', ['id' => 1]) }}"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1"
-                            title="View">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <a href="{{ url('/files/download', ['id' => 1]) }}"
-                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded flex items-center gap-1"
-                            title="Download">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                    </td>
-                </tr>
-                <tr class="border-b border-gray-200">
-                    <td class="px-4 py-2">1 COS Payroll 2025 - Region XI_March.xlsx</td>
-                    <td class="px-4 py-2">1-15</td>
-                    <td class="px-4 py-2">2025-03-01 11:15:00</td>
-                    <td class="px-4 py-2 flex gap-2">
-                        <a href="{{ url('/files/view', ['id' => 2]) }}"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1"
-                            title="View">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <a href="{{ url('/files/download', ['id' => 2]) }}"
-                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded flex items-center gap-1"
-                            title="Download">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                    </td>
-                </tr>
-                <tr class="border-b border-gray-200">
-                    <td class="px-4 py-2">1 COS Payroll 2025 - Region XI_April.xlsx</td>
-                    <td class="px-4 py-2">1-15</td>
-                    <td class="px-4 py-2">2025-04-01 09:45:00</td>
-                    <td class="px-4 py-2 flex gap-2">
-                        <a href="{{ url('/files/view', ['id' => 3]) }}"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1"
-                            title="View">
-                            <i class="fas fa-eye"></i> View
-                        </a>
-                        <a href="{{ url('/files/download', ['id' => 3]) }}"
-                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded flex items-center gap-1"
-                            title="Download">
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                @forelse ($files as $file)
+                    <tr class="border-b border-gray-200">
+                        <td class="px-4 py-2">{{ $file->filename }}</td>
+                        <td class="px-4 py-2">{{ $file->cutoff }}</td>
+                        <td></td>
+                        <td></td>
+                        <td class="px-4 py-2">{{ $file->date_saved }}</td>
 
+
+                        <td class="px-4 py-2 flex gap-2">
+                            <a href="{{ route('files.download', $file->id) }}"
+                                class="inline-flex items-center bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                                title="Download">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-gray-500">
+                            No Archive Found.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+
+        </table>
     </div>
-    {{-- @if ($employees->hasPages())
+
+    {{-- @if ($files->hasPages())
         <div class="w-full flex justify-between items-end">
             <div class="flex justify-center text-gray-600 mt-2 text-xs select-none">
                 @php
-                    $from = $employees->firstItem();
-                    $to = $employees->lastItem();
-                    $total = $employees->total();
+                    $from = $filess->firstItem();
+                    $to = $filess->lastItem();
+                    $total = $filess->total();
                 @endphp
                 Showing {{ $from }} to {{ $to }} of {{ number_format($total) }} results
             </div>
             <nav role="navigation" aria-label="Pagination Navigation" class="flex justify-center mt-4 text-xs">
                 <ul class="inline-flex items-center space-x-1 select-none">
-                    @if ($employees->onFirstPage())
+                    @if ($filess->onFirstPage())
                         <li class="text-gray-400 cursor-not-allowed px-4 py-2 rounded ">&lt;</li>
                     @else
                         <li>
@@ -127,8 +81,8 @@
                     @endif
 
                     @php
-                        $current = $employees->currentPage();
-                        $last = $employees->lastPage();
+                        $current = $filess->currentPage();
+                        $last = $filess->lastPage();
 
                         if ($current == 1) {
                             $start = 1;
@@ -153,7 +107,7 @@
                         @endif
                     @endfor
 
-                    @if ($employees->hasMorePages())
+                    @if ($files->hasMorePages())
                         <li>
                             <button wire:click="nextPage"
                                 class="px-4 py-2 rounded hover:bg-gray-200 cursor-pointer bg-white shadow-sm">&gt;</button>
@@ -164,7 +118,6 @@
 
                 </ul>
             </nav>
-
         </div>
     @endif --}}
 </div>

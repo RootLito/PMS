@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DownloadController;
+
 
 
 //MAIN PAGE ROUTE
@@ -86,3 +88,6 @@ Route::get('/designation', function () {
 Route::get('/archive', function () {
     return view('jocos.show-archive');
 })->name('archive');
+
+
+Route::get('/files/download/{id}', [DownloadController::class, 'download'])->name('files.download');

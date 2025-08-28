@@ -30,6 +30,8 @@ class RawCalculation extends Model
         'office_code',
         'office_name',
         'cutoff',
+        'month',       
+        'year',
     ];
 
     public function employee()

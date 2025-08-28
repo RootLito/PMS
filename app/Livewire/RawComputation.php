@@ -48,6 +48,16 @@ class RawComputation extends Component
     public $total_cont = null;
     public $currentCutoffLabel = '';
     public bool $showSaveModal = false;
+
+
+    public $month;
+    public $year;
+
+    public $months = [];
+    public $years = [];
+
+
+
     public $fields = [];
     public $mp2Entries = [];
     public $designations = [];
@@ -95,12 +105,10 @@ class RawComputation extends Component
     public function mount()
     {
         $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
-
         if ($this->employeeSelectedId) {
             $this->goToEmployeePage();
             $this->employeeSelected($this->employeeSelectedId);
         }
-
         $day = Carbon::now()->day;
         if ($day >= 1 && $day <= 15) {
             $this->cutoff = '1-15';
@@ -109,6 +117,20 @@ class RawComputation extends Component
         }
         $this->fields = $this->cutoffFields[$this->cutoff] ?? [];
         $this->currentCutoffLabel = $this->cutoffLabels[$this->cutoff] ?? '';
+        $this->initializeDateOptions();
+    }
+    public function initializeDateOptions()
+    {
+        $this->months = collect(range(1, 12))->mapWithKeys(function ($monthNumber) {
+            return [$monthNumber => Carbon::create()->month($monthNumber)->format('F')];
+        })->toArray();
+
+        $currentYear = Carbon::now()->year;
+
+        $this->years = range($currentYear, $currentYear - 10);
+
+        $this->month = Carbon::now()->month;
+        $this->year = $currentYear;
     }
     protected $cutoffLabels = [
         '1-15' => '1st Cutoff (1-15)',
@@ -400,8 +422,6 @@ class RawComputation extends Component
         $tax = (float) $this->tax;
 
         $this->net_tax = $netLateAbsences - $tax;
-
-        // Check if a record exists for the employee + selected cutoff
         $existing = RawCalculation::where('employee_id', $this->selectedEmployee)
             ->where('cutoff', $this->cutoff)
             ->first();
@@ -426,13 +446,13 @@ class RawComputation extends Component
             'net_pay' => $this->net_pay,
             'remarks' => $this->remarks,
             'cutoff' => $this->cutoff,
+            'month' => $this->month, 
+            'year' => $this->year,
         ];
 
         if ($existing) {
-            // Update existing
             $existing->update($data);
         } else {
-            // Create new
             RawCalculation::create(array_merge($data, [
                 'employee_id' => $this->selectedEmployee,
             ]));
@@ -441,7 +461,6 @@ class RawComputation extends Component
         $this->dispatch('success', message: 'Payroll saved!');
         $this->resetCalculation();
     }
-
     public function updatingSearch()
     {
         $this->resetPage();

@@ -10,6 +10,8 @@ use App\Models\RawCalculation;
 use App\Models\Assigned;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PayrollExport;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Archived;
 
 
 
@@ -29,6 +31,12 @@ class PayrollSummary extends Component
     public $designation = [];
     public $designations = [];
     public $officeOptions = [];
+
+    public $month;
+    public $year;
+
+    public $months = [];
+    public $years = [];
     public function toggleDesignations()
     {
         $this->showDesignations = !$this->showDesignations;
@@ -62,19 +70,54 @@ class PayrollSummary extends Component
     {
         $this->office_code = $this->officeOptions[$this->newDesignation][$value] ?? '';
     }
+    // public function mount()
+    // {
+    //     $today = Carbon::today();
+    //     $day = $today->day;
+    //     $year = $today->year;
+    //     $month = strtoupper($today->format('F'));
+    //     if ($day <= 15) {
+    //         $this->cutoff = '1-15';
+    //         $this->dateRange = "{$month} 1-15, {$year}";
+    //     } else {
+    //         $this->cutoff = '16-31';
+    //         $this->dateRange = "{$month} 16-31, {$year}";
+    //     }
+    //     $designationsData = Designation::all();
+    //     $this->designations = $designationsData
+    //         ->pluck('designation')
+    //         ->unique()
+    //         ->values()
+    //         ->toArray();
+
+    //     foreach ($designationsData as $item) {
+    //         $this->officeOptions[$item->designation][$item->office] = $item->pap;
+    //     }
+    //     $this->assigned = Assigned::with(['prepared', 'noted', 'funds', 'approved'])->latest()->first();
+    //     $this->initializeDateOptions();
+    // }
+
+
+
     public function mount()
     {
-        $today = Carbon::today();
-        $day = $today->day;
-        $year = $today->year;
-        $month = strtoupper($today->format('F'));
-        if ($day <= 15) {
+        // Use the class properties $month and $year instead of re-initializing date here
+        // For example, if they aren't set yet, set defaults (current month and year)
+        $this->month = $this->month ?? strtoupper(Carbon::now()->format('F'));
+        $this->year = $this->year ?? Carbon::now()->year;
+
+        // Determine today's day to assign cutoff and dateRange
+        $todayDay = Carbon::now()->day;
+
+        if ($todayDay <= 15) {
             $this->cutoff = '1-15';
-            $this->dateRange = "{$month} 1-15, {$year}";
+            $this->dateRange = "{$this->month} 1-15, {$this->year}";
         } else {
             $this->cutoff = '16-31';
-            $this->dateRange = "{$month} 16-31, {$year}";
+            $this->dateRange = "{$this->month} 16-31, {$this->year}";
         }
+
+        // Other initializations remain the same
         $designationsData = Designation::all();
         $this->designations = $designationsData
             ->pluck('designation')
@@ -85,24 +128,85 @@ class PayrollSummary extends Component
         foreach ($designationsData as $item) {
             $this->officeOptions[$item->designation][$item->office] = $item->pap;
         }
+
         $this->assigned = Assigned::with(['prepared', 'noted', 'funds', 'approved'])->latest()->first();
+
+        $this->initializeDateOptions();
+    }
+
+
+
+
+
+
+    public function updatedMonth($value)
+    {
+        $this->updateCutoffAndDateRange();
+    }
+
+    public function updatedYear($value)
+    {
+        $this->updateCutoffAndDateRange();
+    }
+
+    protected function updateCutoffAndDateRange()
+    {
+        $todayDay = Carbon::now()->day;
+
+        if ($todayDay <= 15) {
+            $this->cutoff = '1-15';
+            $this->dateRange = strtoupper(Carbon::createFromDate($this->year, $this->month)->format('F')) . " 1-15, {$this->year}";
+        } else {
+            $this->cutoff = '16-31';
+            $this->dateRange = strtoupper(Carbon::createFromDate($this->year, $this->month)->format('F')) . " 16-31, {$this->year}";
+        }
     }
     public function updatedCutoff($value)
     {
-        $today = Carbon::today();
-        $year = $today->year;
-        $month = strtoupper($today->format('F'));
+        $monthName = $this->month
+            ? strtoupper(Carbon::createFromDate($this->year, $this->month)->format('F'))
+            : '';
+
+        $year = $this->year ?? Carbon::now()->year;
 
         if ($value == '1-15') {
-            $this->dateRange = "{$month} 1-15, {$year}";
+            $this->dateRange = "{$monthName} 1-15, {$year}";
         } elseif ($value == '16-31') {
-            $this->dateRange = "{$month} 16-31, {$year}";
+            $this->dateRange = "{$monthName} 16-31, {$year}";
         } else {
             $this->dateRange = '';
         }
     }
 
-    //SAVE--------------------------------------
+
+
+
+
+
+
+
+
+
+
+    public function initializeDateOptions()
+    {
+        $this->months = collect(range(1, 12))->mapWithKeys(function ($monthNumber) {
+            return [$monthNumber => Carbon::create()->month($monthNumber)->format('F')];
+        })->toArray();
+
+        $currentYear = Carbon::now()->year;
+
+        $this->years = range($currentYear, $currentYear - 10);
+
+        $this->month = Carbon::now()->month;
+        $this->year = $currentYear;
+    }
+
+
+
+
+
+    //SAVE----------------------------------------
     public function confirmSelected()
     {
         if (empty($this->newDesignation)) {
@@ -132,7 +236,10 @@ class PayrollSummary extends Component
             $this->dispatch('error', message: 'No employees selected for deletion.');
             return;
         }
-        $deleted = RawCalculation::whereIn('employee_id', $this->selectedEmployees)->delete();
+        $deleted = RawCalculation::whereIn('employee_id', $this->selectedEmployees)
+            ->where('cutoff', $this->cutoff)
+            ->delete();
+
         if ($deleted) {
             $this->dispatch('success', message: 'Computation data removed from payroll.');
         } else {
@@ -150,25 +257,29 @@ class PayrollSummary extends Component
         $employeeId = $this->selectedEmployees[0];
         return redirect()->to('/computation?employee_id=' . $employeeId);
     }
-    public function exportPayroll()
-    {
 
-        $this->employees = Employee::with('rawCalculation')
-            ->whereHas('rawCalculation', fn($q) => $q->where('is_completed', true))
+
+
+    //EXPORT DATA---------------------------------
+    private function prepareExportData()
+    {
+        $this->employees = Employee::with([
+            'rawCalculations' => function ($query) {
+                $query->where('is_completed', true);
+            }
+        ])
+            ->whereHas('rawCalculations', fn($q) => $q->where('is_completed', true))
             ->get();
 
         $filteredEmployees = $this->employees->filter(function ($employee) {
-            $effectiveDesignation = $employee->rawCalculation->voucher_include ?? $employee->designation;
-
-            // Filter by designation
+            $rawCalculation = $employee->rawCalculations->firstWhere('cutoff', $this->cutoff);
+            $effectiveDesignation = $rawCalculation?->voucher_include ?? $employee->designation;
             $designationMatch = empty($this->designation) || in_array($effectiveDesignation, $this->designation);
 
-            // Filter by cutoff
-            $cutoffMatch = empty($this->cutoff) || ($employee->rawCalculation?->cutoff === $this->cutoff);
+            $cutoffMatch = empty($this->cutoff) || ($rawCalculation?->cutoff === $this->cutoff);
 
             return $designationMatch && $cutoffMatch;
         });
-
 
         $groupedEmployees = $filteredEmployees->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
             ->map(fn($group) => $group->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
@@ -195,35 +306,71 @@ class PayrollSummary extends Component
             'totalNetPay' => $offices->sum('totalNetPay'),
         ]);
 
-        $cutoffFields = $this->cutoff === '1st'
-            ? $this->cutoffFields['1-15']
-            : ($this->cutoff === '2nd' ? $this->cutoffFields['16-31'] : []);
 
-        $exportData = [
+
+        $cutoffFields = $this->cutoff === '1-15'
+            ? $this->cutoffFields['1-15']
+            : ($this->cutoff === '16-31' ? $this->cutoffFields['16-31'] : []);
+
+
+
+
+        return [
             'groupedEmployees' => $groupedEmployees,
             'totalPerVoucher' => $totalPerVoucher,
             'cutoffFields' => $cutoffFields,
             'dateRange' => $this->dateRange,
             'assigned' => $this->assigned,
-            'cutoff' => $this->cutoff
+            'cutoff' => $this->cutoff,
         ];
+    }
 
+
+    //ARCHIVE-------------------------------------
+    public function saveArchive()
+    {
+        $exportData = $this->prepareExportData();
+        $filename = 'COS Payroll ' . now()->year . ' - Region XI_' . now()->format('Ymd_His') . '.xlsx';
+        $path = 'archives/' . $filename;
+        Excel::store(new PayrollExport($exportData), $path, 'public');
+        Archived::create([
+            'filename' => $filename,
+            'cutoff' => $this->cutoff,
+            'date_saved' => now(),
+        ]);
+        $this->dispatch('success', message: 'Archive saved successfully!');
+    }
+
+
+
+    //EXPORT --------------------------------------
+    public function exportPayroll()
+    {
+        $exportData = $this->prepareExportData();
+
+
+
+
+
+        
         return Excel::download(new PayrollExport($exportData), 'payroll.xlsx');
     }
 
 
 
 
+
+
     public function render()
     {
-        // Load all employees with their multiple rawCalculations
         $this->employees = Employee::with([
             'rawCalculations' => function ($q) {
-                $q->where('is_completed', true);
+                $q->where('is_completed', true)
+                    ->where('month', $this->month)
+                    ->where('year', $this->year);
             }
         ])->get();
 
-        // Flatten employees with multiple rawCalculations based on selected cutoff and designation
         $filteredEmployees = collect();
 
         foreach ($this->employees as $employee) {
@@ -241,7 +388,6 @@ class PayrollSummary extends Component
             }
         }
 
-        // Group by Designation or Voucher Include
         $groupedEmployees = $filteredEmployees
             ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
             ->map(function ($group) {
@@ -249,6 +395,8 @@ class PayrollSummary extends Component
 
                 $offices = $group
                     ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
+                    // ->groupBy(fn($e) => strtolower(trim($e->rawCalculation->office_name ?? $e->office_name)))
+    
                     ->map(fn($officeGroup) => [
                         'employees' => $officeGroup,
                         'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code ?? null,
@@ -278,10 +426,8 @@ class PayrollSummary extends Component
                 ];
             });
 
-        // Per-designation totals
         $totalPerVoucher = $groupedEmployees->map(function ($group) {
             $offices = collect($group['offices']);
-
             return [
                 'totalGross' => $offices->sum('totalGross'),
                 'totalAbsent' => $offices->sum('totalAbsent'),
@@ -303,7 +449,6 @@ class PayrollSummary extends Component
             ];
         });
 
-        // Overall totals across all filtered employees
         $overallTotal = [
             'totalGross' => $filteredEmployees->sum('gross'),
             'totalAbsentLate' => $filteredEmployees->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
@@ -320,7 +465,6 @@ class PayrollSummary extends Component
             'totalNetPay' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
         ];
 
-        // Determine cutoff fields
         $cutoffFields = $this->cutoff === '1-15'
             ? $this->cutoffFields['1-15']
             : ($this->cutoff === '16-31' ? $this->cutoffFields['16-31'] : []);
@@ -332,5 +476,4 @@ class PayrollSummary extends Component
             'totalPerVoucher' => $totalPerVoucher,
         ]);
     }
-
 }
