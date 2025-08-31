@@ -4,27 +4,29 @@
             RAW COMPUTATION
         </h2>
         <div class="flex gap-2">
-            <select wire:model.live="cutoff" class="h-10 border border-gray-200 shadow-sm rounded-md px-2 bg-white">
-                <option value="" disabled>Select Cutoff</option>
-                <option value="1-15">1st Cutoff (1-15)</option>
-                <option value="16-31">2nd Cutoff (16-31)</option>
-            </select>
+            <select wire:model.live="cutoff"
+    class="h-10 border border-gray-200 shadow-sm rounded-md px-2 pr-8 bg-white appearance-none bg-[url('data:image/svg+xml;utf8,<svg fill=\'%236b7280\' height=\'20\' viewBox=\'0 0 24 24\' width=\'20\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>')] bg-no-repeat bg-[right_0.75rem_center]">
+    <option value="" disabled>Select Cutoff</option>
+    <option value="1-15">1st Cutoff (1-15)</option>
+    <option value="16-31">2nd Cutoff (16-31)</option>
+</select>
 
-            <select wire:model.live="month" class="h-10 border border-gray-200 shadow-sm rounded-md px-2 bg-white ">
-                <option value="" disabled>Select Month</option>
-                @foreach ($months as $num => $name)
-                    <option value="{{ $num }}" {{ $month == $num ? 'selected' : '' }}>{{ $name }}
-                    </option>
-                @endforeach
-            </select>
+<select wire:model.live="month"
+    class="h-10 border border-gray-200 shadow-sm rounded-md px-2 pr-8 bg-white appearance-none bg-[url('data:image/svg+xml;utf8,<svg fill=\'%236b7280\' height=\'20\' viewBox=\'0 0 24 24\' width=\'20\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>')] bg-no-repeat bg-[right_0.75rem_center]">
+    <option value="" disabled>Select Month</option>
+    @foreach ($months as $num => $name)
+        <option value="{{ $num }}" {{ $month == $num ? 'selected' : '' }}>{{ $name }}</option>
+    @endforeach
+</select>
 
-            <select wire:model.live="year" class="h-10 border border-gray-200 shadow-sm rounded-md px-2 bg-white">
-                <option value="" disabled>Select Year</option>
-                @foreach ($years as $yearOption)
-                    <option value="{{ $yearOption }}" {{ $year == $yearOption ? 'selected' : '' }}>{{ $yearOption }}
-                    </option>
-                @endforeach
-            </select>
+<select wire:model.live="year"
+    class="h-10 border border-gray-200 shadow-sm rounded-md px-2 pr-8 bg-white appearance-none bg-[url('data:image/svg+xml;utf8,<svg fill=\'%236b7280\' height=\'20\' viewBox=\'0 0 24 24\' width=\'20\' xmlns=\'http://www.w3.org/2000/svg\'><path d=\'M7 10l5 5 5-5z\'/></svg>')] bg-no-repeat bg-[right_0.75rem_center]">
+    <option value="" disabled>Select Year</option>
+    @foreach ($years as $yearOption)
+        <option value="{{ $yearOption }}" {{ $year == $yearOption ? 'selected' : '' }}>{{ $yearOption }}</option>
+    @endforeach
+</select>
+
 
 
 
