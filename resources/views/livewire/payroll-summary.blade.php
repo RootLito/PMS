@@ -132,7 +132,8 @@
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Tax</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Net of Tax</th>
                         <th colspan="5" class="border border-gray-300 px-2 py-1 text-center">Contributions</th>
-                        <th rowspan="2" class="border border-gray-300 px-2 py-1">Total Deductions</th>
+                        <th rowspan="2" class="border border-gray-300 px-2 py-1">Total Deductions (Contribution)
+                        </th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Net Pay</th>
                     </tr>
                     <tr>
@@ -237,43 +238,64 @@
                                     {{ $officeGroup['office_name'] }}
                                 </td>
                                 <td></td>
-                                <td class="px-2 text-right">{{ number_format($officeGroup['totalGross'], 2) }}</td>
-                                <td class="px-2 text-right">{{ number_format($officeGroup['totalAbsent'], 2) }}</td>
-                                <td class="px-2 text-right">{{ number_format($officeGroup['totalLateUndertime'], 2) }}
-                                </td>
-                                <td class="px-2 text-right">{{ number_format($officeGroup['totalAbsentLate'], 2) }}
+                                <td class="px-2 text-right">
+                                    {{ $officeGroup['totalGross'] ? number_format($officeGroup['totalGross'], 2) : '-' }}
                                 </td>
                                 <td class="px-2 text-right">
-                                    {{ number_format($officeGroup['totalNetLateAbsences'], 2) }}
+                                    {{ $officeGroup['totalAbsent'] ? number_format($officeGroup['totalAbsent'], 2) : '-' }}
                                 </td>
-                                <td class="px-2 text-right">{{ number_format($officeGroup['totalTax'], 2) }}</td>
-                                <td class="px-2 text-right">{{ number_format($officeGroup['totalNetTax'], 2) }}</td>
+                                <td class="px-2 text-right">
+                                    {{ $officeGroup['totalLateUndertime'] ? number_format($officeGroup['totalLateUndertime'], 2) : '-' }}
+                                </td>
+                                <td class="px-2 text-right">
+                                    {{ $officeGroup['totalAbsentLate'] ? number_format($officeGroup['totalAbsentLate'], 2) : '-' }}
+                                </td>
+                                <td class="px-2 text-right">
+                                    {{ $officeGroup['totalNetLateAbsences'] ? number_format($officeGroup['totalNetLateAbsences'], 2) : '-' }}
+                                </td>
+                                <td class="px-2 text-right">
+                                    {{ $officeGroup['totalTax'] ? number_format($officeGroup['totalTax'], 2) : '-' }}
+                                </td>
+                                <td class="px-2 text-right">
+                                    {{ $officeGroup['totalNetTax'] ? number_format($officeGroup['totalNetTax'], 2) : '-' }}
+                                </td>
+
 
                                 @if ($cutoff === '1-15')
-                                    <td class="px-2 text-right">{{ number_format($officeGroup['totalHdmfPi'], 2) }}
+                                    <td class="px-2 text-right">
+                                        {{ $officeGroup['totalHdmfPi'] ? number_format($officeGroup['totalHdmfPi'], 2) : '-' }}
                                     </td>
-                                    <td class="px-2 text-right">{{ number_format($officeGroup['totalHdmfMpl'], 2) }}
+                                    <td class="px-2 text-right">
+                                        {{ $officeGroup['totalHdmfMpl'] ? number_format($officeGroup['totalHdmfMpl'], 2) : '-' }}
                                     </td>
-                                    <td class="px-2 text-right">{{ number_format($officeGroup['totalHdmfMp2'], 2) }}
+                                    <td class="px-2 text-right">
+                                        {{ $officeGroup['totalHdmfMp2'] ? number_format($officeGroup['totalHdmfMp2'], 2) : '-' }}
                                     </td>
-                                    <td class="px-2 text-right">{{ number_format($officeGroup['totalHdmfCl'], 2) }}
+                                    <td class="px-2 text-right">
+                                        {{ $officeGroup['totalHdmfCl'] ? number_format($officeGroup['totalHdmfCl'], 2) : '-' }}
                                     </td>
-                                    <td class="px-2 text-right">{{ number_format($officeGroup['totalDareco'], 2) }}
+                                    <td class="px-2 text-right">
+                                        {{ $officeGroup['totalDareco'] ? number_format($officeGroup['totalDareco'], 2) : '-' }}
                                     </td>
                                 @elseif($cutoff === '16-31')
-                                    <td class="px-2 text-right">{{ number_format($officeGroup['totalSsCon'], 2) }}
+                                    <td class="px-2 text-right">
+                                        {{ $officeGroup['totalSsCon'] ? number_format($officeGroup['totalSsCon'], 2) : '-' }}
                                     </td>
-                                    <td class="px-2 text-right">{{ number_format($officeGroup['totalEcCon'], 2) }}
+                                    <td class="px-2 text-right">
+                                        {{ $officeGroup['totalEcCon'] ? number_format($officeGroup['totalEcCon'], 2) : '-' }}
                                     </td>
-                                    <td class="px-2 text-right">{{ number_format($officeGroup['totalWisp'], 2) }}</td>
-                                    <td></td>
-                                    <td></td>
+                                    <td class="px-2 text-right">
+                                        {{ $officeGroup['totalWisp'] ? number_format($officeGroup['totalWisp'], 2) : '-' }}
+                                    </td>
+                                    <td class="px-2 text-right">-</td>
+                                    <td class="px-2 text-right">-</td>
                                 @endif
-
                                 <td class="px-2 text-right">
-                                    {{ number_format($officeGroup['totalTotalDeduction'], 2) }}
+                                    {{ $officeGroup['totalTotalDeduction'] ? number_format($officeGroup['totalTotalDeduction'], 2) : '-' }}
                                 </td>
-                                <td class="px-2 text-right">{{ number_format($officeGroup['totalNetPay'], 2) }}</td>
+                                <td class="px-2 text-right">
+                                    {{ $officeGroup['totalNetPay'] ? number_format($officeGroup['totalNetPay'], 2) : '-' }}
+                                </td>
                             </tr>
 
                             {{-- Office employees --}}
@@ -491,6 +513,9 @@
                                     ? '-'
                                     : number_format($totalPerVoucher[$designation]['totalDareco'], 2) }}
                             </td>
+                            
+
+
                             <td class=" py-1 text-right px-2">
                                 {{ ($totalPerVoucher[$designation]['totalTotalDeduction'] ?? 0) == 0
                                     ? '-'

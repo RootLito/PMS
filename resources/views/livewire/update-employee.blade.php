@@ -95,7 +95,7 @@
         <div>
             <label for="office_code" class="block text-sm text-gray-700">PAP for Office</label>
             <input type="text" id="office_code" wire:model="office_code"
-                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2" disabled>
+                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
             @error('office_code')
                 <span class="text-red-500 text-xs">{{ $message }}</span>
             @enderror

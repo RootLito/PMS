@@ -48,16 +48,10 @@ class RawComputation extends Component
     public $total_cont = null;
     public $currentCutoffLabel = '';
     public bool $showSaveModal = false;
-
-
     public $month;
     public $year;
-
     public $months = [];
     public $years = [];
-
-
-
     public $fields = [];
     public $mp2Entries = [];
     public $designations = [];
@@ -74,6 +68,10 @@ class RawComputation extends Component
             ['label' => 'EC CON', 'model' => 'ec_con'],
             ['label' => 'WISP', 'model' => 'wisp'],
         ],
+    ];
+    protected $cutoffLabels = [
+        '1-15' => '1st Cutoff (1-15)',
+        '16-31' => '2nd Cutoff (16-31)',
     ];
     public function goToEmployeePage()
     {
@@ -132,10 +130,6 @@ class RawComputation extends Component
         $this->month = Carbon::now()->month;
         $this->year = $currentYear;
     }
-    protected $cutoffLabels = [
-        '1-15' => '1st Cutoff (1-15)',
-        '16-31' => '2nd Cutoff (16-31)',
-    ];
     public function updatedCutoff($value)
     {
         $this->fields = $this->cutoffFields[$value] ?? [];
@@ -167,28 +161,20 @@ class RawComputation extends Component
 
         if ($employee) {
             $this->resetCalculation();
-
             $this->selectedEmployee = $employeeId;
-
             $this->gross = $employee->gross;
             $this->net_late_absences = $employee->gross;
             $this->net_pay = $employee->gross;
-
             $this->employeeSelectedId = $employee->id;
             $this->employeeName = $employee->last_name . ', ' . $employee->first_name;
             if (!empty($employee->suffix)) {
                 $this->employeeName .= ' ' . $employee->suffix;
             }
-
             if (!empty($employee->middle_initial)) {
                 $this->employeeName .= ' ' . strtoupper(substr($employee->middle_initial, 0, 1)) . '.';
             }
-
-
             $this->monthly_rate = round((float) $employee->monthly_rate, 2);
-
             $this->matchedRate = $this->deductionRates[$this->monthly_rate] ?? null;
-
             if (!$this->matchedRate) {
                 dd("No matched rate for: ", $this->monthly_rate, $this->deductionRates);
             }
@@ -404,17 +390,82 @@ class RawComputation extends Component
             $this->net_pay = null;
         }
     }
+    // public function saveCalculation()
+    // {
+    //     $totalDeduction =
+    //         floatval($this->hdmf_pi) +
+    //         floatval($this->hdmf_mpl) +
+    //         floatval($this->hdmf_mp2) +
+    //         floatval($this->hdmf_cl) +
+    //         floatval($this->dareco) +
+    //         floatval($this->ss_con) +
+    //         floatval($this->ec_con) +
+    //         floatval($this->wisp);
+
+    //     $totalDeduction = ($totalDeduction == 0) ? null : $totalDeduction;
+
+    //     $netLateAbsences = (float) $this->net_late_absences;
+    //     $tax = (float) $this->tax;
+
+    //     $this->net_tax = $netLateAbsences - $tax;
+    //     $existing = RawCalculation::where('employee_id', $this->selectedEmployee)
+    //         ->where('cutoff', $this->cutoff)
+    //         ->first();
+
+    //     $data = [
+    //         'is_completed' => true,
+    //         'absent' => $this->amount,
+    //         'late_undertime' => $this->min_amount,
+    //         'total_absent_late' => $this->total,
+    //         'net_late_absences' => $this->net_late_absences,
+    //         'tax' => $this->tax,
+    //         'net_tax' => $this->net_tax,
+    //         'hdmf_pi' => $this->hdmf_pi,
+    //         'hdmf_mpl' => $this->hdmf_mpl,
+    //         'hdmf_mp2' => $this->hdmf_mp2,
+    //         'hdmf_cl' => $this->hdmf_cl,
+    //         'dareco' => $this->dareco,
+    //         'ss_con' => $this->ss_con,
+    //         'ec_con' => $this->ec_con,
+    //         'wisp' => $this->wisp,
+    //         'total_deduction' => $totalDeduction,
+    //         'net_pay' => $this->net_pay,
+    //         'remarks' => $this->remarks,
+    //         'cutoff' => $this->cutoff,
+    //         'month' => $this->month,
+    //         'year' => $this->year,
+    //     ];
+
+    //     if ($existing) {
+    //         $existing->update($data);
+    //     } else {
+    //         RawCalculation::create(array_merge($data, [
+    //             'employee_id' => $this->selectedEmployee,
+    //         ]));
+    //     }
+
+    //     $this->dispatch('success', message: 'Payroll saved!');
+    //     $this->resetCalculation();
+    // }
     public function saveCalculation()
     {
-        $totalDeduction =
-            floatval($this->hdmf_pi) +
-            floatval($this->hdmf_mpl) +
-            floatval($this->hdmf_mp2) +
-            floatval($this->hdmf_cl) +
-            floatval($this->dareco) +
-            floatval($this->ss_con) +
-            floatval($this->ec_con) +
-            floatval($this->wisp);
+        $cutoff = $this->cutoff;
+
+        if ($cutoff === '1-15') {
+            $totalDeduction =
+                floatval($this->hdmf_pi) +
+                floatval($this->hdmf_mpl) +
+                floatval($this->hdmf_mp2) +
+                floatval($this->hdmf_cl) +
+                floatval($this->dareco);
+        } elseif ($cutoff === '16-31') {
+            $totalDeduction =
+                floatval($this->ss_con) +
+                floatval($this->ec_con) +
+                floatval($this->wisp);
+        } else {
+            $totalDeduction = 0;
+        }
 
         $totalDeduction = ($totalDeduction == 0) ? null : $totalDeduction;
 
@@ -422,6 +473,7 @@ class RawComputation extends Component
         $tax = (float) $this->tax;
 
         $this->net_tax = $netLateAbsences - $tax;
+
         $existing = RawCalculation::where('employee_id', $this->selectedEmployee)
             ->where('cutoff', $this->cutoff)
             ->first();
@@ -446,7 +498,7 @@ class RawComputation extends Component
             'net_pay' => $this->net_pay,
             'remarks' => $this->remarks,
             'cutoff' => $this->cutoff,
-            'month' => $this->month, 
+            'month' => $this->month,
             'year' => $this->year,
         ];
 
@@ -461,6 +513,7 @@ class RawComputation extends Component
         $this->dispatch('success', message: 'Payroll saved!');
         $this->resetCalculation();
     }
+
     public function updatingSearch()
     {
         $this->resetPage();
