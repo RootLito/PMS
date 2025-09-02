@@ -49,8 +49,9 @@ class PayrollExport implements WithEvents, WithColumnWidths
             'R' => 10,
             'S' => 18,
             'T' => 18,
-            'U' => 15,
-            'V' => 15,
+            'U' => 12,
+            'V' => 12,
+            'W' => 38,
         ];
     }
     public function registerEvents(): array
@@ -59,7 +60,6 @@ class PayrollExport implements WithEvents, WithColumnWidths
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
                 $currentRow = 1;
-
                 // --- GLOBAL FONT STYLE ---
                 $sheet->getParent()->getDefaultStyle()->getFont()->setName('Arial Narrow')->setSize(14);
 
@@ -78,25 +78,20 @@ class PayrollExport implements WithEvents, WithColumnWidths
                 $sheet->setShowGridlines(false);
                 $sheet->getHeaderFooter()->setOddFooter('&CPage &P of &N');
                 $sheet->getHeaderFooter()->setEvenFooter('&CPage &P of &N');
-
                 $this->drawHeader($sheet, $currentRow);
                 $currentRow = 10;
                 $isFirstPage = true;
-
                 foreach ($this->data['groupedEmployees'] as $designationName => $designationData) {
                     if (!$isFirstPage) {
                         $sheet->setBreak('A' . ($currentRow - 1), Worksheet::BREAK_ROW);
                     }
                     $isFirstPage = false;
-
                     $voucherTotals = $this->data['totalPerVoucher'][$designationName];
                     $designationPap = $designationData['designation_pap'];
                     $offices = $designationData['offices'];
                     $cutoff = $this->data['cutoff'];
-
                     $this->drawDesignationRow($sheet, $currentRow, $designationName, $designationPap, $voucherTotals, $cutoff);
                     $currentRow++;
-
                     foreach ($offices as $office) {
                         if (!empty($office['office_name'])) {
                             $this->drawOfficeRow($sheet, $currentRow, $office, $cutoff);
@@ -107,18 +102,15 @@ class PayrollExport implements WithEvents, WithColumnWidths
                             $currentRow++;
                         }
                     }
-
-
-
                     $this->drawTotalRows($sheet, $currentRow, $voucherTotals, $cutoff);
                     $this->drawGrandTotalRows($sheet, $currentRow, $voucherTotals, $cutoff);
-
-
                     $this->drawSignatories($sheet, $currentRow, $this->data['assigned']);
                     $currentRow += 2;
                 }
-                // $sheet->setBreak("A{$currentRow}", Worksheet::BREAK_ROW);
-                // $this->drawOverallTotals($sheet, $currentRow, $this->data['overallTotal'], $this->data['overallImems'], $this->data['cutoff']);
+                $sheet->setBreak("A{$currentRow}", Worksheet::BREAK_ROW);
+                $this->drawOverallTotals($sheet, $currentRow, $this->data['overallTotal'], $this->data['overallImems'], $this->data['cutoff']);
+                $lastRow = $currentRow - 1;
+                $sheet->getPageSetup()->setPrintArea("A1:T{$lastRow}");
             },
 
         ];
@@ -153,6 +145,8 @@ class PayrollExport implements WithEvents, WithColumnWidths
             'N8' => 'CONTRIBUTIONS',
             'S8' => 'Total Deductions (Contribution)',
             'T8' => 'Net Pay',
+            'U8' => 'No of. Cutoff Instances',
+            'W8' => 'REMARKS',
         ];
         foreach ($headers as $cell => $value) {
             $sheet->setCellValue($cell, $value);
@@ -160,6 +154,8 @@ class PayrollExport implements WithEvents, WithColumnWidths
         $subHeaders = [
             'H9' => 'Absent',
             'I9' => 'Late/Undertime',
+            'U9' => 'Absences',
+            'V9' => 'Lates',
         ];
         $sheet->getStyle('I9')->getAlignment()->setWrapText(true);
         if ($this->data['cutoff'] === '1-15') {
@@ -191,16 +187,19 @@ class PayrollExport implements WithEvents, WithColumnWidths
             ->mergeCells('M8:M9')
             ->mergeCells('N8:R8')
             ->mergeCells('S8:S9')
-            ->mergeCells('T8:T9');
+            ->mergeCells('T8:T9')
+            ->mergeCells('U8:V8')
+            ->mergeCells('W8:W9');
 
-        $sheet->getStyle('B8:T9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
-        $sheet->getStyle('B8:T9')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('B8:W9')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+        $sheet->getStyle('B8:W9')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('F8')->getFont()->setBold(false);
         $sheet->getStyle('H9')->getFont()->setBold(false);
         $sheet->getStyle('I9')->getFont()->setBold(false);
         $sheet->getStyle('B8:T9')->applyFromArray([
             'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FF000000']]]
         ]);
+        $sheet->getStyle('U8:W9')->getFont()->getColor()->setARGB('FFFF0000');
         $sheet->getRowDimension(8)->setRowHeight(35);
         $sheet->getRowDimension(9)->setRowHeight(35);
         $sheet->freezePane('G10');
@@ -215,6 +214,9 @@ class PayrollExport implements WithEvents, WithColumnWidths
 
         $sheet->setCellValue("F{$row}", '');
         $sheet->setCellValue("G{$row}", $voucher['totalGross'] ? number_format($voucher['totalGross'], 2) : '-');
+        $sheet->setCellValue("H{$row}", $voucher['totalAbsent'] ? number_format($voucher['totalAbsent'], 2) : '-');
+        $sheet->setCellValue("I{$row}", $voucher['totalLateUndertime'] ? number_format($voucher['totalLateUndertime'], 2) : '-');
+        $sheet->setCellValue("J{$row}", $voucher['totalAbsentLate'] ? number_format($voucher['totalAbsentLate'], 2) : '-');
         $sheet->setCellValue("K{$row}", $voucher['totalNetLateAbsences'] ? number_format($voucher['totalNetLateAbsences'], 2) : '-');
         $sheet->setCellValue("L{$row}", $voucher['totalTax'] ? number_format($voucher['totalTax'], 2) : '-');
         $sheet->setCellValue("M{$row}", $voucher['totalNetTax'] ? number_format($voucher['totalNetTax'], 2) : '-');
@@ -250,6 +252,9 @@ class PayrollExport implements WithEvents, WithColumnWidths
 
         $sheet->setCellValue("F{$row}", '');
         $sheet->setCellValue("G{$row}", $office['totalGross'] ? number_format($office['totalGross'], 2) : '-');
+        $sheet->setCellValue("H{$row}", $office['totalAbsent'] ? number_format($office['totalAbsent'], 2) : '-');
+        $sheet->setCellValue("I{$row}", $office['totalLateUndertime'] ? number_format($office['totalLateUndertime'], 2) : '-');
+        $sheet->setCellValue("J{$row}", $office['totalAbsentLate'] ? number_format($office['totalAbsentLate'], 2) : '-');
         $sheet->setCellValue("K{$row}", $office['totalNetLateAbsences'] ? number_format($office['totalNetLateAbsences'], 2) : '-');
         $sheet->setCellValue("L{$row}", $office['totalTax'] ? number_format($office['totalTax'], 2) : '-');
         $sheet->setCellValue("M{$row}", $office['totalNetTax'] ? number_format($office['totalNetTax'], 2) : '-');
@@ -310,6 +315,14 @@ class PayrollExport implements WithEvents, WithColumnWidths
         $sheet->setCellValue("S{$row}", ($rc?->total_deduction ?? 0) > 0 ? number_format($rc->total_deduction, 2) : '-');
         $sheet->setCellValue("T{$row}", ($rc?->net_pay ?? 0) > 0 ? number_format($rc->net_pay, 2) : '-');
 
+        $sheet->setCellValue("U{$row}", $rc?->absent_ins ?? '-');
+        $sheet->setCellValue("V{$row}", $rc?->late_ins ?? '-');
+        $sheet->setCellValue("W{$row}", $rc?->remarks2 ?? '-');
+        foreach (['U', 'V', 'W'] as $col) {
+            $style = $sheet->getStyle("{$col}{$row}");
+            $style->getFont()->getColor()->setARGB(Color::COLOR_RED);
+            $style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        }
 
         $sheet->getStyle("B{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle("E{$row}:T{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
@@ -321,16 +334,14 @@ class PayrollExport implements WithEvents, WithColumnWidths
         $sheet->getRowDimension($row)->setRowHeight(35);
         $sheet->setCellValue("D{$row}", 'Total');
         $sheet->mergeCells("D{$row}:E{$row}");
-
         $sheet->setCellValue("F{$row}", '');
-        $sheet->setCellValue("G{$row}", number_format($voucher['totalGross'] ?? 0, 2));
-
-        // Skip H, I, J
         $sheet->setCellValue("G{$row}", ($voucher['totalGross'] ?? 0) > 0 ? number_format($voucher['totalGross'], 2) : '-');
+        $sheet->setCellValue("H{$row}", ($voucher['totalAbsent'] ?? 0) > 0 ? number_format($voucher['totalAbsent'], 2) : '-');
+        $sheet->setCellValue("I{$row}", ($voucher['totalLateUndertime'] ?? 0) > 0 ? number_format($voucher['totalLateUndertime'], 2) : '-');
+        $sheet->setCellValue("J{$row}", ($voucher['totalAbsentLate'] ?? 0) > 0 ? number_format($voucher['totalAbsentLate'], 2) : '-');
         $sheet->setCellValue("K{$row}", ($voucher['totalNetLateAbsences'] ?? 0) > 0 ? number_format($voucher['totalNetLateAbsences'], 2) : '-');
         $sheet->setCellValue("L{$row}", ($voucher['totalTax'] ?? 0) > 0 ? number_format($voucher['totalTax'], 2) : '-');
-        $sheet->setCellValue("M{$row}", '');
-
+        $sheet->setCellValue("M{$row}", ($voucher['totalNetTax'] ?? 0) > 0 ? number_format($voucher['totalNetTax'], 2) : '-');
         if ($cutoff === '1-15') {
             $sheet->setCellValue("N{$row}", ($voucher['totalHdmfPi'] ?? 0) > 0 ? number_format($voucher['totalHdmfPi'], 2) : '-');
             $sheet->setCellValue("O{$row}", ($voucher['totalHdmfMpl'] ?? 0) > 0 ? number_format($voucher['totalHdmfMpl'], 2) : '-');
@@ -344,12 +355,8 @@ class PayrollExport implements WithEvents, WithColumnWidths
             $sheet->setCellValue("Q{$row}", '');
             $sheet->setCellValue("R{$row}", '');
         }
-
         $sheet->setCellValue("S{$row}", ($voucher['totalTotalDeduction'] ?? 0) > 0 ? number_format($voucher['totalTotalDeduction'], 2) : '-');
         $sheet->setCellValue("T{$row}", ($voucher['totalNetPay'] ?? 0) > 0 ? number_format($voucher['totalNetPay'], 2) : '-');
-
-
-        // Styling
         $sheet->getStyle("B{$row}:T{$row}")->getFill()
             ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FFFFFF00');
@@ -365,17 +372,17 @@ class PayrollExport implements WithEvents, WithColumnWidths
     private function drawGrandTotalRows(Worksheet $sheet, int &$row, array $voucher, string $cutoff): void
     {
         $row++;
-
         $sheet->getRowDimension($row)->setRowHeight(45);
         $sheet->setCellValue("D{$row}", 'Grand Total');
         $sheet->mergeCells("D{$row}:E{$row}");
-
         $sheet->setCellValue("F{$row}", '');
         $sheet->setCellValue("G{$row}", ($voucher['totalGross'] ?? 0) > 0 ? number_format($voucher['totalGross'], 2) : '-');
+        $sheet->setCellValue("H{$row}", ($voucher['totalAbsent'] ?? 0) > 0 ? number_format($voucher['totalAbsent'], 2) : '-');
+        $sheet->setCellValue("I{$row}", ($voucher['totalLateUndertime'] ?? 0) > 0 ? number_format($voucher['totalLateUndertime'], 2) : '-');
+        $sheet->setCellValue("J{$row}", ($voucher['totalAbsentLate'] ?? 0) > 0 ? number_format($voucher['totalAbsentLate'], 2) : '-');
         $sheet->setCellValue("K{$row}", ($voucher['totalNetLateAbsences'] ?? 0) > 0 ? number_format($voucher['totalNetLateAbsences'], 2) : '-');
         $sheet->setCellValue("L{$row}", ($voucher['totalTax'] ?? 0) > 0 ? number_format($voucher['totalTax'], 2) : '-');
-        $sheet->setCellValue("M{$row}", '');
-
+        $sheet->setCellValue("M{$row}", ($voucher['totalNetTax'] ?? 0) > 0 ? number_format($voucher['totalNetTax'], 2) : '-');
         if ($cutoff === '1-15') {
             $sheet->setCellValue("N{$row}", ($voucher['totalHdmfPi'] ?? 0) > 0 ? number_format($voucher['totalHdmfPi'], 2) : '-');
             $sheet->setCellValue("O{$row}", ($voucher['totalHdmfMpl'] ?? 0) > 0 ? number_format($voucher['totalHdmfMpl'], 2) : '-');
@@ -389,12 +396,8 @@ class PayrollExport implements WithEvents, WithColumnWidths
             $sheet->setCellValue("Q{$row}", '');
             $sheet->setCellValue("R{$row}", '');
         }
-
         $sheet->setCellValue("S{$row}", ($voucher['totalTotalDeduction'] ?? 0) > 0 ? number_format($voucher['totalTotalDeduction'], 2) : '-');
         $sheet->setCellValue("T{$row}", ($voucher['totalNetPay'] ?? 0) > 0 ? number_format($voucher['totalNetPay'], 2) : '-');
-
-
-        // Styling
         $sheet->getStyle("B{$row}:T{$row}")->getFill()
             ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FF5B9BD5');
@@ -410,69 +413,103 @@ class PayrollExport implements WithEvents, WithColumnWidths
     private function drawOverallTotals(Worksheet $sheet, int &$row, array $overallTotal, array $overallImems, string $cutoff): void
     {
         $row++;
-
         $sheet->getRowDimension($row)->setRowHeight(40);
-        $sheet->setCellValue("D{$row}", 'OVER ALL');
-        $sheet->mergeCells("D{$row}:E{$row}");
-
+        $sheet->setCellValue("D{$row}", 'Gross');
+        $sheet->setCellValue("E{$row}", '');
         $sheet->setCellValue("F{$row}", '');
-        $sheet->setCellValue("G{$row}", number_format($overallTotal['totalGross'] ?? 0, 2));
-        $sheet->setCellValue("K{$row}", number_format($overallTotal['totalAbsentLate'] ?? 0, 2));
-        $sheet->setCellValue("L{$row}", number_format($overallTotal['totalTax'] ?? 0, 2));
-
-        if ($cutoff === '1-15') {
-            $sheet->setCellValue("M{$row}", number_format($overallTotal['totalHdmfPi'] ?? 0, 2));
-            $sheet->setCellValue("N{$row}", number_format($overallTotal['totalHdmfMpl'] ?? 0, 2));
-            $sheet->setCellValue("O{$row}", number_format($overallTotal['totalHdmfMp2'] ?? 0, 2));
-            $sheet->setCellValue("P{$row}", number_format($overallTotal['totalHdmfCl'] ?? 0, 2));
-            $sheet->setCellValue("Q{$row}", number_format($overallTotal['totalDareco'] ?? 0, 2));
-        } elseif ($cutoff === '16-31') {
-            $sheet->setCellValue("M{$row}", number_format($overallTotal['totalSsCon'] ?? 0, 2));
-            $sheet->setCellValue("N{$row}", number_format($overallTotal['totalEcCon'] ?? 0, 2));
-            $sheet->setCellValue("O{$row}", number_format($overallTotal['totalWisp'] ?? 0, 2));
-            $sheet->setCellValue("P{$row}", '');
-            $sheet->setCellValue("Q{$row}", '');
+        $sheet->setCellValue("G{$row}", 'Late/Absences');
+        $sheet->setCellValue("I{$row}", 'Tax');
+        $sheet->setCellValue("J{$row}", '');
+        if ($cutoff = '1-15') {
+            $sheet->setCellValue("K{$row}", 'HDMF-PI');
+            $sheet->setCellValue("L{$row}", 'MPL');
+            $sheet->setCellValue("M{$row}", 'MP2');
+            $sheet->setCellValue("N{$row}", 'CAL');
+            $sheet->setCellValue("O{$row}", 'DARECO');
+        } elseif ($cutoff = '1-15') {
+            $sheet->setCellValue("K{$row}", 'SSS CON');
+            $sheet->setCellValue("L{$row}", 'EC CON');
+            $sheet->setCellValue("M{$row}", 'WISP');
+            $sheet->setCellValue("N{$row}", '');
+            $sheet->setCellValue("O{$row}", '');
         }
-
-        $sheet->setCellValue("R{$row}", number_format($overallTotal['totalTotalDeduction'] ?? 0, 2));
-        $sheet->setCellValue("S{$row}", number_format($overallTotal['totalNetPay'] ?? 0, 2));
-
-        $sheet->getStyle("B{$row}:T{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF5B9BD5');
-        $sheet->getStyle("B{$row}:T{$row}")->getFont()->setBold(true)->setColor(new Color(Color::COLOR_WHITE));
-        $sheet->getStyle("F{$row}:T{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle("B{$row}:T{$row}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->setCellValue("P{$row}", 'Total Ded');
+        $sheet->setCellValue("Q{$row}", 'NET');
+        $style = $sheet->getStyle("D{$row}:Q{$row}");
+        $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFF2C691');
+        $style->getFont()->setBold(true)->setColor(new Color(Color::COLOR_BLACK));
+        $style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_BOTTOM);
         $row++;
-
-        $sheet->getRowDimension($row)->setRowHeight(22.5);
-        $sheet->setCellValue("D{$row}", 'IMEMS');
-        $sheet->mergeCells("D{$row}:E{$row}");
-
+        $row++;
+        // JO/COS
+        $sheet->setCellValue("C{$row}", 'JO/COS');
+        $sheet->setCellValue("D{$row}", ($v = $overallTotal['totalGross'] ?? 0) == 0 ? '-' : number_format($v, 2));
         $sheet->setCellValue("F{$row}", '');
-        $sheet->setCellValue("G{$row}", number_format($overallImems['totalGross'] ?? 0, 2));
-        $sheet->setCellValue("K{$row}", number_format($overallImems['totalAbsentLate'] ?? 0, 2));
-        $sheet->setCellValue("L{$row}", number_format($overallImems['totalTax'] ?? 0, 2));
-
+        $sheet->setCellValue("G{$row}", ($v = $overallTotal['totalAbsentLate'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("I{$row}", ($v = $overallTotal['totalTax'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("J{$row}", '');
         if ($cutoff === '1-15') {
-            $sheet->setCellValue("M{$row}", number_format($overallImems['totalHdmfPi'] ?? 0, 2));
-            $sheet->setCellValue("N{$row}", number_format($overallImems['totalHdmfMpl'] ?? 0, 2));
-            $sheet->setCellValue("O{$row}", number_format($overallImems['totalHdmfMp2'] ?? 0, 2));
-            $sheet->setCellValue("P{$row}", number_format($overallImems['totalHdmfCl'] ?? 0, 2));
-            $sheet->setCellValue("Q{$row}", number_format($overallImems['totalDareco'] ?? 0, 2));
+            $sheet->setCellValue("K{$row}", ($v = $overallTotal['totalHdmfPi'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("L{$row}", ($v = $overallTotal['totalHdmfMpl'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("M{$row}", ($v = $overallTotal['totalHdmfMp2'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("N{$row}", ($v = $overallTotal['totalHdmfCl'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("O{$row}", ($v = $overallTotal['totalDareco'] ?? 0) == 0 ? '-' : number_format($v, 2));
         } elseif ($cutoff === '16-31') {
-            $sheet->setCellValue("M{$row}", number_format($overallImems['totalSsCon'] ?? 0, 2));
-            $sheet->setCellValue("N{$row}", number_format($overallImems['totalEcCon'] ?? 0, 2));
-            $sheet->setCellValue("O{$row}", number_format($overallImems['totalWisp'] ?? 0, 2));
-            $sheet->setCellValue("P{$row}", '');
-            $sheet->setCellValue("Q{$row}", '');
+            $sheet->setCellValue("K{$row}", ($v = $overallTotal['totalSsCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("L{$row}", ($v = $overallTotal['totalEcCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("M{$row}", ($v = $overallTotal['totalWisp'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("N{$row}", '-');
+            $sheet->setCellValue("O{$row}", '-');
         }
-
-        $sheet->setCellValue("R{$row}", number_format($overallImems['totalTotalDeduction'] ?? 0, 2));
-        $sheet->setCellValue("S{$row}", number_format($overallImems['totalNetPay'] ?? 0, 2));
-
-        $sheet->getStyle("B{$row}:T{$row}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFCE4D6');
-        $sheet->getStyle("B{$row}:T{$row}")->getFont()->setBold(true);
-        $sheet->getStyle("F{$row}:T{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->getStyle("B{$row}:T{$row}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->setCellValue("P{$row}", ($v = $overallTotal['totalTotalDeduction'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("Q{$row}", ($v = $overallTotal['totalNetPay'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $numericColumns = ['C', 'D', 'G', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
+        foreach ($numericColumns as $col) {
+            $sheet->getStyle("{$col}{$row}")
+                ->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        }
+        // IMEMS
+        $row++; 
+        $sheet->setCellValue("C{$row}", 'IMEMS');
+        $sheet->setCellValue("D{$row}", ($v = $overallImems['totalGross'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("F{$row}", '');
+        $sheet->setCellValue("G{$row}", ($v = $overallImems['totalAbsentLate'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("I{$row}", ($v = $overallImems['totalTax'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("J{$row}", '');
+        if ($cutoff === '1-15') {
+            $sheet->setCellValue("K{$row}", ($v = $overallImems['totalHdmfPi'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("L{$row}", ($v = $overallImems['totalHdmfMpl'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("M{$row}", ($v = $overallImems['totalHdmfMp2'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("N{$row}", ($v = $overallImems['totalHdmfCl'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("O{$row}", ($v = $overallImems['totalDareco'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        } elseif ($cutoff === '16-31') {
+            $sheet->setCellValue("K{$row}", ($v = $overallImems['totalSsCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("L{$row}", ($v = $overallImems['totalEcCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("M{$row}", ($v = $overallImems['totalWisp'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("N{$row}", '-');
+            $sheet->setCellValue("O{$row}", '-');
+        }
+        $sheet->setCellValue("P{$row}", ($v = $overallImems['totalTotalDeduction'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("Q{$row}", ($v = $overallImems['totalNetPay'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        foreach ($numericColumns as $col) {
+            $sheet->getStyle("{$col}{$row}")
+                ->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        }
+        $row++;
+        $sheet->setCellValue("C{$row}", 'SEPARATED');
+        $sheet->getStyle("C{$row}")
+            ->getFont()->getColor()->setARGB(Color::COLOR_RED);
+        $sheet->getStyle("C{$row}")
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $row++;
+        $sheet->setCellValue("C{$row}", 'NEW');
+        $sheet->getStyle("C{$row}")
+            ->getFont()->getColor()->setARGB(Color::COLOR_RED);
+        $sheet->getStyle("C{$row}")
+            ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $row++;
     }
     private function drawSignatories(Worksheet $sheet, int &$row, $assigned): void
     {

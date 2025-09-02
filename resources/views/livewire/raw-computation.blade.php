@@ -279,13 +279,46 @@
                     </div>
                 </div>
 
+
+                <div class="w-full grid grid-cols-2 gap-2 mt-2">
+                    <div class="flex flex-col">
+                        <label for="total" class="block text-sm text-gray-700">
+                            No. of instance (Absent)
+                        </label>
+                        <input id="total" wire:model.live="absent" type="number"
+                            class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2">
+                    </div>
+                    
+                    <div class="flex flex-col">
+                        <label for="tax" class="block text-sm text-gray-700">
+                            No. of instance (Late)
+                        </label>
+                        <input id="tax" wire:model.live="late" type="number"
+                            class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
+                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                    </div>
+                </div>
+
+                <div class="w-full flex gap-2">
+                    <div class="w-full flex flex-col mt-2">
+                        <label for="remarks" class="block text-sm text-gray-700 mt-auto">
+                            Remarks
+                        </label>
+                        <input id="remarks" wire:model.live="remarks2" type="text"
+                            class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
+                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
                 <div class="flex justify-between mt-4">
                     <h2 class="text-2xl text-gray-700 font-bold">Contribution</h2>
-                    {{-- <select wire:model.live="cutoff" class="h-10 border border-gray-200 shadow-sm rounded-md px-2">
-                    <option value="" disabled>Select Cutoff</option>
-                    <option value="1-15">1st Cutoff (1-15)</option>
-                    <option value="16-31">2nd Cutoff (16-31)</option>
-                </select> --}}
                 </div>
 
                 @if ($cutoff)

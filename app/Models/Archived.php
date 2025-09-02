@@ -11,6 +11,8 @@ class Archived extends Model
     protected $fillable = [
         'filename',
         'cutoff',
+        'month',
+        'year',
         'date_saved',
     ];
 }

@@ -29,6 +29,16 @@ class RawComputation extends Component
     public $gross = null;
     public $daily = null;
     public $minutes = null;
+
+
+    public $absent = null;
+    public $late = null;
+    public $remarks2 = "";
+
+
+
+
+
     public $amount = null;
     public $min_amount = null;
     public $total = null;
@@ -224,6 +234,7 @@ class RawComputation extends Component
                 $this->net_pay = $this->net_pay - $this->total_cont;
             }
 
+
         } else {
             $this->resetContributionAmounts();
         }
@@ -258,11 +269,17 @@ class RawComputation extends Component
         $this->hdmf_mp2 = null;
         $this->hdmf_cl = null;
         $this->dareco = null;
+
+
+        $this->tax = null;
+        $this->adjustment = null;
     }
     public function updatedDaily()
     {
         $this->calculateDailyAmount();
         $this->calculateDeduction();
+        $this->absent = $this->daily;
+
     }
     public function updatedMinutes()
     {
@@ -390,63 +407,6 @@ class RawComputation extends Component
             $this->net_pay = null;
         }
     }
-    // public function saveCalculation()
-    // {
-    //     $totalDeduction =
-    //         floatval($this->hdmf_pi) +
-    //         floatval($this->hdmf_mpl) +
-    //         floatval($this->hdmf_mp2) +
-    //         floatval($this->hdmf_cl) +
-    //         floatval($this->dareco) +
-    //         floatval($this->ss_con) +
-    //         floatval($this->ec_con) +
-    //         floatval($this->wisp);
-
-    //     $totalDeduction = ($totalDeduction == 0) ? null : $totalDeduction;
-
-    //     $netLateAbsences = (float) $this->net_late_absences;
-    //     $tax = (float) $this->tax;
-
-    //     $this->net_tax = $netLateAbsences - $tax;
-    //     $existing = RawCalculation::where('employee_id', $this->selectedEmployee)
-    //         ->where('cutoff', $this->cutoff)
-    //         ->first();
-
-    //     $data = [
-    //         'is_completed' => true,
-    //         'absent' => $this->amount,
-    //         'late_undertime' => $this->min_amount,
-    //         'total_absent_late' => $this->total,
-    //         'net_late_absences' => $this->net_late_absences,
-    //         'tax' => $this->tax,
-    //         'net_tax' => $this->net_tax,
-    //         'hdmf_pi' => $this->hdmf_pi,
-    //         'hdmf_mpl' => $this->hdmf_mpl,
-    //         'hdmf_mp2' => $this->hdmf_mp2,
-    //         'hdmf_cl' => $this->hdmf_cl,
-    //         'dareco' => $this->dareco,
-    //         'ss_con' => $this->ss_con,
-    //         'ec_con' => $this->ec_con,
-    //         'wisp' => $this->wisp,
-    //         'total_deduction' => $totalDeduction,
-    //         'net_pay' => $this->net_pay,
-    //         'remarks' => $this->remarks,
-    //         'cutoff' => $this->cutoff,
-    //         'month' => $this->month,
-    //         'year' => $this->year,
-    //     ];
-
-    //     if ($existing) {
-    //         $existing->update($data);
-    //     } else {
-    //         RawCalculation::create(array_merge($data, [
-    //             'employee_id' => $this->selectedEmployee,
-    //         ]));
-    //     }
-
-    //     $this->dispatch('success', message: 'Payroll saved!');
-    //     $this->resetCalculation();
-    // }
     public function saveCalculation()
     {
         $cutoff = $this->cutoff;
@@ -500,6 +460,11 @@ class RawComputation extends Component
             'cutoff' => $this->cutoff,
             'month' => $this->month,
             'year' => $this->year,
+
+
+            'absent_ins'=> $this->absent,
+            'late_ins'=> $this->late,
+            'remarks2'=> $this->remarks2,
         ];
 
         if ($existing) {
@@ -513,7 +478,6 @@ class RawComputation extends Component
         $this->dispatch('success', message: 'Payroll saved!');
         $this->resetCalculation();
     }
-
     public function updatingSearch()
     {
         $this->resetPage();

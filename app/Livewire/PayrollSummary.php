@@ -31,10 +31,8 @@ class PayrollSummary extends Component
     public $designation = [];
     public $designations = [];
     public $officeOptions = [];
-
     public $month;
     public $year;
-
     public $months = [];
     public $years = [];
     public function toggleDesignations()
@@ -70,7 +68,6 @@ class PayrollSummary extends Component
     {
         $this->office_code = $this->officeOptions[$this->newDesignation][$value] ?? '';
     }
-
     public function mount()
     {
         $this->month = $this->month ?? strtoupper(Carbon::now()->format('F'));
@@ -96,32 +93,17 @@ class PayrollSummary extends Component
         foreach ($designationsData as $item) {
             $this->officeOptions[$item->designation][$item->office] = $item->pap;
         }
-
-
-
         $this->assigned = Assigned::with(['prepared', 'noted', 'funds', 'approved'])->latest()->first();
-
-
-        // dd($this->assigned);
-
         $this->initializeDateOptions();
     }
-
-
-
-
-
-
     public function updatedMonth($value)
     {
         $this->updateCutoffAndDateRange();
     }
-
     public function updatedYear($value)
     {
         $this->updateCutoffAndDateRange();
     }
-
     protected function updateCutoffAndDateRange()
     {
         $todayDay = Carbon::now()->day;
@@ -150,17 +132,6 @@ class PayrollSummary extends Component
             $this->dateRange = '';
         }
     }
-
-
-
-
-
-
-
-
-
-
-
     public function initializeDateOptions()
     {
         $this->months = collect(range(1, 12))->mapWithKeys(function ($monthNumber) {
@@ -235,14 +206,7 @@ class PayrollSummary extends Component
 
 
 
-
-
-
-
-
-
-
-
+    // PREPARE EXPORT-----------------------------
     public function prepareExportData(
         int $month,
         int $year,
@@ -276,32 +240,22 @@ class PayrollSummary extends Component
                 if ($cutoffMatch && $designationMatch) {
                     $empClone = clone $employee;
                     $empClone->rawCalculation = $calculation;
-                    // $empClone->gross = $calculation->gross;
                     $filteredEmployees->push($empClone);
                 }
             }
         }
-        // $filteredEmployees = collect();
-        // foreach ($this->employees as $employee) {
-        //     foreach ($employee->rawCalculations as $calculation) {
-        //         $cutoffMatch = empty($this->cutoff) || $calculation->cutoff === $this->cutoff;
-        //         $effectiveDesignation = $calculation->voucher_include ?? $employee->designation;
-
-        //         $designationMatch = empty($this->designation) || in_array($effectiveDesignation, $this->designation);
-
-        //         if ($cutoffMatch && $designationMatch) {
-        //             $empClone = clone $employee;
-        //             $empClone->rawCalculation = $calculation;
-        //             $filteredEmployees->push($empClone);
-        //         }
-        //     }
-        // }
         $groupedEmployees = $filteredEmployees
             ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
             ->map(function ($group) use ($cutoff) {
                 $designationPap = $group->first()->rawCalculation->designation_pap ?? $group->first()->designation_pap ?? null;
                 $offices = $group
-                    ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
+                    // ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
+                    ->groupBy(
+                        fn($e) =>
+                        !empty($e->office_code)
+                        ? $e->office_code
+                        : ($e->office_name ?? $e->rawCalculation->office_name)
+                    )
                     ->map(function ($officeGroup) use ($cutoff) {
                         $totalGross = $officeGroup->sum('gross');
                         $totalAbsent = $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0);
@@ -370,13 +324,11 @@ class PayrollSummary extends Component
             $totalNetLateAbsences = $offices->sum('totalNetLateAbsences');
             $totalTax = $offices->sum('totalTax');
             $totalNetTax = $offices->sum('totalNetTax');
-
             $totalHdmfPi = $offices->sum('totalHdmfPi');
             $totalHdmfMpl = $offices->sum('totalHdmfMpl');
             $totalHdmfMp2 = $offices->sum('totalHdmfMp2');
             $totalHdmfCl = $offices->sum('totalHdmfCl');
             $totalDareco = $offices->sum('totalDareco');
-
             $totalSsCon = $offices->sum('totalSsCon');
             $totalEcCon = $offices->sum('totalEcCon');
             $totalWisp = $offices->sum('totalWisp');
@@ -529,37 +481,31 @@ class PayrollSummary extends Component
             'assigned' => $this->assigned,
         ];
     }
-
-
-
-
-
     //ARCHIVE-------------------------------------
     public function saveArchive()
     {
-        $exportData = $this->prepareExportData();
-
+        $assignedData = $this->assigned ? $this->assigned->toArray() : [];
+        $exportData = $this->prepareExportData(
+            $this->month,
+            $this->year,
+            $this->cutoff,
+            $this->designation,
+            $assignedData,
+            $this->dateRange
+        );
         $filename = 'COS Payroll ' . now()->year . ' - Region XI_' . now()->format('Ymd_His') . '.xlsx';
         $path = 'archives/' . $filename;
         Excel::store(new PayrollExport($exportData), $path, 'public');
         Archived::create([
             'filename' => $filename,
             'cutoff' => $this->cutoff,
+            'month' => $this->month,
+            'year' => $this->year,
             'date_saved' => now(),
         ]);
         $this->dispatch('success', message: 'Archive saved successfully!');
     }
-
-
-
     //EXPORT --------------------------------------
-    // public function exportPayroll()
-    // {
-    //     $exportData = $this->prepareExportData();
-    //     return Excel::download(new PayrollExport($exportData), 'COS Payroll ' . now()->year . ' - Region XI_' . now()->format('Ymd_His') . '.xlsx');
-    // }
-
-
     public function exportPayroll()
     {
         $assignedData = $this->assigned ? $this->assigned->toArray() : [];
@@ -575,90 +521,7 @@ class PayrollSummary extends Component
         );
         return Excel::download(new PayrollExport($exportData), 'COS Payroll ' . now()->year . ' - Region XI_' . now()->format('Ymd_His') . '.xlsx');
     }
-
-
-
-
-
-    //EXPORT DATA---------------------------------
-    // private function prepareExportData()
-    // {
-    //     $this->employees = Employee::with([
-    //         'rawCalculations' => function ($query) {
-    //             $query->where('is_completed', true);
-    //         }
-    //     ])
-    //         ->whereHas('rawCalculations', fn($q) => $q->where('is_completed', true))
-    //         ->get();
-
-    //     $filteredEmployees = $this->employees->filter(function ($employee) {
-    //         $rawCalculation = $employee->rawCalculations->firstWhere('cutoff', $this->cutoff);
-    //         $effectiveDesignation = $rawCalculation?->voucher_include ?? $employee->designation;
-    //         $designationMatch = empty($this->designation) || in_array($effectiveDesignation, $this->designation);
-
-    //         $cutoffMatch = empty($this->cutoff) || ($rawCalculation?->cutoff === $this->cutoff);
-
-    //         return $designationMatch && $cutoffMatch;
-    //     });
-
-    //     $groupedEmployees = $filteredEmployees->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
-    //         ->map(fn($group) => $group->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
-    //             ->map(fn($officeGroup) => [
-    //                 'employees' => $officeGroup,
-    //                 'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code,
-    //                 'office_name' => $officeGroup->first()->rawCalculation->office_name ?? $officeGroup->first()->office_name,
-    //                 'totalGross' => $officeGroup->sum('gross'),
-    //                 'totalNetLateAbsences' => $officeGroup->sum(fn($e) => $e->rawCalculation->net_late_absences ?? 0),
-    //                 'totalNetTax' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_tax ?? 0)),
-    //                 'totalHdmfPi' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0)),
-    //                 'totalHdmfMpl' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0)),
-    //                 'totalTotalDeduction' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->total_deduction ?? 0)),
-    //                 'totalNetPay' => $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_pay ?? 0)),
-    //             ]));
-
-    //     $totalPerVoucher = $groupedEmployees->map(fn($offices) => [
-    //         'totalGross' => $offices->sum('totalGross'),
-    //         'totalNetLateAbsences' => $offices->sum('totalNetLateAbsences'),
-    //         'totalNetTax' => $offices->sum('totalNetTax'),
-    //         'totalHdmfPi' => $offices->sum('totalHdmfPi'),
-    //         'totalHdmfMpl' => $offices->sum('totalHdmfMpl'),
-    //         'totalTotalDeduction' => $offices->sum('totalTotalDeduction'),
-    //         'totalNetPay' => $offices->sum('totalNetPay'),
-    //     ]);
-
-
-
-    //     $cutoffFields = $this->cutoff === '1-15'
-    //         ? $this->cutoffFields['1-15']
-    //         : ($this->cutoff === '16-31' ? $this->cutoffFields['16-31'] : []);
-
-
-
-
-    //     return [
-    //         'groupedEmployees' => $groupedEmployees,
-    //         'totalPerVoucher' => $totalPerVoucher,
-    //         'cutoffFields' => $cutoffFields,
-    //         'dateRange' => $this->dateRange,
-    //         'assigned' => $this->assigned,
-    //         'cutoff' => $this->cutoff,
-    //     ];
-    // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //RENDER---------------------------------------------------
+    //RENDER---------------------------------------
     public function render()
     {
         $cutoff = $this->cutoff;
@@ -691,7 +554,20 @@ class PayrollSummary extends Component
             ->map(function ($group) use ($cutoff) {
                 $designationPap = $group->first()->rawCalculation->designation_pap ?? $group->first()->designation_pap ?? null;
                 $offices = $group
-                    ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
+                    // ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name ?? $e->office_code)
+    
+                    // ->groupBy(fn($e) => $e->office_code ?? $e->office_name ?? $e->rawCalculation->office_name)
+    
+
+                    ->groupBy(
+                        fn($e) =>
+                        !empty($e->office_code)
+                        ? $e->office_code
+                        : ($e->office_name ?? $e->rawCalculation->office_name)
+                    )
+
+
+
                     ->map(function ($officeGroup) use ($cutoff) {
                         $totalGross = $officeGroup->sum('gross');
                         $totalAbsent = $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0);
@@ -802,58 +678,101 @@ class PayrollSummary extends Component
             ];
         });
 
-        $overallTotal = [
-            'totalGross' => $filteredEmployees->sum('gross'),
-            'totalAbsentLate' => $filteredEmployees->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
-            'totalTax' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0)),
-            'totalHdmfPi' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0)),
-            'totalHdmfMpl' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0)),
-            'totalHdmfMp2' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0)),
-            'totalHdmfCl' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0)),
-            'totalDareco' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0)),
-            'totalSsCon' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0)),
-            'totalEcCon' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0)),
-            'totalWisp' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0)),
-            'totalTotalDeduction' => $filteredEmployees->sum(function ($e) use ($cutoff) {
-                if ($cutoff == '1-15') {
-                    return
-                        (float) ($e->rawCalculation->hdmf_pi ?? 0) +
-                        (float) ($e->rawCalculation->hdmf_mpl ?? 0) +
-                        (float) ($e->rawCalculation->hdmf_mp2 ?? 0) +
-                        (float) ($e->rawCalculation->hdmf_cl ?? 0) +
-                        (float) ($e->rawCalculation->dareco ?? 0);
-                } elseif ($cutoff == '16-31') {
-                    return
-                        (float) ($e->rawCalculation->ss_con ?? 0) +
-                        (float) ($e->rawCalculation->ec_con ?? 0) +
-                        (float) ($e->rawCalculation->wisp ?? 0);
-                }
-                return 0;
-            }),
+        $jocosTotal = [
+            'totalGross' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum('gross'),
+
+            'totalAbsentLate' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
+
+            'totalTax' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0)),
+
+            'totalHdmfPi' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0)),
+
+            'totalHdmfMpl' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0)),
+
+            'totalHdmfMp2' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0)),
+
+            'totalHdmfCl' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0)),
+
+            'totalDareco' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0)),
+
+            'totalSsCon' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0)),
+
+            'totalEcCon' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0)),
+
+            'totalWisp' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0)),
+
+            'totalTotalDeduction' => $filteredEmployees
+                ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                ->sum(function ($e) use ($cutoff) {
+                    if ($cutoff == '1-15') {
+                        return
+                            (float) ($e->rawCalculation->hdmf_pi ?? 0) +
+                            (float) ($e->rawCalculation->hdmf_mpl ?? 0) +
+                            (float) ($e->rawCalculation->hdmf_mp2 ?? 0) +
+                            (float) ($e->rawCalculation->hdmf_cl ?? 0) +
+                            (float) ($e->rawCalculation->dareco ?? 0);
+                    } elseif ($cutoff == '16-31') {
+                        return
+                            (float) ($e->rawCalculation->ss_con ?? 0) +
+                            (float) ($e->rawCalculation->ec_con ?? 0) +
+                            (float) ($e->rawCalculation->wisp ?? 0);
+                    }
+                    return 0;
+                }),
+
             'totalNetPay' => (
-                $gross = $filteredEmployees->sum('gross')
+                $gross = $filteredEmployees
+                    ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                    ->sum('gross')
             ) - (
-                $filteredEmployees->sum(function ($e) use ($cutoff) {
-                    return
-                        (float) ($e->rawCalculation->total_absent_late ?? 0) +
-                        (float) ($e->rawCalculation->tax ?? 0) +
-                        (
-                            $cutoff == '1-15'
-                            ? (float) ($e->rawCalculation->hdmf_pi ?? 0)
-                            + (float) ($e->rawCalculation->hdmf_mpl ?? 0)
-                            + (float) ($e->rawCalculation->hdmf_mp2 ?? 0)
-                            + (float) ($e->rawCalculation->hdmf_cl ?? 0)
-                            + (float) ($e->rawCalculation->dareco ?? 0)
-                            : ($cutoff == '16-31'
-                                ? (float) ($e->rawCalculation->ss_con ?? 0)
-                                + (float) ($e->rawCalculation->ec_con ?? 0)
-                                + (float) ($e->rawCalculation->wisp ?? 0)
-                                : 0
-                            )
-                        );
-                })
+                $filteredEmployees
+                    ->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) !== 'IMEMS')
+                    ->sum(function ($e) use ($cutoff) {
+                        return
+                            (float) ($e->rawCalculation->total_absent_late ?? 0) +
+                            (float) ($e->rawCalculation->tax ?? 0) +
+                            (
+                                $cutoff == '1-15'
+                                ? (float) ($e->rawCalculation->hdmf_pi ?? 0)
+                                + (float) ($e->rawCalculation->hdmf_mpl ?? 0)
+                                + (float) ($e->rawCalculation->hdmf_mp2 ?? 0)
+                                + (float) ($e->rawCalculation->hdmf_cl ?? 0)
+                                + (float) ($e->rawCalculation->dareco ?? 0)
+                                : ($cutoff == '16-31'
+                                    ? (float) ($e->rawCalculation->ss_con ?? 0)
+                                    + (float) ($e->rawCalculation->ec_con ?? 0)
+                                    + (float) ($e->rawCalculation->wisp ?? 0)
+                                    : 0
+                                )
+                            );
+                    })
             ),
         ];
+
+
+
         $overallImems = [
             'totalGross' => $filteredEmployees->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) === 'IMEMS')->sum('gross'),
             'totalAbsentLate' => $filteredEmployees->filter(fn($e) => ($e->rawCalculation->office_name ?? $e->office_name) === 'IMEMS')->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
@@ -906,6 +825,58 @@ class PayrollSummary extends Component
                 )
             ),
         ];
+        $overallTotal = [
+            'totalGross' => $filteredEmployees->sum('gross'),
+            'totalAbsentLate' => $filteredEmployees->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0),
+            'totalTax' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0)),
+            'totalHdmfPi' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0)),
+            'totalHdmfMpl' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0)),
+            'totalHdmfMp2' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0)),
+            'totalHdmfCl' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0)),
+            'totalDareco' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0)),
+            'totalSsCon' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0)),
+            'totalEcCon' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0)),
+            'totalWisp' => $filteredEmployees->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0)),
+            'totalTotalDeduction' => $filteredEmployees->sum(function ($e) use ($cutoff) {
+                if ($cutoff == '1-15') {
+                    return
+                        (float) ($e->rawCalculation->hdmf_pi ?? 0) +
+                        (float) ($e->rawCalculation->hdmf_mpl ?? 0) +
+                        (float) ($e->rawCalculation->hdmf_mp2 ?? 0) +
+                        (float) ($e->rawCalculation->hdmf_cl ?? 0) +
+                        (float) ($e->rawCalculation->dareco ?? 0);
+                } elseif ($cutoff == '16-31') {
+                    return
+                        (float) ($e->rawCalculation->ss_con ?? 0) +
+                        (float) ($e->rawCalculation->ec_con ?? 0) +
+                        (float) ($e->rawCalculation->wisp ?? 0);
+                }
+                return 0;
+            }),
+            'totalNetPay' => (
+                $gross = $filteredEmployees->sum('gross')
+            ) - (
+                $filteredEmployees->sum(function ($e) use ($cutoff) {
+                    return
+                        (float) ($e->rawCalculation->total_absent_late ?? 0) +
+                        (float) ($e->rawCalculation->tax ?? 0) +
+                        (
+                            $cutoff == '1-15'
+                            ? (float) ($e->rawCalculation->hdmf_pi ?? 0)
+                            + (float) ($e->rawCalculation->hdmf_mpl ?? 0)
+                            + (float) ($e->rawCalculation->hdmf_mp2 ?? 0)
+                            + (float) ($e->rawCalculation->hdmf_cl ?? 0)
+                            + (float) ($e->rawCalculation->dareco ?? 0)
+                            : ($cutoff == '16-31'
+                                ? (float) ($e->rawCalculation->ss_con ?? 0)
+                                + (float) ($e->rawCalculation->ec_con ?? 0)
+                                + (float) ($e->rawCalculation->wisp ?? 0)
+                                : 0
+                            )
+                        );
+                })
+            ),
+        ];
         $cutoffFields = $this->cutoff === '1-15'
             ? $this->cutoffFields['1-15']
             : ($this->cutoff === '16-31' ? $this->cutoffFields['16-31'] : []);
@@ -914,6 +885,7 @@ class PayrollSummary extends Component
             'groupedEmployees' => $groupedEmployees,
             'totalPerVoucher' => $totalPerVoucher,
             'cutoffFields' => $cutoffFields,
+            'jocosTotal' => $jocosTotal,
             'overallTotal' => $overallTotal,
             'overallImems' => $overallImems,
         ]);

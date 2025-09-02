@@ -73,7 +73,7 @@
         {{-- Designation PAP --}}
         <div>
             <label for="designation_pap" class="block text-sm text-gray-700">PAP for Designation</label>
-            <input type="text" id="designation_pap" wire:model.live="designationPap" readonly
+            <input type="text" id="designation_pap" wire:model.live="designationPap"
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
             @error('designationPap')
                 <span class="text-red-500 text-xs">{{ $message }}</span>
@@ -102,7 +102,7 @@
         {{-- Office PAP --}}
         <div>
             <label for="office_pap" class="block text-sm text-gray-700">PAP for Office</label>
-            <input type="text" id="office_pap" wire:model.live="officePap" readonly
+            <input type="text" id="office_pap" wire:model.live="officePap"
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
             @error('officePap')
                 <span class="text-red-500 text-xs">{{ $message }}</span>
