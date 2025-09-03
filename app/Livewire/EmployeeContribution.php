@@ -3,6 +3,10 @@
 namespace App\Livewire;
 
 
+use App\Exports\HdmfCl;
+use App\Exports\HdmfMp2;
+use App\Exports\HdmfPi;
+use App\Exports\SssEcWisp;
 use Livewire\WithPagination;
 use App\Models\Employee;
 use App\Models\Contribution;
@@ -10,12 +14,14 @@ use Livewire\Component;
 use Carbon\Carbon;
 use App\Models\Designation;
 use App\Exports\HmdfMpl;
+use App\Exports\HmdfPi;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EmployeeContribution extends Component
 {
     use WithPagination;
     public $search = '';
+    public $nameMpl = '';
     public $designation = '';
     public $sortOrder = '';
     public $percov = '';
@@ -24,6 +30,16 @@ class EmployeeContribution extends Component
     public array $selectedContributions = [];
     public string $selectedContribution = '';
     public bool $showContributions = false;
+
+    public $showModal = false;
+
+    public $month;
+    public $year;
+    public $months = [];
+    public $years = [];
+    public $newPercovValue;
+
+
     public $pag_ibig_id_rtn;
 
     // MPL ------------------------------------------
@@ -93,10 +109,33 @@ class EmployeeContribution extends Component
         'ec' => ['amount' => null],
         'wisp' => ['amount' => null],
     ];
+
+    //NOTIFICATION MODAL
+    public function openModal()
+    {
+        $this->showModal = true;
+    }
+
+    public function closeModal()
+    {
+        $this->showModal = false;
+    }
     public function mount()
     {
         $this->percov = Carbon::now()->format('Y-m');
         $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
+
+
+        $this->months = collect(range(1, 12))->mapWithKeys(function ($monthNumber) {
+            return [$monthNumber => Carbon::create()->month($monthNumber)->format('F')];
+        })->toArray();
+
+        $currentYear = Carbon::now()->year;
+
+        $this->years = range($currentYear, $currentYear - 10);
+
+        $this->month = Carbon::now()->month;
+        $this->year = $currentYear;
     }
     public function resetContributionData()
     {
@@ -168,6 +207,32 @@ class EmployeeContribution extends Component
             'ec' => false,
             'wisp' => false,
         ];
+
+
+
+        if ($contribution && $contribution->hdmf_mpl) {
+            $jsonString = stripslashes($contribution->hdmf_mpl);
+            $data = json_decode($jsonString, true);
+
+            if (isset($data['end_te'])) {
+                $endTermDate = Carbon::parse($data['end_te']);
+                $today = Carbon::today();
+
+                if ($endTermDate->isSameDay($today->copy()->addDay())) {
+                    $employee = Employee::find($contribution->employee_id);
+                    if ($employee) {
+                        $firstName = $employee->first_name;
+                        $middleInitial = $employee->middle_initial;
+                        $lastName = $employee->last_name;
+                        $suffix = $employee->suffix;
+                        $middle = $middleInitial ? strtoupper(substr($middleInitial, 0, 1)) . '.' : '';
+                        $suffixFormatted = $suffix ? $suffix . '.' : '';
+                    }
+                    $this->nameMpl = trim("{$firstName} {$middle} {$lastName} {$suffixFormatted}");
+                    $this->showModal = true;
+                }
+            }
+        }
 
 
 
@@ -289,6 +354,8 @@ class EmployeeContribution extends Component
 
                 'hdmf_mp2' => in_array('hdmf_mp2', $this->selectedContributions) ? json_encode($this->mp2Entries) : null,
 
+
+
                 'hdmf_mpl' => in_array('hdmf_mpl', $this->selectedContributions) ? json_encode([
                     'pag_ibig_id_rtn' => $this->pag_ibig_id_rtn,
                     'status' => $this->status,
@@ -337,38 +404,6 @@ class EmployeeContribution extends Component
             ]
         );
         $this->dispatch('success', message: 'Contribution added.');
-        // $this->reset([
-        //     'selectedContributions',
-        //     'pag_ibig_id_rtn',
-        //     'account_number',
-        //     'mem_program',
-        //     'pi_mc_percov',
-        //     'pi_mc_ee_share',
-        //     'pi_mc_er_share',
-        //     'pi_mc_remarks',
-        //     'mp2Entries',
-        //     'status',
-        //     'application_number',
-        //     'loan_type',
-        //     'mpl_amount',
-        //     'mpl_remarks',
-        //     'notes',
-        //     'start_te',
-        //     'end_te',
-        //     'cl_app_no',
-        //     'cl_loan_type',
-        //     'cl_amount',
-        //     'cl_remarks',
-        //     'cl_start_term',
-        //     'cl_end_term',
-        //     'dareco_amount',
-        //     'dareco_remarks',
-        //     'sss_number',
-        //     'ec_number',
-        //     'wisp_number',
-        //     'remarks',
-        //     'difference'
-        // ]);
     }
     // DELETE---------------------------------------------------------------------------
     public function deleteContribution($contribution)
@@ -422,29 +457,53 @@ class EmployeeContribution extends Component
     {
         $this->showContributions = false;
     }
+    //UPDATE PERCOV
+    public function updatePercov()
+    {
+        $newPercov = $this->year . str_pad($this->month, 2, '0', STR_PAD_LEFT);
+        $contributions = Contribution::whereNotNull('hdmf_pi')->get();
+        foreach ($contributions as $contribution) {
+            $hdmfPiRaw = $contribution->hdmf_pi;
+            $decoded = json_decode($hdmfPiRaw, true);
+            if (is_string($decoded)) {
+                $decoded = json_decode($decoded, true);
+            }
+            if (is_array($decoded)) {
+                $decoded['percov'] = $newPercov;
+                $contribution->hdmf_pi = json_encode($decoded);
+                $contribution->save();
+
+            }
+        }
+        $this->dispatch('success', message: 'PerCov Updated!');
+    }
     //EXPORT CONTRIBUTION --------------------------------------------------------------
     public function exportContribution()
     {
+        if (!$this->selectedContribution) {
+            $this->dispatch('error', message: 'Please select a contribution type.');
+            return;
+        }
 
         switch ($this->selectedContribution) {
             case 'hdmf_pi':
-                break;
-
+                $year = (String) Carbon::now()->year;
+                return Excel::download(new HdmfPi, "COS-MC {$year}.xlsx");
             case 'hdmf_mp2':
-                break;
-
+                $year = (String) Carbon::now()->year;
+                return Excel::download(new HdmfMp2, "COS-MP2 {$year}.xlsx");
             case 'hdmf_mpl':
                 $year = (String) Carbon::now()->year;
                 return Excel::download(new HmdfMpl, "COS-MPL {$year}.xlsx");
             case 'hdmf_cl':
-                break;
-
+                $year = (String) Carbon::now()->year;
+                return Excel::download(new HdmfCl, "COS-CAL {$year}.xlsx");
             case 'dareco':
                 break;
 
             case 'sss_ec_wisp':
-                break;
-
+                $year = (String) Carbon::now()->year;
+                return Excel::download(new SssEcWisp(), "COS-SSS {$year}.xlsx");
             default:
                 break;
         }

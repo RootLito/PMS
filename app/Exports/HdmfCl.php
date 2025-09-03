@@ -12,9 +12,10 @@ use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
-{
 
+
+class HdmfCl implements FromArray, WithEvents, WithCustomStartCell
+{
     public $signatories = [];
     public $total_mpl_amortization = 0;
 
@@ -31,56 +32,49 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
     public function array(): array
     {
         $data = Contribution::with('employee')
-            ->whereNotNull('hdmf_mpl')
+            ->whereNotNull('hdmf_cl')
             ->get()
             ->map(function ($contribution) {
-                $mplRaw = $contribution->hdmf_mpl ?? '';
-                $mplDecoded = [];
-                if (is_string($mplRaw)) {
-                    $firstDecode = json_decode($mplRaw, true);
-                    $mplDecoded = is_string($firstDecode) ? json_decode($firstDecode, true) : $firstDecode;
-                    if (!is_array($mplDecoded)) {
-                        $mplDecoded = [];
+                $clRaw = $contribution->hdmf_cl ?? '';
+                $clDecoded = [];
+                if (is_string($clRaw)) {
+                    $firstDecode = json_decode($clRaw, true);
+                    $clDecoded = is_string($firstDecode) ? json_decode($firstDecode, true) : $firstDecode;
+                    if (!is_array($clDecoded)) {
+                        $clDecoded = [];
                     }
-                } elseif (is_array($mplRaw)) {
-                    $mplDecoded = $mplRaw;
+                } elseif (is_array($clRaw)) {
+                    $clDecoded = $clRaw;
                 }
-                $amount = isset($mplDecoded['amount']) ? (float) $mplDecoded['amount'] : 0;
+                $amount = isset($clDecoded['cl_amount']) ? (float) $clDecoded['cl_amount'] : 0;
                 $this->total_mpl_amortization += $amount;
 
 
-
-
                 return [
-                    $mplDecoded['pag_ibig_id_rtn'] ?? '',
-                    $mplDecoded['app_no'] ?? '',
+                    $clDecoded['pag_ibig_id_rtn'] ?? '',
+                    $clDecoded['cl_app_no'] ?? '',
                     strtoupper($contribution->employee->last_name ?? ''),
                     strtoupper($contribution->employee->first_name ?? ''),
                     strtoupper($contribution->employee->suffix ?? ''),
                     strtoupper($contribution->employee->middle_initial ?? ''),
-                    $mplDecoded['loan_type'] ?? '',
-                    isset($mplDecoded['amount']) ? number_format($mplDecoded['amount'], 2) : '',
+                    $clDecoded['cl_loan_type'] ?? '',
+                    isset($clDecoded['cl_amount']) ? number_format($clDecoded['cl_amount'], 2) : '',
                     '',
-                    // $mplDecoded['remarks'] ?? '',
-                    $mplDecoded['start_te'] ?? '',
-                    $mplDecoded['end_te'] ?? '',
+                    $clDecoded['start_te'] ?? '',
+                    $clDecoded['end_te'] ?? '',
                     '',
-                    $mplDecoded['status'] ?? '',
-                    $mplDecoded['notes'] ?? '',
+                    $clDecoded['status'] ?? '',
+                    $clDecoded['notes'] ?? '',
                 ];
             })->toArray();
         return $data;
     }
 
-    
+
     public function startCell(): string
     {
         return 'A' . $this->startRow;
     }
-
-
-
-
 
     public function registerEvents(): array
     {
@@ -89,10 +83,10 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
                 $sheet = $event->sheet->getDelegate();
 
                 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
-                $sheet->getPageMargins()->setTop(0.9843);     
+                $sheet->getPageMargins()->setTop(0.9843);
                 $sheet->getPageMargins()->setBottom(0.2362);
-                $sheet->getPageMargins()->setLeft(0.5118);    
-                $sheet->getPageMargins()->setRight(0.5118);   
+                $sheet->getPageMargins()->setLeft(0.5118);
+                $sheet->getPageMargins()->setRight(0.5118);
                 $sheet->getPageSetup()->setScale(72);
 
                 $sheet->getColumnDimension('A')->setWidth(18);
@@ -124,7 +118,6 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
                 $sheet->getStyle('A3')->getFont()->setBold(true);
                 $sheet->getStyle('B3')->getFont()->setBold(true);
 
-
                 $headerRow = $this->startRow - 1;
                 $headings = [
                     'A' => 'Pag-IBIG ID/RTN',
@@ -140,7 +133,6 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
                     'K' => 'end_term',
                     'L' => '',
                     'M' => 'REMARKS',
-                    'N' => '',
                 ];
 
 
@@ -169,8 +161,6 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
                     ->setBorderStyle(Border::BORDER_THIN)
                     ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF000000'));
 
-
-
                 foreach (range($this->startRow, $sheet->getHighestRow()) as $row) {
                     $sheet->getCell('A' . $row)
                         ->setValueExplicit(
@@ -194,7 +184,6 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
                     ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-
                 $totalLabelRow = $lastDataRow + 4;
                 $totalAmountRow = $totalLabelRow;
                 $sheet->setCellValue("A{$totalLabelRow}", "TOTAL MPL AMORTIZATION");
@@ -206,9 +195,6 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
                 $sheet->getStyle("H{$totalAmountRow}")->getFont()->setBold(true);
                 $sheet->getStyle("H{$totalAmountRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 $signatoryStartRow = $totalLabelRow + 3;
-
-
-
 
                 $sheet->setCellValue("A{$signatoryStartRow}", "Prepared by:");
                 $sheet->setCellValue("D{$signatoryStartRow}", "Checked by:");
