@@ -48,20 +48,20 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
                 $amount = isset($mplDecoded['amount']) ? (float) $mplDecoded['amount'] : 0;
                 $this->total_mpl_amortization += $amount;
 
-
-
-
                 return [
                     $mplDecoded['pag_ibig_id_rtn'] ?? '',
                     $mplDecoded['app_no'] ?? '',
-                    strtoupper($contribution->employee->last_name ?? ''),
-                    strtoupper($contribution->employee->first_name ?? ''),
-                    strtoupper($contribution->employee->suffix ?? ''),
-                    strtoupper($contribution->employee->middle_initial ?? ''),
+                    // strtoupper($contribution->employee->last_name ?? ''),
+                    // strtoupper($contribution->employee->first_name ?? ''),
+                    // strtoupper($contribution->employee->suffix ?? ''),
+                    // strtoupper($contribution->employee->middle_initial ?? ''),
+                    mb_strtoupper($contribution->employee->last_name ?? '', 'UTF-8'),
+                    mb_strtoupper($contribution->employee->first_name ?? '', 'UTF-8'),
+                    mb_strtoupper($contribution->employee->suffix ?? '', 'UTF-8'),
+                    mb_strtoupper($contribution->employee->middle_initial ?? '', 'UTF-8'),
                     $mplDecoded['loan_type'] ?? '',
                     isset($mplDecoded['amount']) ? number_format($mplDecoded['amount'], 2) : '',
                     '',
-                    // $mplDecoded['remarks'] ?? '',
                     $mplDecoded['start_te'] ?? '',
                     $mplDecoded['end_te'] ?? '',
                     '',
@@ -72,7 +72,7 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
         return $data;
     }
 
-    
+
     public function startCell(): string
     {
         return 'A' . $this->startRow;
@@ -89,10 +89,10 @@ class HmdfMpl implements FromArray, WithEvents, WithCustomStartCell
                 $sheet = $event->sheet->getDelegate();
 
                 $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
-                $sheet->getPageMargins()->setTop(0.9843);     
+                $sheet->getPageMargins()->setTop(0.9843);
                 $sheet->getPageMargins()->setBottom(0.2362);
-                $sheet->getPageMargins()->setLeft(0.5118);    
-                $sheet->getPageMargins()->setRight(0.5118);   
+                $sheet->getPageMargins()->setLeft(0.5118);
+                $sheet->getPageMargins()->setRight(0.5118);
                 $sheet->getPageSetup()->setScale(72);
 
                 $sheet->getColumnDimension('A')->setWidth(18);

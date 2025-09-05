@@ -88,12 +88,19 @@
                                 </td>
                                 <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}
                                 </td>
+
+
+
                                 <td class="px-4 py-2">
                                     <button wire:click="employeeSelected({{ $employee->id }})"
                                         class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer">
                                         {{ $selectedEmployee === $employee->id ? 'Selected' : 'Select' }}
                                     </button>
                                 </td>
+
+
+
+
                             </tr>
                         @endforeach
                     </tbody>

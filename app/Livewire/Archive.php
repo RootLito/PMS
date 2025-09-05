@@ -19,16 +19,19 @@ class Archive extends Component
     public $year = '';
     public $months = [];
     public $years = [];
-    public function download($fileId)
+    public $previewData = null;
+    public $previewFilename = null;
+
+    public function redirectToEdit()
     {
-        $file = Archived::findOrFail($fileId);
-        $filePath = $file->filename;
-        if (!Storage::exists($filePath)) {
-            session()->flash('error', 'File not found.');
+        if (count($this->selectedEmployees) !== 1) {
+            $this->dispatch('error', message: 'Please select only one employee to update.');
             return;
         }
-        return Storage::download($filePath);
+        $employeeId = $this->selectedEmployees[0];
+        return redirect()->to('/computation?employee_id=' . $employeeId);
     }
+
     public function mount()
     {
         $this->initializeDateOptions();
@@ -45,6 +48,68 @@ class Archive extends Component
 
         // $this->month = Carbon::now()->month;
         // $this->year = $currentYear;
+    }
+
+    public function download($fileId)
+    {
+        $file = Archived::findOrFail($fileId);
+        $filePath = $file->filename;
+        if (!Storage::exists($filePath)) {
+            session()->flash('error', 'File not found.');
+            return;
+        }
+        return Storage::download($filePath);
+    }
+    public function preview($fileId)
+    {
+        $file = Archived::findOrFail($fileId);
+
+        // Use default disk (same as download method)
+        $disk = config('filesystems.default');
+
+        if (!Storage::disk($disk)->exists($file->filename)) {
+            $this->dispatch('error', message: 'File not found for preview.');
+            return;
+        }
+
+        try {
+            $path = Storage::disk($disk)->path($file->filename);
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($path);
+            $sheet = $spreadsheet->getActiveSheet();
+
+            $data = [];
+            foreach ($sheet->getRowIterator(1, 10) as $row) {
+                $rowData = [];
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                foreach ($cellIterator as $cell) {
+                    $rowData[] = $cell->getValue();
+                }
+                $data[] = $rowData;
+            }
+
+            $this->previewData = $data;
+            $this->previewFilename = $file->filename;
+
+            $this->dispatch('success', message: 'Preview loaded!');
+        } catch (\Exception $e) {
+            $this->dispatch('error', message: 'Error reading Excel file: ' . $e->getMessage());
+        }
+    }
+
+
+
+    public function deleteFile($fileId)
+    {
+        $file = Archived::findOrFail($fileId);
+
+        if (Storage::exists($file->filename)) {
+            Storage::delete($file->filename);
+        }
+
+        $file->delete();
+
+        $this->dispatch('success', message: 'File deleted successfully.');
     }
     public function render()
     {

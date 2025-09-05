@@ -26,6 +26,10 @@ class EmployeeContribution extends Component
     public $sortOrder = '';
     public $percov = '';
     public $selectedEmployee = null;
+
+    // UPDATED PART ------------------------ 
+    protected $queryString = ['selectedEmployee' => ['as' => 'employee_id']];
+
     public $employeeName = '';
     public array $selectedContributions = [];
     public string $selectedContribution = '';
@@ -124,16 +128,15 @@ class EmployeeContribution extends Component
     {
         $this->percov = Carbon::now()->format('Y-m');
         $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
-
-
+        if ($this->selectedEmployee) {
+            $this->goToEmployeePage();
+            $this->employeeSelected($this->selectedEmployee);
+        }
         $this->months = collect(range(1, 12))->mapWithKeys(function ($monthNumber) {
             return [$monthNumber => Carbon::create()->month($monthNumber)->format('F')];
         })->toArray();
-
         $currentYear = Carbon::now()->year;
-
         $this->years = range($currentYear, $currentYear - 10);
-
         $this->month = Carbon::now()->month;
         $this->year = $currentYear;
     }
@@ -173,13 +176,50 @@ class EmployeeContribution extends Component
             'sss_number',
         ]);
     }
+
+
+
+
+
+    // UPDATED PART ------------------------ 
+    public function goToEmployeePage()
+    {
+        if (!$this->selectedEmployee)
+            return;
+        $perPage = 10;
+        $query = Employee::query();
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('last_name', 'like', '%' . $this->search . '%')
+                    ->orWhere('first_name', 'like', '%' . $this->search . '%');
+            });
+        }
+        if ($this->designation) {
+            $query->where('designation', $this->designation);
+        }
+        if (in_array(strtolower($this->sortOrder), ['asc', 'desc'])) {
+            $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
+        }
+        $allEmployeeIds = $query->pluck('id')->toArray();
+        $index = array_search($this->selectedEmployee, $allEmployeeIds);
+        if ($index === false) {
+            $this->dispatch('error', message: 'Employee not found in the current listing.');
+            return;
+        }
+        $page = (int) ceil(($index + 1) / $perPage);
+        $this->setPage($page);
+    }
     // SELECT EMPLOYEE X FETCH DATA  ---------------------------------------------------
     public function employeeSelected($employeeId)
     {
         $this->resetContributionData();
         $this->selectedEmployee = $employeeId;
         $contribution = Contribution::where('employee_id', $employeeId)->first();
+
+
         $employee = Employee::find($employeeId);
+
+
         $this->employeeName = $employee->last_name . ', ' . $employee->first_name;
         if (!empty($employee->suffix)) {
             $this->employeeName .= ' ' . $employee->suffix;
@@ -210,29 +250,6 @@ class EmployeeContribution extends Component
 
 
 
-        if ($contribution && $contribution->hdmf_mpl) {
-            $jsonString = stripslashes($contribution->hdmf_mpl);
-            $data = json_decode($jsonString, true);
-
-            if (isset($data['end_te'])) {
-                $endTermDate = Carbon::parse($data['end_te']);
-                $today = Carbon::today();
-
-                if ($endTermDate->isSameDay($today->copy()->addDay())) {
-                    $employee = Employee::find($contribution->employee_id);
-                    if ($employee) {
-                        $firstName = $employee->first_name;
-                        $middleInitial = $employee->middle_initial;
-                        $lastName = $employee->last_name;
-                        $suffix = $employee->suffix;
-                        $middle = $middleInitial ? strtoupper(substr($middleInitial, 0, 1)) . '.' : '';
-                        $suffixFormatted = $suffix ? $suffix . '.' : '';
-                    }
-                    $this->nameMpl = trim("{$firstName} {$middle} {$lastName} {$suffixFormatted}");
-                    $this->showModal = true;
-                }
-            }
-        }
 
 
 
@@ -404,7 +421,12 @@ class EmployeeContribution extends Component
             ]
         );
         $this->dispatch('success', message: 'Contribution added.');
+        return redirect(request()->header('Referer'));
+
     }
+
+
+
     // DELETE---------------------------------------------------------------------------
     public function deleteContribution($contribution)
     {
@@ -412,19 +434,25 @@ class EmployeeContribution extends Component
             'sss_ec_wisp' => ['sss', 'ec', 'wisp'],
         ];
         $fieldsToDelete = $groupMap[$contribution] ?? [$contribution];
-        $this->selectedContributions = array_filter(
-            $this->selectedContributions,
-            fn($item) => !in_array($item, array_keys($groupMap)) && !in_array($item, $fieldsToDelete)
-        );
+        // $this->selectedContributions = array_filter(
+        //     $this->selectedContributions,
+        //     fn($item) => !in_array($item, array_keys($groupMap)) && !in_array($item, $fieldsToDelete)
+        // );
+        $this->selectedContributions = array_values(array_filter(
+            $this->selectedContributions ?? [],
+            fn($item) => $item !== $contribution && !in_array($item, $fieldsToDelete)
+        ));
         $updateData = [];
         foreach ($fieldsToDelete as $field) {
             $updateData[$field] = null;
         }
         Contribution::where('employee_id', $this->selectedEmployee)
             ->update($updateData);
-
         $this->dispatch('success', message: 'Contribution deleted.');
     }
+
+
+
     // DELETE ACCOUNT-------------------------------------------------------------------
     public function deleteAccount($employeeId, $accountNumber)
     {
@@ -461,22 +489,74 @@ class EmployeeContribution extends Component
     public function updatePercov()
     {
         $newPercov = $this->year . str_pad($this->month, 2, '0', STR_PAD_LEFT);
-        $contributions = Contribution::whereNotNull('hdmf_pi')->get();
-        foreach ($contributions as $contribution) {
-            $hdmfPiRaw = $contribution->hdmf_pi;
-            $decoded = json_decode($hdmfPiRaw, true);
-            if (is_string($decoded)) {
-                $decoded = json_decode($decoded, true);
-            }
-            if (is_array($decoded)) {
-                $decoded['percov'] = $newPercov;
-                $contribution->hdmf_pi = json_encode($decoded);
-                $contribution->save();
 
+        $contributions = Contribution::where(function ($query) {
+            $query->whereNotNull('hdmf_pi')
+                ->orWhereNotNull('hdmf_mp2');
+        })->get();
+
+        foreach ($contributions as $contribution) {
+            $piUpdated = false;
+            $hdmfPiRaw = $contribution->hdmf_pi;
+
+            $decodedPi = json_decode($hdmfPiRaw, true);
+            if (is_string($decodedPi)) {
+                $decodedPi = json_decode($decodedPi, true);
+            }
+
+            if (is_array($decodedPi)) {
+                $decodedPi['percov'] = $newPercov;
+                $contribution->hdmf_pi = json_encode($decodedPi);
+                $piUpdated = true;
+            }
+
+            // --- Update HDMF_MP2 (new logic) ---
+            $mp2Updated = false;
+            $hdmfMp2Raw = $contribution->hdmf_mp2;
+
+            $decodedMp2 = json_decode($hdmfMp2Raw, true);
+            if (is_string($decodedMp2)) {
+                $decodedMp2 = json_decode($decodedMp2, true);
+            }
+
+            if (is_array($decodedMp2)) {
+                foreach ($decodedMp2 as &$entry) {
+                    if (
+                        isset($entry['mem_program']) &&
+                        $entry['mem_program'] === 'M2-Modified Pag-IBIG 2'
+                    ) {
+                        $entry['percov'] = $newPercov;
+                        $mp2Updated = true;
+                    }
+                }
+
+                if ($mp2Updated) {
+                    $contribution->hdmf_mp2 = json_encode($decodedMp2);
+                }
+            }
+            if ($piUpdated || $mp2Updated) {
+                $contribution->save();
             }
         }
+        // $contributions = Contribution::whereNotNull('hdmf_pi')->get();
+        // foreach ($contributions as $contribution) {
+        //     $hdmfPiRaw = $contribution->hdmf_pi;
+        //     $decoded = json_decode($hdmfPiRaw, true);
+        //     if (is_string($decoded)) {
+        //         $decoded = json_decode($decoded, true);
+        //     }
+        //     if (is_array($decoded)) {
+        //         $decoded['percov'] = $newPercov;
+        //         $contribution->hdmf_pi = json_encode($decoded);
+        //         $contribution->save();
+        //     }
+        // }
         $this->dispatch('success', message: 'PerCov Updated!');
     }
+
+
+
+
     //EXPORT CONTRIBUTION --------------------------------------------------------------
     public function exportContribution()
     {

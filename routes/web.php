@@ -72,10 +72,16 @@ Route::get('/salary', function () {
 
 
 
+
+
+
 //CONTRIBUTION ROUTE
 Route::get('/contribution', function () {
     return view('jocos.contribution');
 })->name('contribution');
+
+
+
 
 
 //CONTRIBUTION ROUTE
@@ -88,6 +94,11 @@ Route::get('/designation', function () {
 Route::get('/archive', function () {
     return view('jocos.show-archive');
 })->name('archive');
-
-
 Route::get('/files/download/{id}', [DownloadController::class, 'download'])->name('files.download');
+
+
+
+//ATTENDANCE ROUTE
+Route::get('/attendance', function () {
+    return view('jocos.attendance');
+})->name('attendance');

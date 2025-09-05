@@ -29,12 +29,7 @@
             <i class="fa-solid fa-coins ml-5 text-lg"></i>
             Monthly Rate
         </a>
-        <a href="/contribution"
-            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
-               {{ request()->is('contribution*') ? 'bg-gray-300 text-gray-700' : '' }}">
-            <i class="fa-solid fa-money-bill-wave ml-5 text-lg"></i>
-            Contribution
-        </a>
+
         <a href="/designation"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('designation*') ? 'bg-gray-300 text-gray-700' : '' }}">
@@ -49,10 +44,17 @@
             Signatory
         </a>
 
+        <a href="/contribution"
+            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('contribution*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-money-bill-wave ml-5 text-lg"></i>
+            Contribution
+        </a>
+
         <a href="/computation"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('computation*') ? 'bg-gray-300 text-gray-700' : '' }}">
-            <i class="fa-solid fa-file-pen  ml-5 text-lg"></i>
+            <i class="fa-solid fa-calculator ml-5 text-lg"></i>
             Computation
         </a>
 
@@ -62,6 +64,13 @@
                {{ request()->is('payroll*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-money-check ml-5 text-lg"></i>
             Payroll
+        </a>
+
+
+        <a href="/attendance"
+            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('attendance*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-calendar-check ml-5 text-lg"></i> Attendance
         </a>
 
 

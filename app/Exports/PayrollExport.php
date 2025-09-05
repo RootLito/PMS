@@ -108,7 +108,7 @@ class PayrollExport implements WithEvents, WithColumnWidths
                     $currentRow += 2;
                 }
                 $sheet->setBreak("A{$currentRow}", Worksheet::BREAK_ROW);
-                $this->drawOverallTotals($sheet, $currentRow, $this->data['overallTotal'], $this->data['overallImems'], $this->data['cutoff']);
+                $this->drawOverallTotals($sheet, $currentRow, $this->data['jocosTotal'], $this->data['overallImems'], $this->data['overallTotal'], $this->data['cutoff']);
                 $lastRow = $currentRow - 1;
                 $sheet->getPageSetup()->setPrintArea("A1:T{$lastRow}");
             },
@@ -410,7 +410,7 @@ class PayrollExport implements WithEvents, WithColumnWidths
 
         $row++;
     }
-    private function drawOverallTotals(Worksheet $sheet, int &$row, array $overallTotal, array $overallImems, string $cutoff): void
+    private function drawOverallTotals(Worksheet $sheet, int &$row, array $jocosTotal, array $overallImems, array $overallTotal, string $cutoff): void
     {
         $row++;
         $sheet->getRowDimension($row)->setRowHeight(40);
@@ -441,36 +441,38 @@ class PayrollExport implements WithEvents, WithColumnWidths
         $style->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_BOTTOM);
         $row++;
         $row++;
+
         // JO/COS
         $sheet->setCellValue("C{$row}", 'JO/COS');
-        $sheet->setCellValue("D{$row}", ($v = $overallTotal['totalGross'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("D{$row}", ($v = $jocosTotal['totalGross'] ?? 0) == 0 ? '-' : number_format($v, 2));
         $sheet->setCellValue("F{$row}", '');
-        $sheet->setCellValue("G{$row}", ($v = $overallTotal['totalAbsentLate'] ?? 0) == 0 ? '-' : number_format($v, 2));
-        $sheet->setCellValue("I{$row}", ($v = $overallTotal['totalTax'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("G{$row}", ($v = $jocosTotal['totalAbsentLate'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("I{$row}", ($v = $jocosTotal['totalTax'] ?? 0) == 0 ? '-' : number_format($v, 2));
         $sheet->setCellValue("J{$row}", '');
         if ($cutoff === '1-15') {
-            $sheet->setCellValue("K{$row}", ($v = $overallTotal['totalHdmfPi'] ?? 0) == 0 ? '-' : number_format($v, 2));
-            $sheet->setCellValue("L{$row}", ($v = $overallTotal['totalHdmfMpl'] ?? 0) == 0 ? '-' : number_format($v, 2));
-            $sheet->setCellValue("M{$row}", ($v = $overallTotal['totalHdmfMp2'] ?? 0) == 0 ? '-' : number_format($v, 2));
-            $sheet->setCellValue("N{$row}", ($v = $overallTotal['totalHdmfCl'] ?? 0) == 0 ? '-' : number_format($v, 2));
-            $sheet->setCellValue("O{$row}", ($v = $overallTotal['totalDareco'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("K{$row}", ($v = $jocosTotal['totalHdmfPi'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("L{$row}", ($v = $jocosTotal['totalHdmfMpl'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("M{$row}", ($v = $jocosTotal['totalHdmfMp2'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("N{$row}", ($v = $jocosTotal['totalHdmfCl'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("O{$row}", ($v = $jocosTotal['totalDareco'] ?? 0) == 0 ? '-' : number_format($v, 2));
         } elseif ($cutoff === '16-31') {
-            $sheet->setCellValue("K{$row}", ($v = $overallTotal['totalSsCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
-            $sheet->setCellValue("L{$row}", ($v = $overallTotal['totalEcCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
-            $sheet->setCellValue("M{$row}", ($v = $overallTotal['totalWisp'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("K{$row}", ($v = $jocosTotal['totalSsCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("L{$row}", ($v = $jocosTotal['totalEcCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("M{$row}", ($v = $jocosTotal['totalWisp'] ?? 0) == 0 ? '-' : number_format($v, 2));
             $sheet->setCellValue("N{$row}", '-');
             $sheet->setCellValue("O{$row}", '-');
         }
-        $sheet->setCellValue("P{$row}", ($v = $overallTotal['totalTotalDeduction'] ?? 0) == 0 ? '-' : number_format($v, 2));
-        $sheet->setCellValue("Q{$row}", ($v = $overallTotal['totalNetPay'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("P{$row}", ($v = $jocosTotal['totalTotalDeduction'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("Q{$row}", ($v = $jocosTotal['totalNetPay'] ?? 0) == 0 ? '-' : number_format($v, 2));
         $numericColumns = ['C', 'D', 'G', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
         foreach ($numericColumns as $col) {
             $sheet->getStyle("{$col}{$row}")
                 ->getAlignment()
                 ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         }
+
         // IMEMS
-        $row++; 
+        $row++;
         $sheet->setCellValue("C{$row}", 'IMEMS');
         $sheet->setCellValue("D{$row}", ($v = $overallImems['totalGross'] ?? 0) == 0 ? '-' : number_format($v, 2));
         $sheet->setCellValue("F{$row}", '');
@@ -509,7 +511,49 @@ class PayrollExport implements WithEvents, WithColumnWidths
             ->getFont()->getColor()->setARGB(Color::COLOR_RED);
         $sheet->getStyle("C{$row}")
             ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        //OVERALL----
         $row++;
+        $sheet->setCellValue("D{$row}", ($v = $overallTotal['totalGross'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("F{$row}", '');
+        $sheet->setCellValue("G{$row}", ($v = $overallTotal['totalAbsentLate'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("I{$row}", ($v = $overallTotal['totalTax'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("J{$row}", '');
+        if ($cutoff === '1-15') {
+            $sheet->setCellValue("K{$row}", ($v = $overallTotal['totalHdmfPi'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("L{$row}", ($v = $overallTotal['totalHdmfMpl'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("M{$row}", ($v = $overallTotal['totalHdmfMp2'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("N{$row}", ($v = $overallTotal['totalHdmfCl'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("O{$row}", ($v = $overallTotal['totalDareco'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        } elseif ($cutoff === '16-31') {
+            $sheet->setCellValue("K{$row}", ($v = $overallTotal['totalSsCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("L{$row}", ($v = $overallTotal['totalEcCon'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("M{$row}", ($v = $overallTotal['totalWisp'] ?? 0) == 0 ? '-' : number_format($v, 2));
+            $sheet->setCellValue("N{$row}", '-');
+            $sheet->setCellValue("O{$row}", '-');
+        }
+        $sheet->setCellValue("P{$row}", ($v = $overallTotal['totalTotalDeduction'] ?? 0) == 0 ? '-' : number_format($v, 2));
+        $sheet->setCellValue("Q{$row}", ($v = $overallTotal['totalNetPay'] ?? 0) == 0 ? '-' : number_format($v, 2));
+
+        $numericColumns = ['D', 'G', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
+        foreach ($numericColumns as $col) {
+            $sheet->getStyle("{$col}{$row}")
+                ->getAlignment()
+                ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        }
+
+        $yellowColumns = ['D', 'G', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
+        foreach ($yellowColumns as $col) {
+            $style = $sheet->getStyle("{$col}{$row}");
+            $style->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()
+                ->setARGB('FFFFFF00'); 
+            $style->getFont()->setBold(true);
+        }
+        $row++;
+
+
     }
     private function drawSignatories(Worksheet $sheet, int &$row, $assigned): void
     {

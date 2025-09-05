@@ -49,13 +49,35 @@
                         <td class="px-4 py-2">{{ $file->month }}</td>
                         <td class="px-4 py-2">{{ $file->year }}</td>
                         <td class="px-4 py-2">{{ $file->date_saved }}</td>
-                        <td class="px-4 py-2 flex gap-2">
+                        {{-- <td class="px-4 py-2 flex gap-2">
                             <a href="{{ route('files.download', $file->id) }}"
                                 class="inline-flex items-center bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded"
                                 title="Download">
                                 <i class="fas fa-download mr-2"></i> Download
                             </a>
+                        </td> --}}
+
+                        <td class="px-4 py-2 flex gap-2">
+                            <a href="{{ route('files.download', $file->id) }}"
+                                class="inline-flex items-center bg-green-700  text-white px-3 py-1 rounded"
+                                title="Download">
+                                <i class="fas fa-download mr-2"></i> Download
+                            </a>
+
+                            {{-- <button wire:click="preview({{ $file->id }})"
+                                class="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded cursor-pointer"
+                                title="Preview">
+                                <i class="fas fa-eye mr-2"></i> Preview
+                            </button> --}}
+
+                            <button wire:click="deleteFile({{ $file->id }})"
+                                class="inline-flex items-center bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded  cursor-pointer"
+                                title="Delete"
+                                onclick="confirm('Are you sure you want to delete this file?') || event.stopImmediatePropagation()">
+                                <i class="fas fa-trash mr-2"></i> Delete
+                            </button>
                         </td>
+
                     </tr>
                 @empty
                     <tr>
@@ -129,4 +151,26 @@
             </nav>
         </div>
     @endif
+
+
+    @if ($previewData)
+        <div class="mt-6 p-4 bg-gray-100 rounded shadow overflow-auto max-h-64">
+            <h3 class="text-lg font-semibold mb-2">Preview: {{ $previewFilename }}</h3>
+            <table class="min-w-full table-auto text-sm border border-gray-300">
+                <tbody>
+                    @foreach ($previewData as $row)
+                        <tr class="border-b border-gray-300">
+                            @foreach ($row as $cell)
+                                <td class="px-2 py-1 border-r border-gray-300 whitespace-nowrap">{{ $cell }}
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <button wire:click="$set('previewData', null)" class="mt-2 px-3 py-1 bg-red-500 text-white rounded">Close
+                Preview</button>
+        </div>
+    @endif
+
 </div>

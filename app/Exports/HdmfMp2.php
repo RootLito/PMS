@@ -54,13 +54,18 @@ class HdmfMp2 implements FromArray, WithEvents, WithCustomStartCell
                         $eeShare = is_numeric($entry['ee_share'] ?? null) ? (float) $entry['ee_share'] : 0;
                         $this->total_mp2_amortization += $eeShare;
                         $rows[] = [
-                            $entry['pag_big_id_rtn'] ?? '',
-                            $entry['account_number'] ?? '',
+                            $entry['pag_ibig_id_rtn'] ?? '',
+                            (string) ($entry['account_number'] ?? ''),
                             $entry['mem_program'] ?? '',
-                            strtoupper($contribution->employee->last_name ?? ''),
-                            strtoupper($contribution->employee->first_name ?? ''),
-                            strtoupper($contribution->employee->suffix ?? ''),
-                            strtoupper($contribution->employee->middle_initial ?? ''),
+                            // strtoupper($contribution->employee->last_name ?? ''),
+                            // strtoupper($contribution->employee->first_name ?? ''),
+                            // strtoupper($contribution->employee->suffix ?? ''),
+                            // strtoupper($contribution->employee->middle_initial ?? ''),
+                            mb_strtoupper($contribution->employee->last_name ?? '', 'UTF-8'),
+                            mb_strtoupper($contribution->employee->first_name ?? '', 'UTF-8'),
+                            mb_strtoupper($contribution->employee->suffix ?? '', 'UTF-8'),
+                            mb_strtoupper($contribution->employee->middle_initial ?? '', 'UTF-8'),
+
                             $entry['percov'] ?? '',
                             is_numeric($entry['ee_share'] ?? null) ? number_format((float) $entry['ee_share'], 2) : '',
                             is_numeric($entry['er_share'] ?? null) ? number_format((float) $entry['er_share'], 2) : '',
@@ -176,14 +181,31 @@ class HdmfMp2 implements FromArray, WithEvents, WithCustomStartCell
                             $sheet->getCell('A' . $row)->getValue(),
                             DataType::TYPE_STRING
                         );
+
+                    $sheet->getCell('B' . $row)
+                        ->setValueExplicit(
+                            $sheet->getCell('B' . $row)->getValue(),
+                            DataType::TYPE_STRING
+                        );
+                    $sheet->getStyle('A' . $row)
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $sheet->getStyle('B' . $row)
+                        ->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 }
 
+
+
                 $lastDataRow = $sheet->getHighestRow();
-                // $sheet->getStyle("A{$this->startRow}:F{$lastDataRow}")->getFont()->setBold(true);
                 $lastDataRow = $sheet->getHighestRow();
                 $dataRange = "A{$this->startRow}:K{$lastDataRow}";
                 $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF000000'));
                 $sheet->getStyle("H{$this->startRow}:H{$lastDataRow}")
+                    ->getAlignment()
+                    ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("I{$this->startRow}:I{$lastDataRow}")
                     ->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 $sheet->getStyle("E{$this->startRow}:E{$lastDataRow}")
@@ -194,16 +216,16 @@ class HdmfMp2 implements FromArray, WithEvents, WithCustomStartCell
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
 
-                $totalLabelRow = $lastDataRow + 4;
+                $totalLabelRow = $lastDataRow + 2;
                 $totalAmountRow = $totalLabelRow;
-                $sheet->setCellValue("A{$totalLabelRow}", "TOTAL MPL AMORTIZATION");
+                $sheet->setCellValue("A{$totalLabelRow}", "Total Remittance");
                 $sheet->getStyle("A{$totalLabelRow}")->getFont()->setBold(true);
-                $sheet->setCellValue("H{$totalAmountRow}", number_format($this->total_mp2_amortization, 2));
-                $sheet->getStyle("H{$totalAmountRow}")
+                $sheet->setCellValue("I{$totalAmountRow}", number_format($this->total_mp2_amortization, 2));
+                $sheet->getStyle("I{$totalAmountRow}")
                     ->getNumberFormat()
                     ->setFormatCode('₱#,##0.00');
-                $sheet->getStyle("H{$totalAmountRow}")->getFont()->setBold(true);
-                $sheet->getStyle("H{$totalAmountRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("I{$totalAmountRow}")->getFont()->setBold(true);
+                $sheet->getStyle("I{$totalAmountRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
                 $signatoryStartRow = $totalLabelRow + 3;
 
 
@@ -226,8 +248,8 @@ class HdmfMp2 implements FromArray, WithEvents, WithCustomStartCell
                 $sheet->setCellValue("G" . ($signatoryStartRow + 3), "OIC, Accounting Unit");
 
 
-                $sheet->getPageSetup()->setPrintArea('A1:I' . $sheet->getHighestRow());
-                $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
+                $sheet->getPageSetup()->setPrintArea('A1:K' . $sheet->getHighestRow());
+                $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
                 $sheet->getPageSetup()->setFitToWidth(1);
                 $sheet->getPageSetup()->setFitToHeight(0);
             }

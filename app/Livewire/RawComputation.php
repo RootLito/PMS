@@ -83,6 +83,9 @@ class RawComputation extends Component
         '1-15' => '1st Cutoff (1-15)',
         '16-31' => '2nd Cutoff (16-31)',
     ];
+
+
+
     public function goToEmployeePage()
     {
         if (!$this->employeeSelectedId)
@@ -102,6 +105,10 @@ class RawComputation extends Component
             $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
         }
         $allEmployeeIds = $query->pluck('id')->toArray();
+
+
+
+
         $index = array_search($this->employeeSelectedId, $allEmployeeIds);
         if ($index === false) {
             $this->dispatch('error', message: 'Employee not found in the current listing.');
@@ -110,13 +117,22 @@ class RawComputation extends Component
         $page = (int) ceil(($index + 1) / $perPage);
         $this->setPage($page);
     }
+
+
+
+
     public function mount()
     {
         $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
+
+
         if ($this->employeeSelectedId) {
             $this->goToEmployeePage();
             $this->employeeSelected($this->employeeSelectedId);
         }
+
+
+
         $day = Carbon::now()->day;
         if ($day >= 1 && $day <= 15) {
             $this->cutoff = '1-15';
@@ -193,7 +209,6 @@ class RawComputation extends Component
 
         //CONTRIBUTION
         $contribution = Contribution::where('employee_id', $employeeId)->first();
-
         if ($contribution) {
             $sss = json_decode($contribution->sss, true);
             $ec = json_decode($contribution->ec, true);
@@ -240,6 +255,11 @@ class RawComputation extends Component
         }
 
     }
+
+
+
+
+
     public function resetContributionAmounts()
     {
         $this->ss_con = null;
@@ -273,6 +293,10 @@ class RawComputation extends Component
 
         $this->tax = null;
         $this->adjustment = null;
+
+        $this->absent = null;
+        $this->late = null;
+        $this->remarks2 = '';
     }
     public function updatedDaily()
     {

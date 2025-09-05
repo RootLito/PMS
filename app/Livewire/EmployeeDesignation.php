@@ -25,9 +25,6 @@ class EmployeeDesignation extends Component
         'office' => 'nullable|string',
         'officePap' => 'nullable|string',
     ];
-
-
-
     public function save()
     {
         $this->validate([
@@ -59,9 +56,6 @@ class EmployeeDesignation extends Component
 
         $this->resetForm();
     }
-
-
-
 
     public function edit($id)
     {

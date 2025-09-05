@@ -791,7 +791,14 @@
                     <tr class="border-x border-gray-300">
                         <td></td>
                         <td></td>
-                        <td class="text-right">NEW</td>
+                        <td class="text-right text-red-500">SEPARATED</td>
+                        <td class="px-2 text-right"></td>
+                    </tr>
+
+                     <tr class="border-x border-gray-300">
+                        <td></td>
+                        <td></td>
+                        <td class="text-right  text-red-500">NEW</td>
                         <td class="px-2 text-right"></td>
                     </tr>
 

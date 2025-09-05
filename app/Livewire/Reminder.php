@@ -2,20 +2,16 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-use App\Models\Contribution;
 use App\Models\Employee;
+use App\Models\Contribution;
+use Livewire\Component;
 use Carbon\Carbon;
 
-class DashboardData extends Component
+class Reminder extends Component
 {
-    public $reminderData = [];
+    public $reminder = false;
     public $showModal = false;
-
-    public function mount()
-    {
-        $this->loadReminderData();
-    }
+    public $reminderData = [];
 
     public function loadReminderData()
     {
@@ -56,6 +52,22 @@ class DashboardData extends Component
         $this->showModal = count($this->reminderData) > 0;
     }
 
+    public function redirectToComputation($employeeId)
+    {
+        return redirect()->to('/contribution?employee_id=' . $employeeId);
+    }
+
+    public function mount()
+    {
+        $this->loadReminderData();
+    }
+
+    public function reminderToggle()
+    {
+        $this->reminder = !$this->reminder;
+        $this->loadReminderData();
+    }
+
     public function closeModal()
     {
         $this->showModal = false;
@@ -63,7 +75,8 @@ class DashboardData extends Component
 
     public function render()
     {
-        return view('livewire.dashboard-data');
+        return view('livewire.reminder', [
+            'reminderData' => $this->reminderData,
+        ]);
     }
-
 }

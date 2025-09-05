@@ -66,8 +66,6 @@ class SalaryEncode extends Component
 
         $this->isUpdating = true;
     }
-
-
     public function confirmDelete($id)
     {
         $this->deletingId = $id;
@@ -89,15 +87,6 @@ class SalaryEncode extends Component
 
         $this->deletingId = null;
     }
-
-
-
-
-
-
-
-
-
     public function resetFields()
     {
         $this->salaryId = null;
@@ -110,7 +99,7 @@ class SalaryEncode extends Component
     }
     public function render()
     {
-        $salaries = Salary::latest()->paginate(13);
+        $salaries = Salary::latest()->paginate(11);
         return view('livewire.salary-encode', compact('salaries'));
     }
 }

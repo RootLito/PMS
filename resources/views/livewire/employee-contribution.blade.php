@@ -20,9 +20,10 @@
                 @endforeach
             </select>
 
-            <button wire:click.prevent="updatePercov"
+            <button wire:click.prevent="updatePercov" wire:loading.attr="disabled" wire:target="updatePercov"
                 class="w-48 h-10 bg-slate-700 rounded-md text-white cursor-pointer hover:bg-slate-900 mr-4 text-sm">
-                Update PerCov
+                <span wire:loading.remove wire:target="updatePercov">Update PerCov</span>
+                <span wire:loading wire:target="updatePercov">Updating...</span>
             </button>
 
             <select wire:model.live="selectedContribution"
@@ -65,6 +66,9 @@
                 </div>
             </div>
 
+
+            
+
             <div class="overflow-auto mt-6">
                 <table class="min-w-full table-auto text-sm">
                     <thead class="bg-gray-100 text-left">
@@ -90,12 +94,20 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-2">{{ $employee->designation }}</td>
+
+
+
+
                                 <td class="px-4 py-2">
                                     <button wire:click="employeeSelected({{ $employee->id }})"
                                         class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer">
                                         {{ $selectedEmployee === $employee->id ? 'Selected' : 'Select' }}
                                     </button>
                                 </td>
+
+
+
+
                             </tr>
                         @endforeach
                     </tbody>
@@ -217,8 +229,6 @@
                             </div>
                         @endif
                     </div>
-
-
                 </div>
 
 
@@ -354,7 +364,7 @@
                     <div class="mt-6">
                         <div class="w-full flex justify-between bg-gray-300 px-2 item-center mb-2">
                             <h1 class="py-1 text-gray-700 font-bold">HMDF-MP2</h1>
-                            <div class="flex gap-2 items-center py-1 items-center">
+                            <div class="flex gap-2 items-center py-1">
                                 <button
                                     class="bg-green-700 text-white py-1 px-4 rounded flex items-center cursor-pointer "
                                     wire:click.prevent="addMp2Entry" type="button">
@@ -643,9 +653,11 @@
                 <div style="padding: 1.5rem 2rem; color: #2d3748; text-align: center;">
                     <h2 class="text-lg text-gray-700 font-bold mb-6 mt-4">REMINDER</h2>
                     <p style="font-size: 0.9rem; color: #718096; margin-bottom: 1.5rem;">
-                        The Pag-IBIG loan term of <b class="text-gray-600 font-black">{{$nameMpl}}</b> will end tomorrow. Kindly ensure all necessary payments are completed.
+                        The Pag-IBIG loan term of <b class="text-gray-600 font-black">{{ $nameMpl }}</b> will end
+                        tomorrow. Kindly ensure all necessary payments are completed.
                     </p>
-                    <button wire:click="closeModal" class="bg-red-400 text-white rounded-lg py-2 cursor-pointer w-full">
+                    <button wire:click="closeModal"
+                        class="bg-red-500 text-white rounded-lg py-2 cursor-pointer w-full">
                         Dismiss
                     </button>
                 </div>
