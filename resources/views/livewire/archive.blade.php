@@ -152,25 +152,4 @@
         </div>
     @endif
 
-
-    @if ($previewData)
-        <div class="mt-6 p-4 bg-gray-100 rounded shadow overflow-auto max-h-64">
-            <h3 class="text-lg font-semibold mb-2">Preview: {{ $previewFilename }}</h3>
-            <table class="min-w-full table-auto text-sm border border-gray-300">
-                <tbody>
-                    @foreach ($previewData as $row)
-                        <tr class="border-b border-gray-300">
-                            @foreach ($row as $cell)
-                                <td class="px-2 py-1 border-r border-gray-300 whitespace-nowrap">{{ $cell }}
-                                </td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <button wire:click="$set('previewData', null)" class="mt-2 px-3 py-1 bg-red-500 text-white rounded">Close
-                Preview</button>
-        </div>
-    @endif
-
 </div>

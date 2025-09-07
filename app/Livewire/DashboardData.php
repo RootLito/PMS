@@ -10,11 +10,23 @@ use Carbon\Carbon;
 class DashboardData extends Component
 {
     public $reminderData = [];
+    public $joCount = 0;
+    public $cosCount = 0;
+    public $totalCount = 0;
+    public $maleCount = 0;
+    public $femaleCount = 0;
     public $showModal = false;
 
     public function mount()
     {
         $this->loadReminderData();
+        $this->joCount = Employee::where('employment_status', 'JO')->count();
+        $this->cosCount = Employee::where('employment_status', 'COS')->count();
+        $this->totalCount = $this->joCount + $this->cosCount;
+        $this->maleCount = Employee::where('gender', 'male')->count();
+        $this->femaleCount = Employee::where('gender', 'female')->count();
+
+
     }
 
     public function loadReminderData()
@@ -55,6 +67,9 @@ class DashboardData extends Component
 
         $this->showModal = count($this->reminderData) > 0;
     }
+
+
+
 
     public function closeModal()
     {

@@ -50,9 +50,14 @@
             <button wire:click.prevent="saveArchive"
                 class="bg-green-700 text-white font-semibold px-4 py-1 rounded cursor-pointer hover:bg-green-600"><i
                     class="fa-solid fa-floppy-disk mr-1"></i> Save to Archive</button>
+
+
+
             <button wire:click.prevent="exportPayroll"
                 class="bg-blue-700 text-white font-semibold px-4 py-1 rounded cursor-pointer hover:bg-blue-600">
                 <i class="fa-regular fa-file-excel mr-1"></i>Export to Excel</button>
+
+                
         </div>
     </div>
     <div class="bg-white p-6 min-h-100 rounded-xl">

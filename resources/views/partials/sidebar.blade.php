@@ -7,7 +7,7 @@
 
 
 
-    <div class="mt-18 flex flex-col gap-2">
+    <div class="mt-8 flex flex-col gap-2">
         <a href="/dashboard"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('dashboard*') ? 'bg-gray-300 text-gray-700' : '' }}">
@@ -35,6 +35,13 @@
                {{ request()->is('designation*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-address-card ml-5 text-lg"></i>
             Designation
+        </a>
+
+        <a href="/position"
+            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
+               {{ request()->is('position*') ? 'bg-gray-300 text-gray-700' : '' }}">
+            <i class="fa-solid fa-user-tie ml-5 text-lg"></i>
+            Position
         </a>
 
         <a href="/signatory"

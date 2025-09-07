@@ -21,6 +21,8 @@ class Employee extends Model
         'employment_status',
         'monthly_rate',
         'gross',
+        'position',
+        'gender',
     ];
 
 
@@ -28,10 +30,8 @@ class Employee extends Model
     {
         return $this->hasOne(RawCalculation::class);
     }
-
     public function rawCalculations()
     {
         return $this->hasMany(RawCalculation::class);
     }
-
 }

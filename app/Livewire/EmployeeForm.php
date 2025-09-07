@@ -6,6 +6,7 @@ use App\Models\Employee;
 use App\Models\Salary;
 use App\Models\Designation;
 use Livewire\Component;
+use App\Models\Position;
 
 class EmployeeForm extends Component
 {
@@ -16,6 +17,8 @@ class EmployeeForm extends Component
     public $employment_status = '';
     public $monthly_rate = '';
     public $gross;
+    public $position ='';
+    public $gender ='';
     public $designation = '';
     public $office_name = '';
     public $designationPap = '';
@@ -28,8 +31,6 @@ class EmployeeForm extends Component
     {
         $this->runDesignation();
     }
-
-
     public function runDesignation()
     {
         $designationsData = Designation::all();
@@ -46,10 +47,6 @@ class EmployeeForm extends Component
             }
         }
     }
-
-
-
-
     public function updatedDesignation($value)
     {
         $this->office_name = '';
@@ -60,8 +57,6 @@ class EmployeeForm extends Component
     {
         $this->officePap = $this->officeOptions[$this->designation][$value] ?? '';
     }
-
-
     public function updatedMonthlyRate()
     {
         $this->gross = $this->monthly_rate ? number_format($this->monthly_rate / 2, 2, '.', '') : null;
@@ -80,8 +75,11 @@ class EmployeeForm extends Component
             'employment_status' => 'required|string',
             'monthly_rate' => 'required|numeric',
             'gross' => 'required|numeric',
+            'position' => 'required|String',
+            'gender' => 'required|String',
+        ], [
+            '*.required' => 'This field is required',
         ]);
-
         $validatedData['designation_pap'] = $this->designationPap;
         $validatedData['office_code'] = $this->officePap;
 
@@ -90,16 +88,14 @@ class EmployeeForm extends Component
         $this->dispatch('success', message: 'Employee added.');
         $this->reset();
         $this->runDesignation();
-
     }
-
-
-
     public function render()
     {
+        $positions = Position::get();
         $salaries = Salary::latest()->get();
         return view('livewire.employee-form', [
-            'salaries' => $salaries
+            'salaries' => $salaries,
+            'positions' => $positions
         ]);
     }
 }

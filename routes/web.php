@@ -102,3 +102,9 @@ Route::get('/files/download/{id}', [DownloadController::class, 'download'])->nam
 Route::get('/attendance', function () {
     return view('jocos.attendance');
 })->name('attendance');
+
+
+//ATTENDANCE ROUTE
+Route::get('/position', function () {
+    return view('jocos.position');
+})->name('position');

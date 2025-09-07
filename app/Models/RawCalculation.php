@@ -32,7 +32,6 @@ class RawCalculation extends Model
         'cutoff',
         'month',       
         'year',
-
         'absent_ins', 
         'late_ins', 
         'remarks2', 

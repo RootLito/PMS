@@ -1,41 +1,78 @@
 <div class="flex-1 flex flex-col gap-10">
-    <div class="w-full h-96 flex gap-10">
-        <div class="flex-1 flex bg-white rounded-xl p-6 flex-col justify-between gap-4">
-            <h2 class="text-xl">Total Employee</h2>
-            <h1 class="text-5xl text-gray-700 font-bold">1,326,921</h1>
+    <div class="w-full min-h-screen grid grid-cols-3 grid-rows-3 gap-10">
+
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="flex gap-2 p-4 border-b border-gray-200">
+                <i class="fa-solid fa-briefcase text-gray-600 text-xl"></i>
+                <h2 class="font-bold text-gray-600">Employee Status Total</h2>
+            </div>
+
+            <div class="flex-1 py-6 flex ">
+                <div class="flex-1 flex flex-col items-center justify-end py-6">
+                    <div class="text-5xl text-gray-700">
+                        {{ $joCount }}
+                    </div>
+                    <h2 class="text-2xl font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">JO</h2>
+                </div>
+                <div class="flex-1 flex flex-col items-center justify-end py-6">
+                    <p class="text-5xl text-gray-700">{{ $cosCount }}</p>
+                    <h2 class="text-2xl font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">COS</h2>
+                </div>
+                <div class="flex-1 flex flex-col items-center justify-end py-6">
+                    <div class="text-5xl text-gray-700">
+                        {{ $totalCount }}
+                    </div>
+                    <h2 class="text-2xl font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">TOTAL</h2>
+                </div>
+            </div>
         </div>
-        <div class="flex-1 flex bg-white rounded-xl p-6 flex-col justify-between gap-4">
-            <h2 class="text-xl">Gross</h2>
-            <h1 class="text-5xl text-gray-700 font-bold">1,326,921</h1>
+
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="flex gap-2 p-4 border-b border-gray-200">
+                <i class="fa-solid fa-venus-mars text-gray-600 text-xl"></i>
+                <h2 class="font-bold text-gray-600">Gender Total</h2>
+            </div>
+
+            <div class="flex-1 py-6 flex ">
+                <div class="flex-1 flex flex-col items-center justify-end py-6">
+                    <div class="text-5xl text-gray-700">
+                        {{ $maleCount }}
+                    </div>
+                    <h2 class="text-2xl font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">MALE</h2>
+                </div>
+                <div class="flex-1 flex flex-col items-center justify-end py-6">
+                    <div class="text-5xl text-gray-700">
+                        {{ $femaleCount }}
+                    </div>
+                    <h2 class="text-2xl font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">FEMALE</h2>
+                </div>
+            </div>
         </div>
-        <div class="flex-1 flex bg-white rounded-xl p-6 flex-col justify-between gap-4">
-            <h2 class="text-xl">Gross</h2>
-            <h1 class="text-5xl text-gray-700 font-bold">1,326,921</h1>
+
+
+        <div class="bg-white row-span-3 col-start-3 rounded-xl shadow-sm overflow-hidden">
+            <div class="flex gap-2 p-4 border-b border-gray-200">
+                <i class="fa-solid fa-users text-gray-600 text-xl"></i>
+                <h2 class="font-bold text-gray-600">Employee Count per Office</h2>
+            </div>
         </div>
-        <div class="flex-1 flex bg-white rounded-xl p-6 flex-col justify-between gap-4">
-            <h2 class="text-xl">Late/Absences</h2>
-            <h1 class="text-5xl text-gray-700 font-bold">1,326,921</h1>
+
+
+        <div class="bg-white col-span-2 row-start-2 rounded-xl shadow-sm overflow-hidden">
+            <div class="flex gap-2 p-4 border-b border-gray-200">
+                <i class="fa-solid fa-money-bill-wave text-gray-600 text-lg"></i>
+                <h2 class="font-bold text-gray-600">Contribution Total</h2>
+            </div>
         </div>
-        <div class="flex-1 flex bg-white rounded-xl p-6 flex-col justify-between gap-4">
-            <h2 class="text-xl">Tax</h2>
-            <h1 class="text-5xl text-gray-700 font-bold">1,326,921</h1>
+
+        <div class="bg-white col-span-2 row-start-3 rounded-xl shadow-sm overflow-hidden">
+            <div class="flex gap-2  p-4 border-b border-gray-200">
+                <i class="fa-solid fa-calendar-check text-gray-600 text-xl"></i>
+                <h2 class="font-bold text-gray-600">Employee Attendance Status for the Month of September</h2>
+            </div>
         </div>
+
     </div>
-
-
-
-
-
-    <div class="flex-1 bg-white rounded-xl p-6">
-        <div class="flex-1 ">
-            <h2 class="text-xl">Contributions</h2>
-            <h1 class="text-5xl text-gray-700 font-bold">1,326,921</h1>
-        </div>
-    </div>
-
-
-
-
     @if ($showModal)
         <div
             style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40; display: flex; justify-content: center; align-items: center;">
@@ -72,5 +109,4 @@
             </div>
         </div>
     @endif
-
 </div>

@@ -974,7 +974,6 @@ class PayrollSummary extends Component
         $cutoffFields = $this->cutoff === '1-15'
             ? $this->cutoffFields['1-15']
             : ($this->cutoff === '16-31' ? $this->cutoffFields['16-31'] : []);
-
         return view('livewire.payroll-summary', [
             'groupedEmployees' => $groupedEmployees,
             'totalPerVoucher' => $totalPerVoucher,

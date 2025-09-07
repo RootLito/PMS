@@ -49,6 +49,39 @@
         </div>
     </div>
 
+    <div class="w-full grid grid-cols-2 gap-2">
+        <div>
+            <label for="position" class="block text-sm text-gray-700">
+                Position <span class="text-red-400">*</span>
+            </label>
+            <select id="position" wire:model="position"
+                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                <option value="" disabled selected>Select a position</option>
+                @foreach ($positions as $pos)
+                    <option value="{{ $pos->id }}">{{ $pos->name }}</option>
+                @endforeach
+            </select>
+            @error('position')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <div>
+            <label for="gender" class="block text-sm text-gray-700">
+                Gender <span class="text-red-400">*</span>
+            </label>
+            <select id="gender" wire:model="gender"
+                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                <option value="" disabled selected>Select gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+            @error('gender')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
+        </div>
+    </div>
+
     <div class="w-full grid grid-cols-4 gap-2">
         <div>
             <label for="designation" class="block text-sm text-gray-700">
@@ -101,6 +134,8 @@
             @enderror
         </div>
     </div>
+
+
 
     <div class="w-full grid grid-cols-3 gap-2 mt-4">
         <div>

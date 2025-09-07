@@ -6,7 +6,7 @@ use App\Models\Employee;
 use App\Models\Salary;
 use App\Models\Designation;
 use Livewire\Component;
-
+use App\Models\Position;
 class UpdateEmployee extends Component
 {
     public $employeeId;
@@ -25,6 +25,8 @@ class UpdateEmployee extends Component
     public $officeOptions = [];
     public $monthly_rate;
     public $gross;
+    public $position;
+    public $gender;
 
 
 
@@ -45,6 +47,8 @@ class UpdateEmployee extends Component
         $this->office_name = $employee->office_name;
         $this->monthly_rate = $employee->monthly_rate;
         $this->gross = $employee->gross;
+        $this->position = $employee->position;
+        $this->gender = $employee->gender;
 
         $designationsData = Designation::all();
 
@@ -59,9 +63,6 @@ class UpdateEmployee extends Component
             $this->designationMap[$item->designation] = $item->pap;
         }
     }
-
-
-
     public function updatedDesignation($value)
     {
         $this->office_name = '';
@@ -72,9 +73,6 @@ class UpdateEmployee extends Component
     {
         $this->officePap = $this->officeOptions[$this->designation][$value] ?? '';
     }
-
-
-
     public function updatedMonthlyRate()
     {
         $this->gross = $this->monthly_rate ? number_format($this->monthly_rate / 2, 2, '.', '') : null;
@@ -95,6 +93,8 @@ class UpdateEmployee extends Component
             'employment_status' => 'required|string',
             'monthly_rate' => 'required|numeric',
             'gross' => 'required|numeric',
+            'position' => 'required|String',
+            'gender' => 'required|String',
         ]);
 
         $employee = Employee::findOrFail($this->employeeId);
@@ -107,9 +107,11 @@ class UpdateEmployee extends Component
     public function render()
     {
         $salaries = Salary::latest()->get();
+        $positions = Position::get();
 
         return view('livewire.update-employee', [
             'salaries' => $salaries,
+            'positions' => $positions
         ]);
     }
 }
