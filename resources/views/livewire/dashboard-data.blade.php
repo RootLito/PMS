@@ -55,23 +55,106 @@
                 <i class="fa-solid fa-users text-gray-600 text-xl"></i>
                 <h2 class="font-bold text-gray-600">Employee Count per Office</h2>
             </div>
+
+            <div class="p-4 pb-10 space-y-2 max-h-screen overflow-y-auto">
+                @forelse ($officeCounts as $office => $count)
+                    <div class="flex justify-between text-sm text-gray-700 border-b border-gray-200 pb-1">
+                        <span class="font-medium">{{ $office }}</span>
+                        <span class="text-gray-500">{{ $count }}</span>
+                    </div>
+                @empty
+                    <p class="text-gray-400 text-sm">No data available.</p>
+                @endforelse
+            </div>
         </div>
 
 
-        <div class="bg-white col-span-2 row-start-2 rounded-xl shadow-sm overflow-hidden">
+
+        <div class="bg-white col-span-2 row-start-2 rounded-xl shadow-sm overflow-hidden flex flex-col">
             <div class="flex gap-2 p-4 border-b border-gray-200">
                 <i class="fa-solid fa-money-bill-wave text-gray-600 text-lg"></i>
                 <h2 class="font-bold text-gray-600">Contribution Total</h2>
             </div>
-        </div>
 
-        <div class="bg-white col-span-2 row-start-3 rounded-xl shadow-sm overflow-hidden">
-            <div class="flex gap-2  p-4 border-b border-gray-200">
-                <i class="fa-solid fa-calendar-check text-gray-600 text-xl"></i>
-                <h2 class="font-bold text-gray-600">Employee Attendance Status for the Month of September</h2>
+            <div class="flex-1 grid grid-cols-6">
+                <div class="flex flex-col justify-center items-center gap-2 p-4">
+                    <div class="text-xl text-gray-700 font-semibold">₱{{ number_format($totalPi, 2) }}</div>
+                    <h2 class="text-lg font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">HDMF-PI</h2>
+                </div>
+                <div class="flex flex-col justify-center items-center gap-2 p-4">
+                    <div class="text-xl text-gray-700 font-semibold">₱{{ number_format($totalMp2, 2) }}</div>
+                    <h2 class="text-lg font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">HDMF-MP2</h2>
+                </div>
+                <div class="flex flex-col justify-center items-center gap-2 p-4">
+                    <div class="text-xl text-gray-700 font-semibold">₱{{ number_format($totalMpl, 2) }}</div>
+                    <h2 class="text-lg font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">HDMF-MPL</h2>
+                </div>
+                <div class="flex flex-col justify-center items-center gap-2 p-4">
+                    <div class="text-xl text-gray-700 font-semibold">₱{{ number_format($totalCl, 2) }}</div>
+                    <h2 class="text-lg font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">HDMF-CL</h2>
+                </div>
+                <div class="flex flex-col justify-center items-center gap-2 p-4">
+                    <div class="text-xl text-gray-700 font-semibold">₱{{ number_format($totalDareco, 2) }}</div>
+                    <h2 class="text-lg font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">DARECO</h2>
+                </div>
+                <div class="flex flex-col justify-center items-center gap-2 p-4">
+                    <div class="text-xl text-gray-700 font-semibold">₱{{ number_format($totalSssEcWisp, 2) }}</div>
+                    <h2 class="text-lg font-bold mt-6 text-gray-500 p-2 bg-gray-100 rounded-lg">SSS, EC, WISP</h2>
+                </div>
             </div>
         </div>
 
+        <div class="bg-white col-span-2 row-start-3 rounded-xl shadow-sm overflow-hidden flex flex-col">
+            <div class="flex gap-2 p-4 border-b border-gray-200">
+                <i class="fa-solid fa-calendar-check text-gray-600 text-xl"></i>
+                <h2 class="font-bold text-gray-600">Employee Attendance Status for the Month of September</h2>
+            </div>
+
+            <div class="flex-1 p-6 overflow-auto">
+                @if ($employeesData->isEmpty())
+                    <div class="text-center text-gray-500">No Record Yet</div>
+                @else
+                    <table class="w-full text-left table-auto border-collapse border border-gray-200 text-xs">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 px-4 py-2">Name</th>
+                                <th class="border border-gray-300 px-4 py-2">Late</th>
+                                <th class="border border-gray-300 px-4 py-2">Absent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($employeesData as $employee)
+                                <tr>
+                                    <td class="border border-gray-300 px-4 py-2">{{ $employee['full_name'] }}</td>
+                                    <td class="border border-gray-300 px-4 py-2">
+                                        <div class="flex items-center justify-between">
+                                            <div>{{ $employee['total_late_ins'] }}</div>
+                                            <div class="flex items-center space-x-2">
+                                                @if ($employee['late_status'] === 'memo')
+                                                    <span class="w-3 h-3 bg-red-600 rounded-full blink"></span>
+                                                @endif
+                                                <span>{{ $employee['late_status'] }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="border border-gray-300 px-4 py-2">
+                                        <div class="flex items-center justify-between">
+                                            <div>{{ $employee['total_absent_ins'] }}</div>
+                                            <div class="flex items-center space-x-2">
+                                                @if ($employee['absent_status'] === 'memo')
+                                                    <span class="w-3 h-3 bg-red-600 rounded-full blink"></span>
+                                                @endif
+                                                <span>{{ $employee['absent_status'] }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            </div>
+        </div>
     </div>
     @if ($showModal)
         <div

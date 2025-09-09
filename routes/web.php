@@ -108,3 +108,9 @@ Route::get('/attendance', function () {
 Route::get('/position', function () {
     return view('jocos.position');
 })->name('position');
+
+
+//ATTENDANCE ROUTE
+Route::get('/configuration', function () {
+    return view('jocos.config');
+})->name('configuration');

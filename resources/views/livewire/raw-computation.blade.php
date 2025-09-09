@@ -275,7 +275,7 @@
                 </div>
 
 
-                <div class="w-full flex gap-2">
+                {{-- <div class="w-full flex gap-2">
                     <div class="w-full flex flex-col mt-2">
                         <label for="remarks" class="block text-sm text-gray-700 mt-auto">
                             Remarks
@@ -284,7 +284,7 @@
                             class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
                             {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                     </div>
-                </div>
+                </div> --}}
 
 
                 <div class="w-full grid grid-cols-2 gap-2 mt-2">

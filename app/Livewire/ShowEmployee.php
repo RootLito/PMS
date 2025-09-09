@@ -6,6 +6,8 @@ use Livewire\WithPagination;
 use Livewire\Component;
 use App\Models\Employee;
 use App\Models\Designation;
+use App\Exports\ExportPayslip;
+
 
 
 class ShowEmployee extends Component
@@ -42,6 +44,121 @@ class ShowEmployee extends Component
         $this->deletingId = null;
         $this->dispatch('success', message: 'Employee deleted.');
     }
+    public function downloadPayslip($employeeId)
+    {
+        $employee = Employee::with(['contribution', 'rawCalculation'])->findOrFail($employeeId);
+
+        $fullName = trim(
+            $employee->first_name . ' ' .
+            ($employee->middle_initial ? strtoupper(substr($employee->middle_initial, 0, 1)) . '. ' : '') .
+            $employee->last_name .
+            ($employee->suffix ? ' ' . $employee->suffix . '.' : '')
+        );
+
+        $mp2Data = optional($employee->contribution)->hdmf_mp2;
+        $mp2Total = null;
+
+        if ($mp2Data) {
+            $mp2Array = json_decode($mp2Data, true);
+            if (is_array($mp2Array)) {
+                $mp2Total = array_sum(array_column($mp2Array, 'amount'));
+            }
+        }
+
+        $data = [
+            'full_name' => $fullName,
+            'position' => $employee->position,
+            'gross_monthly_income' => $employee->monthly_rate,
+            'contributions' => [
+                'hdmf_pi' => isset($employee->contribution->hdmf_pi)
+                    ? json_decode($employee->contribution->hdmf_pi, true)['ee_share'] ?? null
+                    : null,
+                'hdmf_mpl' => isset($employee->contribution->hdmf_mpl)
+                    ? json_decode($employee->contribution->hdmf_mpl, true)['amount'] ?? null
+                    : null,
+                'hdmf_mp2' => $mp2Total,
+                'hdmf_cl' => isset($employee->contribution->hdmf_cl)
+                    ? json_decode($employee->contribution->hdmf_cl, true)['cl_amount'] ?? null
+                    : null,
+
+                'dareco' => isset($employee->contribution->dareco)
+                    ? json_decode($employee->contribution->dareco, true)['dareco_amount'] ?? null
+                    : null,
+
+                'sss' => isset($employee->contribution->sss)
+                    ? json_decode($employee->contribution->sss, true)['amount'] ?? null
+                    : null,
+
+                'ec' => isset($employee->contribution->ec)
+                    ? json_decode($employee->contribution->ec, true)['amount'] ?? null
+                    : null,
+
+                'wisp' => isset($employee->contribution->wisp)
+                    ? json_decode($employee->contribution->wisp, true)['amount'] ?? null
+                    : null,
+
+            ],
+            'total_absent_late' => optional($employee->rawCalculation)->total_absent_late,
+            'tax' => optional($employee->rawCalculation)->tax,
+        ];
+
+
+        $data = [
+            'full_name' => $fullName,
+            'position' => $employee->position,
+            'gross_monthly_income' => $employee->monthly_rate,
+            'contributions' => [
+                'hdmf_pi' => isset($employee->contribution->hdmf_pi)
+                    ? json_decode($employee->contribution->hdmf_pi, true)['ee_share'] ?? null
+                    : null,
+                'hdmf_mpl' => isset($employee->contribution->hdmf_mpl)
+                    ? json_decode($employee->contribution->hdmf_mpl, true)['amount'] ?? null
+                    : null,
+
+                // 'hdmf_mp2' => optional($employee->contribution)->hdmf_mp2,
+                'hdmf_cl' => isset($employee->contribution->hdmf_cl)
+                    ? json_decode($employee->contribution->hdmf_cl, true)['cl_amount'] ?? null
+                    : null,
+
+                'dareco' => isset($employee->contribution->dareco)
+                    ? json_decode($employee->contribution->dareco, true)['dareco_amount'] ?? null
+                    : null,
+
+                'sss' => isset($employee->contribution->sss)
+                    ? json_decode($employee->contribution->sss, true)['amount'] ?? null
+                    : null,
+
+                'ec' => isset($employee->contribution->ec)
+                    ? json_decode($employee->contribution->ec, true)['amount'] ?? null
+                    : null,
+
+                'wisp' => isset($employee->contribution->wisp)
+                    ? json_decode($employee->contribution->wisp, true)['amount'] ?? null
+                    : null,
+
+            ],
+            // 'total_absent_late' => optional($employee->rawCalculation)->total_absent_late,
+            'total_absent_late' => $employee->rawCalculations->sum(function ($calc) {
+                return floatval($calc->total_absent_late ?? 0);
+            }),
+            'tax' => optional($employee->rawCalculation)->tax,
+        ];
+
+        dd($data);
+
+        $export = new ExportPayslip($data);
+        $fileContents = $export->generate();
+
+        return response()->streamDownload(
+            fn() => print ($fileContents),
+            "payslip_{$employeeId}.docx",
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ]
+        );
+    }
+
+
     public function render()
     {
         $employees = Employee::query()

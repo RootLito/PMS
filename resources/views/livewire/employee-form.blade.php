@@ -60,7 +60,7 @@
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
                 <option value="" disabled selected>Select a position</option>
                 @foreach ($positions as $pos)
-                    <option value="{{ $pos->id }}">{{ $pos->name }}</option>
+                    <option value="{{ $pos->name }}">{{ $pos->name }}</option>
                 @endforeach
             </select>
             @error('position')

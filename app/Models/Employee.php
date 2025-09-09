@@ -25,7 +25,10 @@ class Employee extends Model
         'gender',
     ];
 
-
+    public function contribution()
+    {
+        return $this->hasOne(Contribution::class);
+    }
     public function rawCalculation()
     {
         return $this->hasOne(RawCalculation::class);
