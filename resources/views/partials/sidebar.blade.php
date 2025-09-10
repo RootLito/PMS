@@ -4,9 +4,6 @@
 
         <h2 class="text-5xl text-center font-black text-slate-700">P.M.S.</h2>
     </div>
-
-
-
     <div class="mt-16 flex flex-col gap-2">
         <a href="/dashboard"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
@@ -49,16 +46,6 @@
             <i class="fa-solid fa-box-archive ml-5 text-lg"></i>
             Archive
         </a>
-
-        {{-- <a href="/configuration"
-            class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
-                {{ request()->is('configuration*') ? 'bg-gray-300 text-gray-700' : '' }}">
-            <i class="fa-solid fa-cog ml-5 text-lg"></i>
-            Configuration
-        </a> --}}
-
-
-
         <div x-data="{ open: {{ request()->is('configuration*') ? 'true' : 'false' }} }" class="space-y-1">
             <button @click="open = !open"
                 class="w-full flex items-center gap-2 h-10 px-4 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all cursor-pointer">
@@ -69,8 +56,6 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
-
-            <!-- Submenu -->
             <div x-show="open" x-cloak class="mt-1 space-y-1 bg-gray-100 rounded-lg">
                 <a href="/configuration/salary"
                     class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
@@ -97,9 +82,7 @@
                     Signatory
                 </a>
             </div>
-
         </div>
-
     </div>
     <form action="" class="mt-auto">
         <button class="w-full h-10 text-sm font-semibold bg-red-400  text-white rounded-lg">

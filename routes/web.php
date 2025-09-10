@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DownloadController;
-
+use App\Http\Controllers\PayslipController;
 
 
 //MAIN PAGE ROUTE
@@ -59,14 +59,14 @@ Route::get('/computation/voucher', function () {
 
 
 //SIGNATORY ROUTE
-Route::get('/signatory', function () {
+Route::get('/configuration/signatory', function () {
     return view('jocos.signatory'); 
 })->name('signatory');
 
 
 
 //SALARY ROUTE
-Route::get('/salary', function () {
+Route::get('/configuration/salary', function () {
     return view('jocos.salary');
 })->name('salary');
 
@@ -85,7 +85,7 @@ Route::get('/contribution', function () {
 
 
 //CONTRIBUTION ROUTE
-Route::get('/designation', function () {
+Route::get('/configuration/designation', function () {
     return view('jocos.designation');
 })->name('designation');
 
@@ -105,7 +105,7 @@ Route::get('/attendance', function () {
 
 
 //ATTENDANCE ROUTE
-Route::get('/position', function () {
+Route::get('/configuration/position', function () {
     return view('jocos.position');
 })->name('position');
 
@@ -114,3 +114,7 @@ Route::get('/position', function () {
 Route::get('/configuration', function () {
     return view('jocos.config');
 })->name('configuration');
+
+
+//PRINT PAYSLIP
+Route::get('/employee/payslip/{employeeId}', [PayslipController::class, 'printPayslip'])->name('employee.payslip');

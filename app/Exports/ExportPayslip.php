@@ -19,11 +19,11 @@ class ExportPayslip
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
 
-        // Add header image
+        // Add header image (optional)
         // $header = $section->addHeader();
         // $header->addImage(public_path('header.png'), ['width' => 950, 'height' => 150]);
 
-        // Add footer image
+        // Add footer image (optional)
         // $footer = $section->addFooter();
         // $footer->addImage(public_path('footer.png'), ['width' => 950, 'height' => 70]);
 
@@ -64,13 +64,15 @@ class ExportPayslip
         $section->addText("Total Deductions: Php " . number_format($totalDeductions, 2));
         $section->addText("Net Monthly Income: Php " . number_format($netPay, 2), ['bold' => true]);
 
-        // Save Word to temp memory and return raw contents as string
-        $tempFile = tempnam(sys_get_temp_dir(), 'phpword');
+        // Save Word to memory stream instead of temp file
         $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
-        $objWriter->save($tempFile);
 
-        $contents = file_get_contents($tempFile);
-        unlink($tempFile); // cleanup
+        $memoryStream = fopen('php://memory', 'r+');
+        $objWriter->save($memoryStream);
+
+        rewind($memoryStream);
+        $contents = stream_get_contents($memoryStream);
+        fclose($memoryStream);
 
         return $contents;
     }

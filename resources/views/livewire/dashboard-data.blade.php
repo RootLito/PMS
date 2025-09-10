@@ -1,5 +1,59 @@
 <div class="flex-1 flex flex-col gap-10">
-    <div class="w-full min-h-screen grid grid-cols-3 grid-rows-3 gap-10">
+    <div class="w-full h-full flex gap-10">
+
+        <div class="w-[40%] h-full flex flex-col gap-10">
+            <div class="w-full h-[60%] rounded-xl flex flex-col gap-10">
+                <div class="w-full flex-1 bg-white rounded-xl">
+
+                </div>
+                <div class="w-full flex-1 rounded-xl flex gap-10">
+
+                    <div class="flex-1 bg-white rounded-xl flex gap-10">
+
+                    </div>
+
+                    <div class="flex-1 bg-white rounded-xl flex gap-10">
+
+                    </div>
+
+                </div>
+                <div class="w-full flex-1 flex gap-10">
+
+                    <div class="flex-1 bg-white rounded-xl flex gap-10">
+
+                    </div>
+
+                    <div class="flex-1 bg-white rounded-xl flex gap-10">
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="w-full h-[40%] bg-white rounded-xl">
+
+            </div>
+        </div>
+
+
+        <div class="w-[60%] h-full flex flex-col gap-10">
+            <div class="w-full h-[40%] bg-white rounded-xl">
+
+            </div>
+
+            <div class="w-full h-[60%] bg-white rounded-xl">
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+
+
+    {{-- <div class="w-full min-h-screen grid grid-cols-3 grid-rows-3 gap-10">
 
         <div class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
             <div class="flex gap-2 p-4 border-b border-gray-200">
@@ -155,7 +209,7 @@
                 @endif
             </div>
         </div>
-    </div>
+    </div> --}}
     @if ($showModal)
         <div
             style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40; display: flex; justify-content: center; align-items: center;">
