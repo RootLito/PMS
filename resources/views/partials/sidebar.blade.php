@@ -49,14 +49,58 @@
             <i class="fa-solid fa-box-archive ml-5 text-lg"></i>
             Archive
         </a>
-        <a href="/configuration"
+
+        {{-- <a href="/configuration"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                 {{ request()->is('configuration*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-cog ml-5 text-lg"></i>
             Configuration
-        </a>
-    </div>
+        </a> --}}
 
+
+
+        <div x-data="{ open: {{ request()->is('configuration*') ? 'true' : 'false' }} }" class="space-y-1">
+            <button @click="open = !open"
+                class="w-full flex items-center gap-2 h-10 px-4 text-sm font-semibold text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all cursor-pointer">
+                <i class="fa-solid fa-cog text-lg"></i>
+                <span class="flex-1 text-left">Configuration</span>
+                <svg :class="{ 'rotate-180': open }" class="w-4 h-4 transition-transform duration-300" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="5" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            <!-- Submenu -->
+            <div x-show="open" x-cloak class="mt-1 space-y-1 bg-gray-100 rounded-lg">
+                <a href="/configuration/salary"
+                    class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
+            {{ request()->is('configuration/salary') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
+                    <i class="fa-solid fa-coins ml-2 text-lg"></i>
+                    Monthly Rate
+                </a>
+                <a href="/configuration/designation"
+                    class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
+            {{ request()->is('configuration/designation') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
+                    <i class="fa-solid fa-address-card ml-2 text-lg"></i>
+                    Designation
+                </a>
+                <a href="/configuration/position"
+                    class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
+            {{ request()->is('configuration/position') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
+                    <i class="fa-solid fa-user-tie ml-2 text-lg"></i>
+                    Position
+                </a>
+                <a href="/configuration/signatory"
+                    class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
+            {{ request()->is('configuration/signatory') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
+                    <i class="fa-solid fa-pen-nib ml-2 text-lg"></i>
+                    Signatory
+                </a>
+            </div>
+
+        </div>
+
+    </div>
     <form action="" class="mt-auto">
         <button class="w-full h-10 text-sm font-semibold bg-red-400  text-white rounded-lg">
             <i class="fa-solid fa-right-from-bracket"></i> Logout
