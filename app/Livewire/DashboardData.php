@@ -12,7 +12,7 @@ class DashboardData extends Component
 {
     use WithPagination;
     public $reminderData = [];
-    public $officeCounts = [];
+    // public $officeCounts = [];
     public $joCount = 0;
     public $cosCount = 0;
     public $totalCount = 0;
@@ -28,6 +28,7 @@ class DashboardData extends Component
     public $month = '';
     public $year = '';
     public $employeesData = [];
+    public $date;
 
 
     public function mount()
@@ -44,6 +45,10 @@ class DashboardData extends Component
 
         $this->month = Carbon::now()->month;
         $this->year = Carbon::now()->year;
+
+
+        $this->date = Carbon::now()->format('m/d/Y');
+
     }
 
     public function loadReminderData()
@@ -88,24 +93,25 @@ class DashboardData extends Component
     {
         $this->employeesData = Employee::whereHas('rawCalculations', function ($query) {
             $query->where(function ($q) {
-                $q->where('absent_ins', '>', 0)
-                    ->orWhere('late_ins', '>', 0);
+                $q->where('absent_ins', '>=', 9)
+                    ->orWhere('late_ins', '>=', 9);
             });
         })
             ->withSum('rawCalculations as total_absent_ins', 'absent_ins')
             ->withSum('rawCalculations as total_late_ins', 'late_ins')
             ->paginate(5, ['id', 'first_name', 'last_name', 'middle_initial']);
 
-        $result = $this->employeesData->map(function ($employee) {
+        
+        $result = $this->employeesData->filter(function ($employee) {
+            return $employee->total_absent_ins >= 9 || $employee->total_late_ins >= 9;
+        })->map(function ($employee) {
             $getStatus = function ($count) {
-                if ($count >= 10) {
+                if ($count > 9) {
                     return 'memo';
-                } elseif ($count >= 5) {
+                } elseif ($count == 9) {
                     return 'warning';
-                } elseif ($count >= 1) {
-                    return 'good';
                 } else {
-                    return 'no issues';
+                    return null; 
                 }
             };
 
@@ -117,7 +123,11 @@ class DashboardData extends Component
                 'late_status' => $getStatus($employee->total_late_ins),
             ];
         });
-        $this->employeesData = $result;
+
+        $this->employeesData = $result->values(); 
+
+        // dd($this->employeesData);
+
     }
 
 
@@ -129,17 +139,12 @@ class DashboardData extends Component
 
     public function render()
     {
-        $employees = Employee::all();
-        $officeCounts = [];
-        foreach ($employees as $employee) {
-            $office = $employee->office_name ?: $employee->designation;
-
-            if (!isset($officeCounts[$office])) {
-                $officeCounts[$office] = 0;
-            }
-            $officeCounts[$office]++;
-        }
-        $this->officeCounts = $officeCounts;
+        $this->totalPi = 0;
+        $this->totalMp2 = 0;
+        $this->totalMpl = 0;
+        $this->totalCl = 0;
+        $this->totalDareco = 0;
+        $this->totalSssEcWisp = 0;
 
         $contributions = Contribution::all();
         foreach ($contributions as $contribution) {
@@ -151,8 +156,6 @@ class DashboardData extends Component
                     $eeShare = floatval($data['ee_share']);
                     $this->totalPi += $eeShare;
                 }
-
-
             }
             if ($contribution->hdmf_mp2) {
                 $data = json_decode(stripslashes($contribution->hdmf_mp2), true);
@@ -164,30 +167,25 @@ class DashboardData extends Component
                     }
                 }
             }
-
             if ($contribution->hdmf_mpl) {
                 $data = json_decode(stripslashes($contribution->hdmf_mpl), true);
                 if (is_array($data) && isset($data['amount'])) {
                     $this->totalMpl += floatval($data['amount']);
                 }
             }
-
             if ($contribution->hdmf_cl) {
                 $data = json_decode(stripslashes($contribution->hdmf_cl), true);
                 if (is_array($data) && isset($data['cl_amount'])) {
                     $this->totalCl += floatval($data['cl_amount']);
                 }
             }
-
             if ($contribution->dareco) {
                 $data = json_decode(stripslashes($contribution->dareco), true);
                 if (is_array($data) && isset($data['amount'])) {
                     $this->totalDareco += floatval($data['amount']);
                 }
             }
-
-
-            // SSS, EC, WISP 
+            // SSS, EC, WISP
             if ($contribution->sss) {
                 $sssData = json_decode(stripslashes($contribution->sss), true);
                 if (is_array($sssData) && isset($sssData['amount'])) {
@@ -207,6 +205,16 @@ class DashboardData extends Component
                 }
             }
         }
-        return view('livewire.dashboard-data');
+
+        $officeCounts = Employee::selectRaw('
+                                                COALESCE(NULLIF(office_name, \'\'), designation) as office,
+                                                COUNT(*) as count
+                                            ')->groupBy('office')->orderBy('office')->paginate(5);
+
+
+        return view('livewire.dashboard-data', [
+            'officeCounts' => $officeCounts,
+        ]);
     }
+
 }

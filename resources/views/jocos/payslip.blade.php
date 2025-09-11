@@ -120,12 +120,19 @@
                     placeholder="Enter Control Number"
                     class="text-sm w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2 mt-4">
                 <button type="submit"
-                    class="text-sm  bg-green-700 h-10 mt-4 rounded-lg cursor-pointer text-white w-full"><i
-                        class="fas fa-check mr-2"></i>Confirm</button>
+                    class="text-sm  bg-green-700 hover:bg-green-800 h-10 mt-4 rounded-lg cursor-pointer text-white w-full"><i
+                        class="fas fa-check mr-2"></i>Apply</button>
             </form>
             <button type="button" onclick="window.print()"
-                class="text-sm bg-slate-700 h-10 mt-4 rounded-lg cursor-pointer text-white w-full"><i
+                class="text-sm bg-slate-700 hover:bg-slate-800 h-10 mt-4 rounded-lg cursor-pointer text-white w-full"><i
                     class="fas fa-print mr-2"></i>Print</button>
+
+            <a href="/employee"
+                class="text-sm bg-red-400 hover:bg-red-500 text-white h-10 mt-4 rounded-lg flex items-center justify-center w-full">
+                <i class="fas fa-arrow-left mr-2"></i>Back
+            </a>
+
+
         </div>
     </div>
 @endsection

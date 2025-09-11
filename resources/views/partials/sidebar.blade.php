@@ -84,8 +84,10 @@
             </div>
         </div>
     </div>
-    <form action="" class="mt-auto">
-        <button class="w-full h-10 text-sm font-semibold bg-red-400  text-white rounded-lg">
+    <form method="POST" action="{{ route('logout') }}" class="mt-auto">
+        @csrf
+        <button type="submit"
+            class="w-full h-10 text-sm font-semibold bg-red-400 hover:bg-red-500 text-white rounded-lg cursor-pointer">
             <i class="fa-solid fa-right-from-bracket"></i> Logout
         </button>
     </form>
