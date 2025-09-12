@@ -90,6 +90,10 @@ Route::middleware('auth')->group(function () {
     })->name('configuration');
 
     Route::get('/employee/payslip/{employeeId}', [PayslipController::class, 'printPayslip'])->name('employee.payslip');
+
+    Route::get('/configuration/account', function () {
+        return view('jocos.account');
+    })->name('account');
 });
 
 

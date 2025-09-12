@@ -81,6 +81,18 @@
                     <i class="fa-solid fa-pen-nib ml-2 text-lg"></i>
                     Signatory
                 </a>
+
+                @auth
+                    @if (auth()->user()->role === 'sysadmin')
+                        <a href="/configuration/account"
+                            class="flex items-center gap-1 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
+        {{ request()->is('configuration/account') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
+                            <i class="fa-solid fa-user-gear ml-2 text-lg"></i>
+                            Account
+                        </a>
+                    @endif
+                @endauth
+
             </div>
         </div>
     </div>
