@@ -62,6 +62,11 @@ class PayslipController extends Controller
         $rawDateForInput = $carbonDate->format('Y-m-d');
         $coveragePeriod = $carbonDate->format('F') . ' 1–' . $carbonDate->endOfMonth()->format('j, Y');
 
+        $ftmRaw = $request->input('ftm') ?? now();
+        $ftmDate = Carbon::parse($ftmRaw);
+        $ftmCoverage = $ftmDate->format('F') . ' 1–' . $ftmDate->endOfMonth()->format('j, Y');
+
+
         $controlNumber = $request->input('control_number');
 
 
@@ -81,6 +86,9 @@ class PayslipController extends Controller
             'noted_by_name' => $notedByName,
             'noted_by_designation' => $notedByDesignation,
             'controlNumber' => $controlNumber,
+            'ftm_coverage' => $ftmCoverage,
+            'ftm_raw' => $ftmDate->format('Y-m-d'),
+
         ]);
     }
 

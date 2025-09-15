@@ -23,7 +23,7 @@
                 <div class="flex items-center h-[20px]">
                     <span class="inline-block w-[192px]">For the Month of</span>
                     <span class="inline-block w-[8px] text-right">:</span>
-                    <span class="ml-[40px]"><u>{{ $coverage_period }}</u></span>
+                    <span class="ml-[40px]"><u>{{ $ftm_coverage  }}</u></span>
                 </div>
                 <div class="flex items-center h-[20px]">
                     <span class="inline-block w-[192px]">Gross Monthly Income</span>
@@ -83,8 +83,12 @@
                 <div class="flex items-center h-[20px]">
                     <span class="inline-block w-[192px]">Absences/Late</span>
                     <span class="inline-block w-[8px] text-right">-</span>
-                    <span
-                        class="ml-[40px]"><u>{{ $total_absent_late && $total_absent_late != 0 ? number_format($total_absent_late, 2) : '' }}</u></span>
+                    <span class="ml-[40px]">
+                        <u>{!! $total_absent_late && $total_absent_late != 0
+                            ? number_format($total_absent_late, 2)
+                            : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' !!}</u>
+                    </span>
+
                 </div>
             </div>
             <div class="mt-4 ml-[80px]">
@@ -111,14 +115,19 @@
             <p class="cn">CN: {{ $controlNumber }}</p>
         </div>
         <div class="w-[320px] bg-white absolute top-26 right-10 flex flex-col p-6 rounded-xl date">
-            <h2 class="font-bold text-gray-700">Date Issued | Control Number</h2>
+            <h2 class="font-bold text-gray-700">Modify Payslip</h2>
             <form method="GET" action="{{ route('employee.payslip', ['employeeId' => $employeeId]) }}">
+                <label for="date" class="text-xs mt-4 text-gray-600">Date Issued</label>
                 <input type="date" name="date" value="{{ $raw_date ?? '' }}"
-                    class="text-sm  w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2 mt-4">
+                    class="text-sm  w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2 ">
+                <label for="ftm" class="text-xs mt-4 text-gray-600">For the Month of</label>
+                <input type="date" name="ftm" value="{{ $ftm_raw ?? '' }}"
+                    class="text-sm  w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
 
+                <label for="date" class="text-xs mt-4 text-gray-600">Control Number</label>
                 <input type="text" name="control_number" value="{{ request('control_number') }}"
                     placeholder="Enter Control Number"
-                    class="text-sm w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2 mt-4">
+                    class="text-sm w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
                 <button type="submit"
                     class="text-sm  bg-green-700 hover:bg-green-800 h-10 mt-4 rounded-lg cursor-pointer text-white w-full"><i
                         class="fas fa-check mr-2"></i>Apply</button>
@@ -131,8 +140,6 @@
                 class="text-sm bg-red-400 hover:bg-red-500 text-white h-10 mt-4 rounded-lg flex items-center justify-center w-full">
                 <i class="fas fa-arrow-left mr-2"></i>Back
             </a>
-
-
         </div>
     </div>
 @endsection

@@ -54,7 +54,7 @@
 
 
             <button wire:click.prevent="exportPayroll"
-                class="bg-blue-700 text-white font-semibold px-4 py-1 rounded cursor-pointer hover:bg-blue-600">
+                class="bg-slate-700 text-white font-semibold px-4 py-1 rounded cursor-pointer hover:bg-slate-600">
                 <i class="fa-regular fa-file-excel mr-1"></i>Export to Excel</button>
 
                 

@@ -50,9 +50,12 @@ class AttendanceData extends Component
                 }
             ])
             ->get();
+
+
         $this->offices = $employees->map(function ($employee) {
             return $employee->office_name ?: $employee->designation;
         })->unique()->sort()->values()->all();
+
 
         $groupedEmployees = [];
         foreach ($employees as $employee) {
@@ -139,6 +142,7 @@ class AttendanceData extends Component
                 }
             ])
             ->get();
+            
         $this->offices = $employees->map(function ($employee) {
             return $employee->office_name ?: $employee->designation;
         })->unique()->sort()->values()->all();

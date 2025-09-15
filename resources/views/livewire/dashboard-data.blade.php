@@ -4,15 +4,7 @@
         <div class="w-[40%] h-full flex flex-col gap-10">
             <div class="w-full h-[60%] rounded-xl flex flex-col gap-10">
                 <div class="w-full flex-1 flex gap-10">
-                    <div class="flex-1 flex items-center justify-between p-6 gap-10 bg-white rounded-xl">
-                        <div class="w-[50px] h-[50px] bg-violet-100 rounded-lg grid place-items-center">
-                            <i class="fas fa-folder text-violet-400 text-3xl"></i>
-                        </div>
-                        <div class="flex flex-col items-end">
-                            <p class="text-gray-600">Records as of</p>
-                            <p class="text-2xl font-bold text-gray-700">{{ $date }}</p>
-                        </div>
-                    </div>
+                    
                     <div class="flex-1 flex items-center justify-between p-6 gap-10 bg-white rounded-xl">
                         <div class="w-[50px] h-[50px] bg-green-100 rounded-lg grid place-items-center">
                             <i class="fas fa-users text-green-400 text-3xl"></i>
@@ -20,6 +12,16 @@
                         <div class="flex flex-col items-end">
                             <p class="text-gray-600">Total Employee</p>
                             <p class="text-4xl font-bold text-gray-700">{{ $totalCount }}</p>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex items-center justify-between p-6 gap-10 bg-white rounded-xl">
+                        <div class="w-[50px] h-[50px] bg-violet-100 rounded-lg grid place-items-center">
+                            <p class="text-violet-400  font-bold">NSAP</p>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <p class="text-gray-600">NSAP</p>
+                            <p class="text-4xl font-bold text-gray-700">{{ $nsap }}</p>
                         </div>
                     </div>
                 </div>
@@ -73,7 +75,21 @@
                     <div class="w-[50px] h-[50px] bg-blue-100 rounded-lg grid place-items-center">
                         <i class="fas fa-calendar-alt text-blue-400 text-3xl"></i>
                     </div>
-                    <p class="text-gray-600">Attendance Status</p>
+                    <div class="flex flex-col">
+                        <p class="text-gray-600">Attendance Status</p>
+                        <p class="text-gray-600 text-sm font-bold">For the month of {{ $attMonth }}</p>
+                    </div>
+
+                    <div class="flex flex-col ml-auto text-sm">
+                        <div class="flex gap-2 items-center">
+                            <span class="w-3 h-3 bg-yellow-400 rounded-full inline-block"></span>
+                            <span>1-9 Warning</span>
+                        </div>
+                        <div class="flex gap-2 items-center">
+                            <span class="w-3 h-3 bg-red-400 rounded-full inline-block"></span>
+                            <span>10 Memo</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="flex-1 ">
                     <table class="w-full text-sm text-left text-gray-700 border-collapse">
@@ -176,6 +192,18 @@
                         <i class="fas fa-building text-green-400 text-3xl"></i>
                     </div>
                     <p class="text-gray-600">Employee Per Office</p>
+                    <div class="flex gap-2 ml-auto">
+                        {{-- <input type="text" placeholder="Search Employee"
+                            class="border flex-1 border-gray-300 bg-gray-50 rounded px-4 py-1 text-sm"
+                            wire:model.live="search"> --}}
+                        <select class="shadow-sm border rounded border-gray-200 px-4 py-1 text-sm w-full"
+                            wire:model.live="office">
+                            <option value="">Select Office</option>
+                            @foreach ($offices as $office)
+                                <option value="{{ $office }}">{{ $office }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
 
@@ -202,8 +230,6 @@
                             @endforelse
                         </tbody>
                     </table>
-
-
                     @if ($officeCounts->hasPages())
                         <div class="w-full flex justify-between items-end mt-auto">
                             <div class="flex justify-center text-gray-600 mt-2 text-xs select-none">
@@ -268,11 +294,8 @@
                         </div>
                     @endif
                 </div>
-
-
             </div>
         </div>
-
     </div>
 
 

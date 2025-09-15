@@ -1,10 +1,10 @@
-<div class="flex-1 flex flex-col gap-10">
+<div class="h-full w-full flex flex-col gap-10 ">
     <div class="w-full flex justify-between">
         <h2 class="text-5xl font-bold text-gray-700">
             MONTHLY RATE
         </h2>
     </div>
-    <div class="h-full flex-1 flex gap-10 ">
+    <div class="flex-1 flex gap-10  ">
 
         <div class="h-full flex flex-col w-100 p-6 rounded-xl bg-white">
             <h1 class="text-xl text-gray-700 font-bold mb-2">{{ $isUpdating ? 'Update Salary' : 'Create Salary' }}</h1>
@@ -74,7 +74,7 @@
 
         <div class="flex-1 flex flex-col p-6 rounded-xl bg-white h-full overflow-auto">
             <h2 class="text-xl font-bold mb-4 text-gray-700">Salary Records</h2>
-            <div class="max-h-[400px] overflow-auto">
+            <div class="overflow-auto">
                 <table class="min-w-full mt-4 table-auto text-sm">
                     <thead class="bg-gray-100 text-left text-gray-600">
                         <tr class="border-b border-t border-gray-200">

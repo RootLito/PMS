@@ -29,7 +29,7 @@
                 @endforeach
             </select>
 
-            <a href="#">
+            <a href="/computation/voucher">
                 <button class="w-48 h-10 bg-slate-700 rounded-md text-white cursor-pointer hover:bg-slate-500 ">
                     <i class="fa-solid fa-ticket mr-2"></i>View Vouchers
                 </button>

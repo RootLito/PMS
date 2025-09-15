@@ -14,6 +14,7 @@ class DashboardData extends Component
     public $reminderData = [];
     // public $officeCounts = [];
     public $joCount = 0;
+    public $nsap = 0;
     public $cosCount = 0;
     public $totalCount = 0;
     public $maleCount = 0;
@@ -26,9 +27,14 @@ class DashboardData extends Component
     public $totalDareco = 0;
     public $totalSssEcWisp = 0;
     public $month = '';
+    public $attMonth = '';
     public $year = '';
     public $employeesData = [];
     public $date;
+
+    public $search = '';
+    public $office = '';
+    public $offices = [];
 
 
     public function mount()
@@ -36,8 +42,16 @@ class DashboardData extends Component
         $this->loadReminderData();
         $this->loadEmployeesData();
 
-        $this->joCount = Employee::where('employment_status', 'JO')->count();
-        $this->cosCount = Employee::where('employment_status', 'COS')->count();
+        $this->nsap = Employee::where('designation', 'RESEARCH AND DEVELOPMENT - NSAP')->count();
+
+        $this->joCount = Employee::where('employment_status', 'JO')
+            ->where('designation', '!=', 'RESEARCH AND DEVELOPMENT - NSAP')
+            ->count();
+
+        $this->cosCount = Employee::where('employment_status', 'COS')
+            ->where('designation', '!=', 'RESEARCH AND DEVELOPMENT - NSAP')
+            ->count();
+
         $this->totalCount = $this->joCount + $this->cosCount;
 
         $this->maleCount = Employee::where('gender', 'male')->count();
@@ -46,9 +60,8 @@ class DashboardData extends Component
         $this->month = Carbon::now()->month;
         $this->year = Carbon::now()->year;
 
-
+        $this->attMonth = $this->attMonth = Carbon::now()->format('F');
         $this->date = Carbon::now()->format('m/d/Y');
-
     }
 
     public function loadReminderData()
@@ -101,7 +114,7 @@ class DashboardData extends Component
             ->withSum('rawCalculations as total_late_ins', 'late_ins')
             ->paginate(5, ['id', 'first_name', 'last_name', 'middle_initial']);
 
-        
+
         $result = $this->employeesData->filter(function ($employee) {
             return $employee->total_absent_ins >= 9 || $employee->total_late_ins >= 9;
         })->map(function ($employee) {
@@ -111,7 +124,7 @@ class DashboardData extends Component
                 } elseif ($count == 9) {
                     return 'warning';
                 } else {
-                    return null; 
+                    return null;
                 }
             };
 
@@ -124,7 +137,7 @@ class DashboardData extends Component
             ];
         });
 
-        $this->employeesData = $result->values(); 
+        $this->employeesData = $result->values();
 
         // dd($this->employeesData);
 
@@ -206,11 +219,25 @@ class DashboardData extends Component
             }
         }
 
-        $officeCounts = Employee::selectRaw('
-                                                COALESCE(NULLIF(office_name, \'\'), designation) as office,
-                                                COUNT(*) as count
-                                            ')->groupBy('office')->orderBy('office')->paginate(5);
+        $officeCounts = Employee::selectRaw("
+        COALESCE(NULLIF(office_name, ''), designation) as office,
+        COUNT(*) as count
+    ")
+            ->when($this->office, function ($query) {
+                $query->whereRaw("COALESCE(NULLIF(office_name, ''), designation) = ?", [$this->office]);
+            })
+            ->when($this->search, function ($query) {
+                $query->whereRaw("COALESCE(NULLIF(office_name, ''), designation) LIKE ?", ["%{$this->search}%"]);
+            })
+            ->groupBy('office')
+            ->orderBy('office')
+            ->paginate(5);
 
+        $employees = Employee::get();
+
+        $this->offices = $employees->map(function ($employee) {
+            return $employee->office_name ?: $employee->designation;
+        })->unique()->sort()->values()->all();
 
         return view('livewire.dashboard-data', [
             'officeCounts' => $officeCounts,
