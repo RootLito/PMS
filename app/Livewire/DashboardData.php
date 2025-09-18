@@ -12,7 +12,6 @@ class DashboardData extends Component
 {
     use WithPagination;
     public $reminderData = [];
-    // public $officeCounts = [];
     public $joCount = 0;
     public $nsap = 0;
     public $cosCount = 0;
@@ -31,11 +30,9 @@ class DashboardData extends Component
     public $year = '';
     public $employeesData = [];
     public $date;
-
     public $search = '';
     public $office = '';
     public $offices = [];
-
 
     public function mount()
     {
@@ -63,7 +60,6 @@ class DashboardData extends Component
         $this->attMonth = $this->attMonth = Carbon::now()->format('F');
         $this->date = Carbon::now()->format('m/d/Y');
     }
-
     public function loadReminderData()
     {
         $this->reminderData = [];
@@ -142,14 +138,10 @@ class DashboardData extends Component
         // dd($this->employeesData);
 
     }
-
-
-
     public function closeModal()
     {
         $this->showModal = false;
     }
-
     public function render()
     {
         $this->totalPi = 0;
