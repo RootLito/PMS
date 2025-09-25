@@ -117,10 +117,6 @@ class RawComputation extends Component
         $page = (int) ceil(($index + 1) / $perPage);
         $this->setPage($page);
     }
-
-
-
-
     public function mount()
     {
         $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
@@ -319,11 +315,17 @@ class RawComputation extends Component
         foreach ($salaries as $salary) {
             $monthlyRate = round((float) $salary->monthly_rate, 2);
 
+            // $this->deductionRates[$monthlyRate] = [
+            //     'daily' => round((float) $salary->daily_rate, 2),
+            //     'halfday' => round((float) $salary->halfday_rate, 2),
+            //     'hourly' => round((float) $salary->hourly_rate, 2),
+            //     'per_min' => round((float) $salary->per_min_rate, 2),
+            // ];
             $this->deductionRates[$monthlyRate] = [
-                'daily' => round((float) $salary->daily_rate, 2),
-                'halfday' => round((float) $salary->halfday_rate, 2),
-                'hourly' => round((float) $salary->hourly_rate, 2),
-                'per_min' => round((float) $salary->per_min_rate, 2),
+                'daily' => floor((float) $salary->daily_rate * 100) / 100,
+                'halfday' => floor((float) $salary->halfday_rate * 100) / 100,
+                'hourly' => floor((float) $salary->hourly_rate * 100) / 100,
+                'per_min' => floor((float) $salary->per_min_rate * 100) / 100,
             ];
         }
     }
@@ -412,6 +414,7 @@ class RawComputation extends Component
             $this->net_pay = null;
         }
     }
+
     public function updated($propertyName)
     {
         $this->calculateDeduction();
@@ -486,9 +489,9 @@ class RawComputation extends Component
             'year' => $this->year,
 
 
-            'absent_ins'=> $this->absent,
-            'late_ins'=> $this->late,
-            'remarks2'=> $this->remarks2,
+            'absent_ins' => $this->absent,
+            'late_ins' => $this->late,
+            'remarks2' => $this->remarks2,
         ];
 
         if ($existing) {
