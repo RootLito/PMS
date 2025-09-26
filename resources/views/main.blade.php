@@ -15,17 +15,26 @@
 <body>
     <div class="w-full h-screen flex flex-col justify-center items-center bg-gray-200">
         <form action="{{ route('login') }}" method="POST"
-            class="w-[360px] bg-white rounded-xl shadow-sm flex flex-col px-6 py-10">
+            class="w-[360px] bg-white rounded-xl shadow-sm flex flex-col p-6">
             @csrf
 
             <img src="{{ asset('images/bfar.png') }}" alt="bfar logo" width="200px" class="self-center">
-            <h1 class="text-xl text-center text-gray-700 font-bold">PAYROLL MANAGEMENT SYSTEM</h1>
-            <p class="text-xl mb-4 mt-6 text-gray-700 font-semibold">Login</p>
+            <h1 class="text-lg text-center text-gray-700 font-bold">PAYROLL MANAGEMENT SYSTEM</h1>
+            <p class="text-md mt-6 text-gray-700 font-bold">Login</p>
             @error('username')
                 <p class="text-red-600 text-xs mb-4 block w-full py-4 bg-red-200 px-6 text-center rounded-xl">{{ $message }}</p>
             @enderror
 
-            <label for="username" class="block text-xs text-gray-700">Username</label>
+
+            {{-- <label for="username" class="block text-xs text-gray-700">Login as</label>
+            <input type="text" id="username" name="username"
+                class="text-sm mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
+                placeholder="Username" value="{{ old('username') }}" required autofocus>
+                <select> --}}
+                
+
+
+            <label for="username" class="block text-xs text-gray-700 mt-4">Username</label>
             <input type="text" id="username" name="username"
                 class="text-sm mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
                 placeholder="Username" value="{{ old('username') }}" required autofocus>

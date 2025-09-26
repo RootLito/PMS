@@ -11,14 +11,17 @@
     <link rel="shortcut icon" href="{{ asset('images/bfar.png') }}" type="image/x-icon">
     <style>
         @keyframes blink {
+
             0%,
             100% {
                 opacity: 1;
             }
+
             50% {
                 opacity: 0.1;
             }
         }
+
         .blink {
             animation: blink 1s infinite;
         }
@@ -50,9 +53,17 @@
         @endif
 
 
-        <div class="w-56 h-screen sticky top-0 bg-white">
+        {{-- <div class="w-56 h-screen sticky top-0 bg-white">
             @include('partials.sidebar')
+        </div> --}}
+        <div class="w-56 h-screen sticky top-0 bg-white">
+            @if (auth()->check() && auth()->user()->role === 'admin')
+                @include('partials.sidebar') 
+            @elseif (auth()->check() && auth()->user()->role === 'regular')
+                @include('partials.sidebar-admin') 
+            @endif
         </div>
+
 
 
         <div class="flex-1 min-h-screen bg-gray-200 flex flex-col">

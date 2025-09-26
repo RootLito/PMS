@@ -97,8 +97,8 @@
                             <tr class="bg-gray-200 border-b border-gray-300">
                                 <th class="font-semibold py-3 px-3" width="10%">Status</th>
                                 <th class="font-semibold py-3 px-3">Name</th>
-                                <th class="font-semibold py-3 px-3 text-center" width="20%">Late</th>
-                                <th class="font-semibold py-3 px-3 text-center" width="20%">Absent</th>
+                                <th class="font-semibold py-3 px-3 text-center" width="15%">Late</th>
+                                <th class="font-semibold py-3 px-3 text-center" width="15%">Absent</th>
                             </tr>
                         </thead>
                         <tbody>
