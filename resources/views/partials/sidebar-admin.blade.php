@@ -5,7 +5,7 @@
         <h2 class="text-5xl text-center font-black text-slate-700">P.M.S.</h2>
     </div>
     <div class="mt-16 flex flex-col gap-2">
-        <a href="/dashboard"
+        <a href="/regular-dashboard"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('dashboard*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-house ml-5 text-lg"></i>
@@ -17,30 +17,30 @@
             <i class="fas fa-user-group ml-5 text-lg"></i>
             Employee
         </a>
-        <a href="/contribution"
+        <a href="/regular-contribution"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('contribution*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-money-bill-wave ml-5 text-lg"></i>
             Contribution
         </a>
-        <a href="/computation"
+        <a href="/regular-computation"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('computation*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-calculator ml-5 text-lg"></i>
             Computation
         </a>
-        <a href="/payroll"
+        <a href="/regular-payroll"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('payroll*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-money-check ml-5 text-lg"></i>
             Payroll
         </a>
-        <a href="/attendance"
+        <a href="/regular-attendance"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                {{ request()->is('attendance*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-calendar-check ml-5 text-lg"></i> Attendance
         </a>
-        <a href="/archive"
+        <a href="/regular-archive"
             class="flex bg-gray-100 items-center gap-2 h-10 text-sm font-semibold text-gray-700 rounded-lg hover:bg-gray-200 hover:text-gray-600 transition-all
                 {{ request()->is('archive*') ? 'bg-gray-300 text-gray-700' : '' }}">
             <i class="fa-solid fa-box-archive ml-5 text-lg"></i>
@@ -57,25 +57,25 @@
                 </svg>
             </button>
             <div x-show="open" x-cloak class="mt-1 space-y-1 bg-gray-100 rounded-lg">
-                <a href="/configuration/salary"
+                <a href="/configuration/regular-salary"
                     class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
             {{ request()->is('configuration/salary') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
                     <i class="fa-solid fa-coins ml-2 text-lg"></i>
                     Monthly Rate
                 </a>
-                <a href="/configuration/designation"
+                <a href="/configuration/regular-designation"
                     class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
             {{ request()->is('configuration/designation') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
                     <i class="fa-solid fa-address-card ml-2 text-lg"></i>
                     Designation
                 </a>
-                <a href="/configuration/position"
+                <a href="/configuration/regular-position"
                     class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
             {{ request()->is('configuration/position') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
                     <i class="fa-solid fa-user-tie ml-2 text-lg"></i>
                     Position
                 </a>
-                <a href="/configuration/signatory"
+                <a href="/configuration/regular-signatory"
                     class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
             {{ request()->is('configuration/signatory') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
                     <i class="fa-solid fa-pen-nib ml-2 text-lg"></i>
@@ -84,7 +84,7 @@
 
                 @auth
                     @if (auth()->user()->role === 'sysadmin')
-                        <a href="/configuration/account"
+                        <a href="/configuration/regular-account"
                             class="flex items-center gap-1 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
         {{ request()->is('configuration/account') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
                             <i class="fa-solid fa-user-gear ml-2 text-lg"></i>

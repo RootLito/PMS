@@ -11,7 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::create('regular_salaries',function( Blueprint $table){
+            $table->id();
+            $table->decimal('monthly_salary', 15, 2);
+            $table->timestamps();
+        });
     }
 
     /**
@@ -19,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('regular_salaries');
     }
 };

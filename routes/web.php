@@ -97,6 +97,17 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // });
 
 
+
+
+
+
+//REGULAR DASHBOARD
+Route::get('/regular-dashboard', function () {
+    return view('regular/regular-dashboard');
+});
+
+
+//REGULAR EMPLOYEE
 Route::get('/regular-employee', function () {
     return view('regular.regular-employee');
 })->name('regular-employee');
@@ -110,5 +121,40 @@ Route::get('/employee/update/{id}', function ($id) {
 })->name('employee.update');
 
 Route::get('/employee/payslip/{employeeId}', [
-    PayslipController::class, 'printPayslip'
+    PayslipController::class,
+    'printPayslip'
 ])->name('employee.payslip');
+
+
+
+//REGULAR CONTRIBUTION
+
+//     Route::get('/contribution', function () {
+//         return view('jocos.contribution');
+//     })->name('contribution');
+
+//REGULAR COMPUTATION
+
+
+
+
+
+
+//REGULAR PAYROLL
+
+//     Route::get('/payroll', function () {
+//         return view('jocos/payroll');
+//     });
+
+
+Route::get('/configuration/regular-designation', function () {
+    return view('regular.regular-designation');
+})->name('designation');
+
+Route::get('/configuration/regular-position', function () {
+    return view('regular.regular-position');
+})->name('position');
+
+Route::get('/configuration/regular-salary', function () {
+    return view('regular.regular-salary');
+})->name('salary');
