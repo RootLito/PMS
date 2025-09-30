@@ -99,6 +99,10 @@ class EmployeeContribution extends Component
     public $difference;
     public $remarks;
 
+
+    // DARECO -------------------------------------------
+    public $tax;
+
     public $designations = [];
     public array $contributionLabels = [
         'hdmf_pi' => 'HDMF - PI',
@@ -107,6 +111,7 @@ class EmployeeContribution extends Component
         'hdmf_cl' => 'HDMF - CL',
         'dareco' => 'DARECO',
         'sss_ec_wisp' => 'SSS, EC, WISP',
+        'tax' => 'TAX',
     ];
     public $contributions = [
         'sss' => ['amount' => null],
@@ -174,6 +179,7 @@ class EmployeeContribution extends Component
             'wisp_number',
             'ec_number',
             'sss_number',
+            'tax',
         ]);
     }
 
@@ -215,11 +221,7 @@ class EmployeeContribution extends Component
         $this->resetContributionData();
         $this->selectedEmployee = $employeeId;
         $contribution = Contribution::where('employee_id', $employeeId)->first();
-
-
         $employee = Employee::find($employeeId);
-
-
         $this->employeeName = $employee->last_name . ', ' . $employee->first_name;
         if (!empty($employee->suffix)) {
             $this->employeeName .= ' ' . $employee->suffix;
@@ -240,6 +242,7 @@ class EmployeeContribution extends Component
             'sss',
             'ec',
             'wisp',
+            'tax'
         ];
         $selectedContributions = [];
         $sssEcWispGroup = [
@@ -247,10 +250,6 @@ class EmployeeContribution extends Component
             'ec' => false,
             'wisp' => false,
         ];
-
-
-
-
 
 
         foreach ($fields as $field) {
@@ -297,6 +296,7 @@ class EmployeeContribution extends Component
             $sss = json_decode($contribution->sss, true) ?? [];
             $ec = json_decode($contribution->ec, true) ?? [];
             $wisp = json_decode($contribution->wisp, true) ?? [];
+            $tax = json_decode($contribution->tax, true) ?? [];
 
             $this->pag_ibig_id_rtn = $mpl['pag_ibig_id_rtn']
                 ?? $mp2[0]['pag_ibig_id_rtn']
@@ -347,6 +347,9 @@ class EmployeeContribution extends Component
             $this->sss_number = $sss['amount'] ?? null;
             $this->ec_number = $ec['amount'] ?? null;
             $this->wisp_number = $wisp['amount'] ?? null;
+
+            // TAX
+            $this->tax = $tax['tax'] ?? null;
 
             // Remarks
             $this->remarks = $sss['remarks'] ?? $ec['remarks'] ?? $wisp['remarks'] ?? null;
@@ -417,7 +420,9 @@ class EmployeeContribution extends Component
                     'remarks' => $this->remarks,
                     'difference' => $this->difference,
                 ]) : null,
-
+                'tax' => in_array('tax', $this->selectedContributions) ? json_encode([
+                    'tax' => $this->tax,
+                ]) : null,
             ]
         );
         $this->dispatch('success', message: 'Contribution added.');

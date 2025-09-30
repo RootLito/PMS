@@ -249,7 +249,6 @@ class PayrollSummary extends Component
             ->map(function ($group) use ($cutoff) {
                 $designationPap = $group->first()->rawCalculation->designation_pap ?? $group->first()->designation_pap ?? null;
                 $offices = $group
-                    // ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name)
                     ->groupBy(
                         fn($e) =>
                         !empty($e->office_code)
@@ -313,6 +312,7 @@ class PayrollSummary extends Component
                     'offices' => $offices,
                 ];
             });
+
 
         $totalPerVoucher = $groupedEmployees->map(function ($group) use ($cutoff) {
             $offices = collect($group['offices']);
@@ -564,6 +564,7 @@ class PayrollSummary extends Component
                 })
             ),
         ];
+        
         return [
             'groupedEmployees' => $groupedEmployees,
             'totalPerVoucher' => $totalPerVoucher,

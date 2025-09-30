@@ -16,6 +16,7 @@ class Contribution extends Model
         'sss',
         'ec',
         'wisp',
+        'tax',
     ];
 
     protected $casts = [
@@ -27,6 +28,7 @@ class Contribution extends Model
         'sss' => 'array',
         'ec' => 'array',
         'wisp' => 'array',
+        'tax' => 'array',
     ];
 
     public function employee()

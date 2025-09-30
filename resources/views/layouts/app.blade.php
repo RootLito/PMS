@@ -53,18 +53,9 @@
         @endif
 
 
-        {{-- <div class="w-56 h-screen sticky top-0 bg-white">
-            @include('partials.sidebar')
-        </div> --}}
         <div class="w-56 h-screen sticky top-0 bg-white">
-            @if (auth()->check() && auth()->user()->role === 'admin')
-                @include('partials.sidebar') 
-            @elseif (auth()->check() && auth()->user()->role === 'regular')
-                @include('partials.sidebar-admin') 
-            @endif
+            @include('partials.sidebar')
         </div>
-
-
 
         <div class="flex-1 min-h-screen bg-gray-200 flex flex-col">
             @include('partials.navbar')

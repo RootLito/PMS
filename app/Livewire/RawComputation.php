@@ -125,7 +125,12 @@ class RawComputation extends Component
         if ($this->employeeSelectedId) {
             $this->goToEmployeePage();
             $this->employeeSelected($this->employeeSelectedId);
+
+
         }
+
+
+
 
 
 
@@ -139,6 +144,10 @@ class RawComputation extends Component
         $this->currentCutoffLabel = $this->cutoffLabels[$this->cutoff] ?? '';
         $this->initializeDateOptions();
     }
+
+
+
+
     public function initializeDateOptions()
     {
         $this->months = collect(range(1, 12))->mapWithKeys(function ($monthNumber) {
@@ -203,6 +212,9 @@ class RawComputation extends Component
         }
 
 
+
+
+
         //CONTRIBUTION
         $contribution = Contribution::where('employee_id', $employeeId)->first();
         if ($contribution) {
@@ -214,6 +226,7 @@ class RawComputation extends Component
             $hdmf_mpl = json_decode($contribution->hdmf_mpl, true);
             $hdmf_cl = json_decode($contribution->hdmf_cl, true);
             $dareco = json_decode($contribution->dareco, true);
+            $taxData = json_decode($contribution->tax, true) ?? [];
 
             $this->mp2Entries = json_decode($contribution->hdmf_mp2, true) ?? [];
             if (is_array($hdmf_mp2)) {
@@ -236,14 +249,35 @@ class RawComputation extends Component
             $this->ec_con = $ec['amount'] ?? null;
             $this->wisp = $wisp['amount'] ?? null;
 
+            // $this->tax = floor(($taxData['tax'] ?? 0) / 2);
+            $this->tax = round(($taxData['tax'] ?? 0) / 2, 2);
+
+
+
             if ($this->cutoff === '1-15') {
                 $this->total_cont = (float) $this->hdmf_pi + (float) $this->hdmf_mp2 + (float) $this->hdmf_mpl
                     + (float) $this->hdmf_cl + (float) $this->dareco;
                 $this->net_pay = $this->net_pay - $this->total_cont;
+                $this->net_pay = $this->net_pay - $this->tax;
+
             } elseif ($this->cutoff === '16-31') {
                 $this->total_cont = (float) $this->ss_con + (float) $this->ec_con + (float) $this->wisp;
                 $this->net_pay = $this->net_pay - $this->total_cont;
+                $this->net_pay = $this->net_pay - $this->tax;
             }
+
+
+            // if ($this->cutoff === '1-15') {
+            //     $this->total_cont = (float) $this->hdmf_pi + (float) $this->hdmf_mp2 + (float) $this->hdmf_mpl
+            //         + (float) $this->hdmf_cl + (float) $this->dareco;
+            //     $this->net_pay = $this->net_pay - $this->total_cont;
+            // } elseif ($this->cutoff === '16-31') {
+            //     $this->total_cont = (float) $this->ss_con + (float) $this->ec_con + (float) $this->wisp;
+            //     $this->net_pay = $this->net_pay - $this->total_cont;
+            // }
+
+
+
 
 
         } else {

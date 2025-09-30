@@ -35,6 +35,7 @@
                 <option value="hdmf_cl">HDMF - CL</option>
                 <option value="dareco">DARECO</option>
                 <option value="sss_ec_wisp">SSS, EC, WISP</option>
+                {{-- <option value="tax">TAX</option> --}}
             </select>
             <button wire:click.prevent="exportContribution"
                 class="text-sm px-10 h-10 bg-slate-700 rounded-md text-white cursor-pointer">
@@ -113,6 +114,7 @@
                     </tbody>
                 </table>
             </div>
+
             @if ($employees->hasPages())
                 <div class="w-full flex justify-between items-end">
                     <div class="flex justify-center text-gray-600 mt-2 text-xs select-none">
@@ -619,6 +621,27 @@
                                     class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
                                     {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                             </div>
+                        </div>
+                    </div>
+                @endif
+
+
+
+                 {{-- TAX ------------------------------------------------------ --}}
+                @if (in_array('tax', $selectedContributions))
+                    <div class="mt-6">
+                        <div class="w-full flex justify-between bg-gray-300 px-2 item-center mb-2">
+                            <h1 class="py-1 text-gray-700 font-bold">TAX</h1>
+                            <button wire:click.prevent="deleteContribution('tax')"
+                                class="text-red-500 cursor-pointer">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <label class="block  text-gray-700">Amount</label>
+                            <input type="number" wire:model.live="tax"
+                                class="block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2 mb-2"  step="0.01"
+                                {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                         </div>
                     </div>
                 @endif
