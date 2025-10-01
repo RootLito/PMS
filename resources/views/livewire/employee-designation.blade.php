@@ -7,6 +7,18 @@
 
             <div class="w-full flex gap-2 flex-wrap">
                 <div class="flex-1 min-w-[200px]">
+                    <label for="order_no" class="block text-sm text-gray-700">
+                        Order No. <span class="text-red-400">*</span>
+                    </label>
+                    <input type="text" id="order_no" wire:model.defer="orderNo"
+                        class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+                    @error('orderNo')
+                        <span class="text-red-500 text-xs">{{ $message }}</span>
+                    @enderror
+                </div>
+
+
+                <div class="flex-1 min-w-[200px]">
                     <label for="designation" class="block text-sm text-gray-700">
                         Designation <span class="text-red-400">*</span>
                     </label>
@@ -25,6 +37,7 @@
                         <span class="text-red-500 text-xs">{{ $message }}</span>
                     @enderror
                 </div>
+
 
                 <div class="flex-1 min-w-[200px]">
                     <label for="office" class="block text-sm text-gray-700">Office</label>
@@ -70,6 +83,7 @@
         <table class="min-w-full table-auto text-sm mt-2">
             <thead class="bg-gray-100 text-left">
                 <tr class="border-b border-t border-gray-200">
+                    <th class="px-4 py-3 text-nowrap" width="5%">Order No.</th>
                     <th class="px-4 py-3 text-nowrap" width="25%">Designation</th>
                     <th class="px-4 py-3 text-nowrap" width="15%">PAP for Designation</th>
                     <th class="px-4 py-2 text-nowrap" width="25%">Office</th>
@@ -82,6 +96,13 @@
                 @forelse ($designations as $item)
                     <tr class="border-b border-gray-200 hover:bg-gray-100">
                         @if ($editingId === $item->id)
+                            <td class="px-4 py-2">
+                                <input type="text" id="order_no" wire:model.defer="editOrderNo"
+                                    class="block w-full py-1 border border-gray-200 bg-gray-50 rounded-md px-2">
+                                @error('editPap')
+                                    <span class="text-red-500 text-xs">{{ $message }}</span>
+                                @enderror
+                            </td>
                             <td class="px-4 py-2">
                                 <input type="text" wire:model.defer="editDesignation"
                                     class="block w-full py-1 border border-gray-200 bg-gray-50 rounded-md px-2" />
@@ -123,6 +144,7 @@
                                 </button>
                             </td>
                         @elseif ($deletingId === $item->id)
+                            <td class="px-4 py-2">{{ $item->order_id }}</td>
                             <td class="px-4 py-2">{{ $item->designation }}</td>
                             <td class="px-4 py-2 font-bold">{{ $item->pap }}</td>
                             <td class="px-4 py-2">{{ $item->office }}</td>
@@ -140,6 +162,7 @@
                                 </button>
                             </td>
                         @else
+                            <td class="px-4 py-2">{{ $item->order_no }}</td>
                             <td class="px-4 py-2">{{ $item->designation }}</td>
                             <td class="px-4 py-2 font-bold">{{ $item->pap }}</td>
                             <td class="px-4 py-2">{{ $item->office }}</td>

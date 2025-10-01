@@ -564,7 +564,7 @@ class PayrollSummary extends Component
                 })
             ),
         ];
-        
+
         return [
             'groupedEmployees' => $groupedEmployees,
             'totalPerVoucher' => $totalPerVoucher,
@@ -650,19 +650,13 @@ class PayrollSummary extends Component
                 $designationPap = $group->first()->rawCalculation->designation_pap ?? $group->first()->designation_pap ?? null;
                 $offices = $group
                     // ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name ?? $e->office_code)
-    
                     // ->groupBy(fn($e) => $e->office_code ?? $e->office_name ?? $e->rawCalculation->office_name)
-    
-
                     ->groupBy(
                         fn($e) =>
                         !empty($e->office_code)
                         ? $e->office_code
                         : ($e->office_name ?? $e->rawCalculation->office_name)
                     )
-
-
-
                     ->map(function ($officeGroup) use ($cutoff) {
                         $totalGross = $officeGroup->sum('gross');
                         $totalAbsent = $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0);
@@ -720,6 +714,13 @@ class PayrollSummary extends Component
                     'offices' => $offices,
                 ];
             });
+            // })
+            // ->sortBy(function ($group, $designationKey) use ($filteredEmployees) {
+            //     $matching = $filteredEmployees->first(function ($e) use ($designationKey) {
+            //         return ($e->rawCalculation->voucher_include ?? $e->designation) === $designationKey;
+            //     });
+            //     return (int) ($matching->order_no ?? 9999);
+            // });
 
         $totalPerVoucher = $groupedEmployees->map(function ($group) use ($cutoff) {
             $offices = collect($group['offices']);
