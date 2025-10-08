@@ -647,18 +647,14 @@
                 @endif
 
 
-                @if (is_null($selectedEmployee))
-                @elseif (empty($selectedContributions))
-                    <p
-                        class="text-gray-600 text-sm mt-4 mb-4 w-full h-10 flex items-center justify-center bg-gray-300 rounded-md font-semibold">
-                        Please select contribution(s)
-                    </p>
-                @else
-                    <button type="submit"
-                        class="mt-4 mb-4 w-full h-10 bg-slate-700 rounded-md text-white cursor-pointer">
-                        CONFIRM
-                    </button>
-                @endif
+                <button 
+    type="submit" 
+    class="mt-4 mb-4 w-full h-10 bg-slate-700 rounded-md text-white cursor-pointer" 
+    @if(is_null($selectedEmployee)) disabled @endif
+>
+    CONFIRM
+</button>
+
             </form>
         </div>
     </div>

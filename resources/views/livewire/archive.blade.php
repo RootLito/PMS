@@ -49,27 +49,12 @@
                         <td class="px-4 py-2">{{ $file->month }}</td>
                         <td class="px-4 py-2">{{ $file->year }}</td>
                         <td class="px-4 py-2">{{ $file->date_saved }}</td>
-                        {{-- <td class="px-4 py-2 flex gap-2">
-                            <a href="{{ route('files.download', $file->id) }}"
-                                class="inline-flex items-center bg-green-700 hover:bg-green-600 text-white px-3 py-1 rounded"
-                                title="Download">
-                                <i class="fas fa-download mr-2"></i> Download
-                            </a>
-                        </td> --}}
-
                         <td class="px-4 py-2 flex gap-2">
                             <a href="{{ route('files.download', $file->id) }}"
                                 class="inline-flex items-center bg-green-700  text-white px-3 py-1 rounded"
                                 title="Download">
                                 <i class="fas fa-download mr-2"></i> Download
                             </a>
-
-                            {{-- <button wire:click="preview({{ $file->id }})"
-                                class="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded cursor-pointer"
-                                title="Preview">
-                                <i class="fas fa-eye mr-2"></i> Preview
-                            </button> --}}
-
                             <button wire:click="deleteFile({{ $file->id }})"
                                 class="inline-flex items-center bg-red-500 hover:bg-red-400 text-white px-3 py-1 rounded  cursor-pointer"
                                 title="Delete"
@@ -151,5 +136,4 @@
             </nav>
         </div>
     @endif
-
 </div>

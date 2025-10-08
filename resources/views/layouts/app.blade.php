@@ -21,7 +21,6 @@
                 opacity: 0.1;
             }
         }
-
         .blink {
             animation: blink 1s infinite;
         }
