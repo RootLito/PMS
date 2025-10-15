@@ -404,6 +404,9 @@ class RawComputation extends Component
         $this->gross = $this->baseGross;
         $this->gross += (float) $this->adjustment;
         $this->gross = round($this->gross, 2);
+
+
+        $this->net_late_absences = $this->gross;
     }
 
 
