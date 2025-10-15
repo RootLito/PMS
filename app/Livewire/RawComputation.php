@@ -15,7 +15,7 @@ use Livewire\WithPagination;
 class RawComputation extends Component
 {
     use WithPagination;
-    public $remarks = '';
+    // public $remarks = '';
     public $cutoff = '';
     public $search = '';
     public $designation = '';
@@ -26,19 +26,19 @@ class RawComputation extends Component
     public $selectedEmployee = null;
     public $monthly_rate = null;
     public $matchedRate;
+
+
+    // gross  
     public $gross = null;
+    public $baseGross = null;
+
+
+
     public $daily = null;
     public $minutes = null;
-
-
     public $absent = null;
     public $late = null;
     public $remarks2 = "";
-
-
-
-
-
     public $amount = null;
     public $min_amount = null;
     public $total = null;
@@ -86,6 +86,7 @@ class RawComputation extends Component
 
 
 
+
     public function goToEmployeePage()
     {
         if (!$this->employeeSelectedId)
@@ -120,20 +121,12 @@ class RawComputation extends Component
     public function mount()
     {
         $this->designations = Designation::pluck('designation')->unique()->sort()->values()->toArray();
-
-
         if ($this->employeeSelectedId) {
             $this->goToEmployeePage();
             $this->employeeSelected($this->employeeSelectedId);
 
 
         }
-
-
-
-
-
-
         $day = Carbon::now()->day;
         if ($day >= 1 && $day <= 15) {
             $this->cutoff = '1-15';
@@ -144,10 +137,6 @@ class RawComputation extends Component
         $this->currentCutoffLabel = $this->cutoffLabels[$this->cutoff] ?? '';
         $this->initializeDateOptions();
     }
-
-
-
-
     public function initializeDateOptions()
     {
         $this->months = collect(range(1, 12))->mapWithKeys(function ($monthNumber) {
@@ -174,12 +163,9 @@ class RawComputation extends Component
     public function employeeSelected($employeeId)
     {
         $this->deductionRates = [];
-
         $salaries = Salary::all();
-
         foreach ($salaries as $salary) {
             $monthlyRate = round((float) $salary->monthly_rate, 2);
-
             $this->deductionRates[$monthlyRate] = [
                 'daily' => round((float) $salary->daily_rate, 2),
                 'halfday' => round((float) $salary->halfday_rate, 2),
@@ -193,7 +179,13 @@ class RawComputation extends Component
         if ($employee) {
             $this->resetCalculation();
             $this->selectedEmployee = $employeeId;
+
+
+            // set gross 
             $this->gross = $employee->gross;
+            $this->baseGross = $employee->gross;
+
+
             $this->net_late_absences = $employee->gross;
             $this->net_pay = $employee->gross;
             $this->employeeSelectedId = $employee->id;
@@ -211,10 +203,6 @@ class RawComputation extends Component
             }
         }
 
-
-
-
-
         //CONTRIBUTION
         $contribution = Contribution::where('employee_id', $employeeId)->first();
         if ($contribution) {
@@ -226,16 +214,13 @@ class RawComputation extends Component
             $hdmf_mpl = json_decode($contribution->hdmf_mpl, true);
             $hdmf_cl = json_decode($contribution->hdmf_cl, true);
             $dareco = json_decode($contribution->dareco, true);
-            $taxData = json_decode($contribution->tax, true) ?? [];
-
+            $taxData = json_decode($contribution->tax, true);
             $this->mp2Entries = json_decode($contribution->hdmf_mp2, true) ?? [];
             if (is_array($hdmf_mp2)) {
                 $totalEeShare = array_sum(array_column($hdmf_mp2, 'ee_share'));
             } else {
                 $totalEeShare = null;
             }
-
-
 
             // 1st cutoff 
             $this->hdmf_pi = $hdmf_pi['ee_share'] ?? null;
@@ -249,17 +234,12 @@ class RawComputation extends Component
             $this->ec_con = $ec['amount'] ?? null;
             $this->wisp = $wisp['amount'] ?? null;
 
-            // $this->tax = floor(($taxData['tax'] ?? 0) / 2);
-            $this->tax = round(($taxData['tax'] ?? 0) / 2, 2);
-
-
-
+            $this->tax = floor(($taxData['tax'] ?? 0) / 2);
             if ($this->cutoff === '1-15') {
                 $this->total_cont = (float) $this->hdmf_pi + (float) $this->hdmf_mp2 + (float) $this->hdmf_mpl
                     + (float) $this->hdmf_cl + (float) $this->dareco;
                 $this->net_pay = $this->net_pay - $this->total_cont;
                 $this->net_pay = $this->net_pay - $this->tax;
-
             } elseif ($this->cutoff === '16-31') {
                 $this->total_cont = (float) $this->ss_con + (float) $this->ec_con + (float) $this->wisp;
                 $this->net_pay = $this->net_pay - $this->total_cont;
@@ -267,29 +247,10 @@ class RawComputation extends Component
             }
 
 
-            // if ($this->cutoff === '1-15') {
-            //     $this->total_cont = (float) $this->hdmf_pi + (float) $this->hdmf_mp2 + (float) $this->hdmf_mpl
-            //         + (float) $this->hdmf_cl + (float) $this->dareco;
-            //     $this->net_pay = $this->net_pay - $this->total_cont;
-            // } elseif ($this->cutoff === '16-31') {
-            //     $this->total_cont = (float) $this->ss_con + (float) $this->ec_con + (float) $this->wisp;
-            //     $this->net_pay = $this->net_pay - $this->total_cont;
-            // }
-
-
-
-
-
         } else {
             $this->resetContributionAmounts();
         }
-
     }
-
-
-
-
-
     public function resetContributionAmounts()
     {
         $this->ss_con = null;
@@ -309,7 +270,6 @@ class RawComputation extends Component
         $this->min_amount = null;
         $this->total = null;
         $this->net_late_absences = null;
-
         $this->net_pay = null;
         $this->ss_con = null;
         $this->ec_con = null;
@@ -319,11 +279,8 @@ class RawComputation extends Component
         $this->hdmf_mp2 = null;
         $this->hdmf_cl = null;
         $this->dareco = null;
-
-
         $this->tax = null;
         $this->adjustment = null;
-
         $this->absent = null;
         $this->late = null;
         $this->remarks2 = '';
@@ -333,7 +290,6 @@ class RawComputation extends Component
         $this->calculateDailyAmount();
         $this->calculateDeduction();
         $this->absent = $this->daily;
-
     }
     public function updatedMinutes()
     {
@@ -343,18 +299,9 @@ class RawComputation extends Component
     public function fetchDeductionRates()
     {
         $this->deductionRates = [];
-
         $salaries = Salary::all();
-
         foreach ($salaries as $salary) {
             $monthlyRate = round((float) $salary->monthly_rate, 2);
-
-            // $this->deductionRates[$monthlyRate] = [
-            //     'daily' => round((float) $salary->daily_rate, 2),
-            //     'halfday' => round((float) $salary->halfday_rate, 2),
-            //     'hourly' => round((float) $salary->hourly_rate, 2),
-            //     'per_min' => round((float) $salary->per_min_rate, 2),
-            // ];
             $this->deductionRates[$monthlyRate] = [
                 'daily' => floor((float) $salary->daily_rate * 100) / 100,
                 'halfday' => floor((float) $salary->halfday_rate * 100) / 100,
@@ -389,6 +336,8 @@ class RawComputation extends Component
             $this->min_amount = null;
         }
     }
+
+
     public function calculateDeduction($applyLateAbsences = true)
     {
         if ($this->monthly_rate) {
@@ -412,13 +361,13 @@ class RawComputation extends Component
                     $this->total = null;
                     $this->net_late_absences = $this->gross;
                 }
-
                 $this->calculateNetPay();
-
-
             }
         }
     }
+
+
+    // tax 
     public function updatedTax($value)
     {
         if (!is_null($value)) {
@@ -430,30 +379,55 @@ class RawComputation extends Component
         $this->net_pay -= (float) $this->tax;
         $this->net_pay = round($this->net_pay, 2);
 
-        if ($this->net_pay == 0) {
-            $this->net_pay = null;
-        }
+        // if ($this->net_pay == 0) {
+        //     $this->net_pay = null;
+        // }
     }
+
+
+
+    // adjustment
     public function updatedAdjustment($value)
     {
         if (!is_null($value)) {
             $this->calculateAdjustment();
         }
     }
+
     public function calculateAdjustment()
     {
-        $this->net_pay += (float) $this->adjustment;
-        $this->net_pay = round($this->net_pay, 2);
-        if ($this->net_pay == 0) {
-            $this->net_pay = null;
-        }
+        // $this->net_pay += (float) $this->adjustment;
+        // $this->net_pay = round($this->net_pay, 2);
+        // if ($this->net_pay == 0) {
+        //     $this->net_pay = null;
+        // }
+        $this->gross = $this->baseGross;
+        $this->gross += (float) $this->adjustment;
+        $this->gross = round($this->gross, 2);
     }
 
+
+
+
+    // net pay
+    // public function updatedNetPay($value)
+    // {
+    //     if (!is_null($value)) {
+    //         $this->calculateNet();
+    //     }
+    // }
+    // public function calculateNet(){
+    //     $this->net_pay = $this->gross;
+    // }
+
+
+
+
+    // net pay 
     public function updated($propertyName)
     {
         $this->calculateDeduction();
         $this->calculateNetPay();
-
     }
     public function calculateNetPay()
     {
@@ -463,11 +437,13 @@ class RawComputation extends Component
             $deductions += isset($this->{$key}) ? (float) $this->{$key} : 0;
         }
         $this->net_pay = round($this->net_late_absences - $deductions, 2);
-
         if ($this->net_pay == 0) {
             $this->net_pay = null;
         }
     }
+
+
+
     public function saveCalculation()
     {
         $cutoff = $this->cutoff;
@@ -517,7 +493,8 @@ class RawComputation extends Component
             'wisp' => $this->wisp,
             'total_deduction' => $totalDeduction,
             'net_pay' => $this->net_pay,
-            'remarks' => $this->remarks,
+            'adjustment' => $this->adjustment,
+            // 'remarks' => $this->remarks,
             'cutoff' => $this->cutoff,
             'month' => $this->month,
             'year' => $this->year,
@@ -562,7 +539,7 @@ class RawComputation extends Component
             ->when(in_array(strtolower($this->sortOrder), ['asc', 'desc']), function ($query) {
                 $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
             })
-            ->paginate(10);
+            ->paginate(12);
         return view('livewire.raw-computation', [
             'employees' => $employees
         ]);

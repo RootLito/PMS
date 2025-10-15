@@ -229,7 +229,9 @@ class PayrollSummary extends Component
                     ->where('year', $this->year);
             }
         ])->get();
+
         $filteredEmployees = collect();
+
         foreach ($employees as $employee) {
             foreach ($employee->rawCalculations as $calculation) {
                 $cutoffMatch = empty($this->cutoff) || $calculation->cutoff === $this->cutoff;
@@ -244,6 +246,7 @@ class PayrollSummary extends Component
                 }
             }
         }
+
         $groupedEmployees = $filteredEmployees
             ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
             ->map(function ($group) use ($cutoff) {
@@ -312,6 +315,7 @@ class PayrollSummary extends Component
                     'offices' => $offices,
                 ];
             });
+
 
 
         $totalPerVoucher = $groupedEmployees->map(function ($group) use ($cutoff) {
@@ -644,13 +648,16 @@ class PayrollSummary extends Component
             }
         }
 
+
         $groupedEmployees = $filteredEmployees
             ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
             ->map(function ($group) use ($cutoff) {
-                $designationPap = $group->first()->rawCalculation->designation_pap ?? $group->first()->designation_pap ?? null;
+                $sortedEmployees = $group->sortBy(fn($e) => $e->order_no ?? 9999);
+
+                $designationPap = $sortedEmployees->first()->rawCalculation->designation_pap ?? $sortedEmployees->first()->designation_pap ?? null;
+
+                // $designationPap = $group->first()->rawCalculation->designation_pap ?? $group->first()->designation_pap ?? null;
                 $offices = $group
-                    // ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name ?? $e->office_code)
-                    // ->groupBy(fn($e) => $e->office_code ?? $e->office_name ?? $e->rawCalculation->office_name)
                     ->groupBy(
                         fn($e) =>
                         !empty($e->office_code)
@@ -658,68 +665,153 @@ class PayrollSummary extends Component
                         : ($e->office_name ?? $e->rawCalculation->office_name)
                     )
                     ->map(function ($officeGroup) use ($cutoff) {
-                        $totalGross = $officeGroup->sum('gross');
-                        $totalAbsent = $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0);
-                        $totalLateUndertime = $officeGroup->sum(fn($e) => $e->rawCalculation->late_undertime ?? 0);
-                        $totalAbsentLate = $officeGroup->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0);
-                        $totalNetLateAbsences = $officeGroup->sum(fn($e) => $e->rawCalculation->net_late_absences ?? 0);
-                        $totalTax = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0));
-                        $totalNetTax = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_tax ?? 0));
+                    $totalGross = $officeGroup->sum('gross');
+                    $totalAbsent = $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0);
+                    $totalLateUndertime = $officeGroup->sum(fn($e) => $e->rawCalculation->late_undertime ?? 0);
+                    $totalAbsentLate = $officeGroup->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0);
+                    $totalNetLateAbsences = $officeGroup->sum(fn($e) => $e->rawCalculation->net_late_absences ?? 0);
+                    $totalTax = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0));
+                    $totalNetTax = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_tax ?? 0));
 
-                        $totalHdmfPi = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0));
-                        $totalHdmfMpl = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0));
-                        $totalHdmfMp2 = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0));
-                        $totalHdmfCl = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0));
-                        $totalDareco = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0));
+                    $totalHdmfPi = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0));
+                    $totalHdmfMpl = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0));
+                    $totalHdmfMp2 = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0));
+                    $totalHdmfCl = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0));
+                    $totalDareco = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0));
 
-                        $totalSsCon = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0));
-                        $totalEcCon = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0));
-                        $totalWisp = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0));
+                    $totalSsCon = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0));
+                    $totalEcCon = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0));
+                    $totalWisp = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0));
 
-                        if ($cutoff === '1-15') {
-                            $totalTotalDeduction = $totalHdmfPi + $totalHdmfMpl + $totalHdmfMp2 + $totalHdmfCl + $totalDareco;
-                        } elseif ($cutoff === '16-31') {
-                            $totalTotalDeduction = $totalSsCon + $totalEcCon + $totalWisp;
-                        } else {
-                            $totalTotalDeduction = 0;
-                        }
+                    if ($cutoff === '1-15') {
+                        $totalTotalDeduction = $totalHdmfPi + $totalHdmfMpl + $totalHdmfMp2 + $totalHdmfCl + $totalDareco;
+                    } elseif ($cutoff === '16-31') {
+                        $totalTotalDeduction = $totalSsCon + $totalEcCon + $totalWisp;
+                    } else {
+                        $totalTotalDeduction = 0;
+                    }
 
-                        $totalNetPay = $totalNetTax - $totalTotalDeduction;
-                        return [
-                            'employees' => $officeGroup,
-                            'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code ?? null,
-                            'office_name' => $officeGroup->first()->rawCalculation->office_name ?? $officeGroup->first()->office_name ?? null,
-                            'totalGross' => $totalGross,
-                            'totalAbsent' => $totalAbsent,
-                            'totalLateUndertime' => $totalLateUndertime,
-                            'totalAbsentLate' => $totalAbsentLate,
-                            'totalNetLateAbsences' => $totalNetLateAbsences,
-                            'totalTax' => $totalTax,
-                            'totalNetTax' => $totalNetTax,
-                            'totalHdmfPi' => $totalHdmfPi,
-                            'totalHdmfMpl' => $totalHdmfMpl,
-                            'totalHdmfMp2' => $totalHdmfMp2,
-                            'totalHdmfCl' => $totalHdmfCl,
-                            'totalDareco' => $totalDareco,
-                            'totalSsCon' => $totalSsCon,
-                            'totalEcCon' => $totalEcCon,
-                            'totalWisp' => $totalWisp,
-                            'totalTotalDeduction' => $totalTotalDeduction,
-                            'totalNetPay' => $totalNetPay,
-                        ];
-                    });
+                    $totalNetPay = $totalNetTax - $totalTotalDeduction;
+                    $totalAdjustment = $officeGroup->sum(fn($e) => $e->rawCalculation->adjustment ?? 0);
+
+
+                    return [
+                        'employees' => $officeGroup,
+                        'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code ?? null,
+                        'office_name' => $officeGroup->first()->rawCalculation->office_name ?? $officeGroup->first()->office_name ?? null,
+                        'totalGross' => $totalGross,
+                        'totalAbsent' => $totalAbsent,
+                        'totalLateUndertime' => $totalLateUndertime,
+                        'totalAbsentLate' => $totalAbsentLate,
+                        'totalNetLateAbsences' => $totalNetLateAbsences,
+                        'totalTax' => $totalTax,
+                        'totalNetTax' => $totalNetTax,
+                        'totalHdmfPi' => $totalHdmfPi,
+                        'totalHdmfMpl' => $totalHdmfMpl,
+                        'totalHdmfMp2' => $totalHdmfMp2,
+                        'totalHdmfCl' => $totalHdmfCl,
+                        'totalDareco' => $totalDareco,
+                        'totalSsCon' => $totalSsCon,
+                        'totalEcCon' => $totalEcCon,
+                        'totalWisp' => $totalWisp,
+                        'totalTotalDeduction' => $totalTotalDeduction,
+                        'totalNetPay' => $totalNetPay,
+                        'totalAdjustment' => $totalAdjustment,
+                    ];
+                });
 
                 return [
                     'designation_pap' => $designationPap,
                     'offices' => $offices,
                 ];
             })
-            ->sortBy(function ($group, $designationKey) use ($filteredEmployees) {
-                $matching = $filteredEmployees->first(function ($e) use ($designationKey) {
-                    return ($e->rawCalculation->voucher_include ?? $e->designation) === $designationKey;
-                });
-                return (int) ($matching->order_no ?? 9999);
+            ->sortBy(function ($group, $designationKey) {
+                return Designation::where('designation', (string) $designationKey)->value('order_no') ?? 9999;
             });
+
+
+
+        // $groupedEmployees = $filteredEmployees
+        //     ->sortBy(function ($e) {
+        //         dump($e->designation); // See what this returns
+        //         return $e->designation->order_no ?? 9999;
+        //     })
+        //     ->groupBy(fn($e) => $e->rawCalculation->voucher_include ?? $e->designation)
+        //     ->map(function ($group) use ($cutoff) {
+        //         $designationPap = $group->first()->rawCalculation->designation_pap ?? $group->first()->designation_pap ?? null;
+        //         $offices = $group
+        //             // ->groupBy(fn($e) => $e->rawCalculation->office_name ?? $e->office_name ?? $e->office_code)
+        //             // ->groupBy(fn($e) => $e->office_code ?? $e->office_name ?? $e->rawCalculation->office_name)
+        //             ->groupBy(
+        //                 fn($e) =>
+        //                 !empty($e->office_code)
+        //                 ? $e->office_code
+        //                 : ($e->office_name ?? $e->rawCalculation->office_name)
+        //             )
+        //             ->map(function ($officeGroup) use ($cutoff) {
+        //                 $totalGross = $officeGroup->sum('gross');
+        //                 $totalAbsent = $officeGroup->sum(fn($e) => $e->rawCalculation->absent ?? 0);
+        //                 $totalLateUndertime = $officeGroup->sum(fn($e) => $e->rawCalculation->late_undertime ?? 0);
+        //                 $totalAbsentLate = $officeGroup->sum(fn($e) => $e->rawCalculation->total_absent_late ?? 0);
+        //                 $totalNetLateAbsences = $officeGroup->sum(fn($e) => $e->rawCalculation->net_late_absences ?? 0);
+        //                 $totalTax = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->tax ?? 0));
+        //                 $totalNetTax = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->net_tax ?? 0));
+
+        //                 $totalHdmfPi = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_pi ?? 0));
+        //                 $totalHdmfMpl = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mpl ?? 0));
+        //                 $totalHdmfMp2 = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_mp2 ?? 0));
+        //                 $totalHdmfCl = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->hdmf_cl ?? 0));
+        //                 $totalDareco = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->dareco ?? 0));
+
+        //                 $totalSsCon = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ss_con ?? 0));
+        //                 $totalEcCon = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->ec_con ?? 0));
+        //                 $totalWisp = $officeGroup->sum(fn($e) => (float) ($e->rawCalculation->wisp ?? 0));
+
+        //                 if ($cutoff === '1-15') {
+        //                     $totalTotalDeduction = $totalHdmfPi + $totalHdmfMpl + $totalHdmfMp2 + $totalHdmfCl + $totalDareco;
+        //                 } elseif ($cutoff === '16-31') {
+        //                     $totalTotalDeduction = $totalSsCon + $totalEcCon + $totalWisp;
+        //                 } else {
+        //                     $totalTotalDeduction = 0;
+        //                 }
+
+        //                 $totalNetPay = $totalNetTax - $totalTotalDeduction;
+        //                 return [
+        //                     'employees' => $officeGroup,
+        //                     'office_code' => $officeGroup->first()->rawCalculation->office_code ?? $officeGroup->first()->office_code ?? null,
+        //                     'office_name' => $officeGroup->first()->rawCalculation->office_name ?? $officeGroup->first()->office_name ?? null,
+        //                     'totalGross' => $totalGross,
+        //                     'totalAbsent' => $totalAbsent,
+        //                     'totalLateUndertime' => $totalLateUndertime,
+        //                     'totalAbsentLate' => $totalAbsentLate,
+        //                     'totalNetLateAbsences' => $totalNetLateAbsences,
+        //                     'totalTax' => $totalTax,
+        //                     'totalNetTax' => $totalNetTax,
+        //                     'totalHdmfPi' => $totalHdmfPi,
+        //                     'totalHdmfMpl' => $totalHdmfMpl,
+        //                     'totalHdmfMp2' => $totalHdmfMp2,
+        //                     'totalHdmfCl' => $totalHdmfCl,
+        //                     'totalDareco' => $totalDareco,
+        //                     'totalSsCon' => $totalSsCon,
+        //                     'totalEcCon' => $totalEcCon,
+        //                     'totalWisp' => $totalWisp,
+        //                     'totalTotalDeduction' => $totalTotalDeduction,
+        //                     'totalNetPay' => $totalNetPay,
+        //                 ];
+        //             });
+
+        //         return [
+        //             'designation_pap' => $designationPap,
+        //             'offices' => $offices,
+        //         ];
+
+        //     });
+        // ->sortBy(function ($group, $designationKey) use ($filteredEmployees) {
+        //     $matching = $filteredEmployees->first(function ($e) use ($designationKey) {
+        //         return ($e->rawCalculation->voucher_include ?? $e->designation) === $designationKey;
+        //     });
+        //     return (int) ($matching->order_no ?? 9999);
+        // });
 
         $totalPerVoucher = $groupedEmployees->map(function ($group) use ($cutoff) {
             $offices = collect($group['offices']);

@@ -259,6 +259,7 @@
                     <div class="flex flex-col">
                         <label for="adjustment" class="block text-sm text-gray-700">
                             ADJUSTMENTS
+                            <br> GROSS : {{ $gross }}
                         </label>
                         <input id="adjustment" wire:model.live="adjustment" type="number" step="0.01"
                             class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
@@ -306,12 +307,15 @@
                     </div>
                 </div>
 
+
+
+                {{-- remarks   --}}
                 <div class="w-full flex gap-2">
                     <div class="w-full flex flex-col mt-2">
                         <label for="remarks" class="block text-sm text-gray-700 mt-auto">
                             Remarks
                         </label>
-                        <input id="remarks" wire:model.live="remarks2" type="text"
+                        <input id="remarks" wire:model="remarks2" type="text"
                             class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
                             {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                     </div>

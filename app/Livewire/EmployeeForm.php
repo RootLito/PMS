@@ -17,6 +17,7 @@ class EmployeeForm extends Component
     public $employment_status = '';
     public $monthly_rate = '';
     public $gross;
+    public $order_no;
     public $position ='';
     public $gender ='';
     public $designation = '';
@@ -64,6 +65,7 @@ class EmployeeForm extends Component
     public function save()
     {
         $validatedData = $this->validate([
+            'order_no' => 'required|integer',
             'last_name' => 'required|string|max:100',
             'first_name' => 'required|string|max:100',
             'middle_initial' => 'nullable|string|max:100',

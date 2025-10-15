@@ -10,14 +10,14 @@ return new class extends Migration
     public function up()
     {
         Schema::table('designations', function (Blueprint $table) {
-            $table->integer('order_no')->nullable()->change();
+            $table->integer('order_no')->nullable();
         });
     }
 
     public function down()
     {
         Schema::table('designations', function (Blueprint $table) {
-           $table->integer('order_no')->nullable()->change();
+           $table->integer('order_no')->nullable();
         });
     }
 };

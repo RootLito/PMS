@@ -57,7 +57,7 @@
                 class="bg-slate-700 text-white font-semibold px-4 py-1 rounded cursor-pointer hover:bg-slate-600">
                 <i class="fa-regular fa-file-excel mr-1"></i>Export to Excel</button>
 
-                
+
         </div>
     </div>
     <div class="bg-white p-6 min-h-100 rounded-xl">
@@ -262,7 +262,15 @@
                                     </td>
                                     <td></td>
                                     <td class="px-2 text-right">
-                                        {{ $officeGroup['totalGross'] ? number_format($officeGroup['totalGross'], 2) : '-' }}
+                                        {{-- {{ $officeGroup['totalGross'] ? number_format($officeGroup['totalGross'], 2) : '-' }} --}}
+                                        @php
+                                            $gross = $officeGroup['totalGross'] ?? 0;
+                                            $adjustment = $officeGroup['totalAdjustment'] ?? 0;
+
+                                            $total =
+                                                $gross + ($adjustment !== null && $adjustment != 0 ? $adjustment : 0);
+                                        @endphp
+                                        {{ $total ? number_format($total, 2) : '-' }}
                                     </td>
                                     <td class="px-2 text-right">
                                         {{ $officeGroup['totalAbsent'] ? number_format($officeGroup['totalAbsent'], 2) : '-' }}
@@ -345,7 +353,13 @@
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ number_format($employee->monthly_rate, 2) }}</td>
                                     <td class="border border-gray-300 px-2 py-1 text-right">
-                                        {{ number_format($employee->gross, 2) }}</td>
+                                        {{-- {{ number_format($employee->gross, 2) }}
+                                         {{ $rc->adjustment ? number_format($rc->adjustment, 2) : '-' }} --}}
+                                        @php
+                                            $total = $employee->gross + ($rc->adjustment ?? 0);
+                                        @endphp
+                                        {{ number_format($total, 2) }}
+                                    </td>
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ $rc->absent ? number_format($rc->absent, 2) : '-' }}</td>
                                     <td class="border border-gray-300 px-2 py-1 text-right">
@@ -800,7 +814,7 @@
                         <td class="px-2 text-right"></td>
                     </tr>
 
-                     <tr class="border-x border-gray-300">
+                    <tr class="border-x border-gray-300">
                         <td></td>
                         <td></td>
                         <td class="text-right  text-red-500">NEW</td>

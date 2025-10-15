@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('raw_calculations', function (Blueprint $table) {
-            $table->string('cutoff')->nullable()->after('office_name');
+            $table->string('cutoff')->nullable();
         });
     }
 

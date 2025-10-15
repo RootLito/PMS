@@ -150,7 +150,7 @@
 
 
 
-    <div class="w-full grid grid-cols-3 gap-2 mt-4">
+    <div class="w-full grid grid-cols-4 gap-2 mt-4">
         <div>
             <label for="employment_status" class="block text-sm text-gray-700">
                 Employment Status <span class="text-red-400">*</span>
@@ -180,15 +180,6 @@
                     </option>
                 @endforeach
             </select>
-
-
-
-
-
-
-
-
-
             @error('monthly_rate')
                 <span class="text-red-500 text-xs">{{ $message }}</span>
             @enderror
@@ -201,6 +192,16 @@
             <input type="number" id="gross" wire:model="gross" step="0.01" readonly
                 class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
             @error('gross')
+                <span class="text-red-500 text-xs">{{ $message }}</span>
+            @enderror
+        </div>
+        <div>
+            <label for="order_no" class="block text-sm text-gray-700">
+                Order Number<span class="text-red-400">*</span>
+            </label>
+            <input type="number" id="order_no" wire:model="order_no"
+                class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2">
+            @error('order_no')
                 <span class="text-red-500 text-xs">{{ $message }}</span>
             @enderror
         </div>

@@ -22,8 +22,6 @@ class PayrollExport implements WithEvents, WithColumnWidths
     public function __construct(array $data)
     {
         $this->data = $data;
-
-
         self::$employeeCounter = 1;
     }
     public function columnWidths(): array

@@ -27,6 +27,7 @@ class UpdateEmployee extends Component
     public $gross;
     public $position;
     public $gender;
+    public $order_no;
 
 
 
@@ -49,6 +50,7 @@ class UpdateEmployee extends Component
         $this->gross = $employee->gross;
         $this->position = $employee->position;
         $this->gender = $employee->gender;
+        $this->order_no = $employee->order_no;
 
         $designationsData = Designation::all();
 
@@ -82,6 +84,7 @@ class UpdateEmployee extends Component
     public function save()
     {
         $validatedData = $this->validate([
+            'order_no' => 'required|integer',
             'last_name' => 'required|string|max:100',
             'first_name' => 'required|string|max:100',
             'middle_initial' => 'nullable|string|max:100',

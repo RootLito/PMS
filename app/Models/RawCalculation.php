@@ -25,6 +25,7 @@ class RawCalculation extends Model
         'wisp',
         'total_deduction',
         'net_pay',
+        'adjustment',
         'remarks',
         'voucher_include',
         'office_code',
