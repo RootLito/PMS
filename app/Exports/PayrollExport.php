@@ -288,7 +288,10 @@ class PayrollExport implements WithEvents, WithColumnWidths
         $sheet->setCellValue("D{$row}", $name);
         $sheet->setCellValue("E{$row}", ($employee->monthly_rate ?? 0) > 0 ? number_format($employee->monthly_rate, 2) : '-');
         $sheet->setCellValue("F{$row}", '');
-        $sheet->setCellValue("G{$row}", ($employee->gross ?? 0) > 0 ? number_format($employee->gross, 2) : '-');
+        $totalGross = ($employee->gross ?? 0) + ($rc->adjustment ?? 0);
+
+        $sheet->setCellValue("G{$row}", $totalGross > 0 ? number_format($totalGross, 2) : '-');
+
         $sheet->setCellValue("H{$row}", ($rc?->absent ?? 0) > 0 ? number_format($rc->absent, 2) : '-');
         $sheet->setCellValue("I{$row}", ($rc?->late_undertime ?? 0) > 0 ? number_format($rc->late_undertime, 2) : '-');
         $sheet->setCellValue("J{$row}", ($rc?->total_absent_late ?? 0) > 0 ? number_format($rc->total_absent_late, 2) : '-');
@@ -546,7 +549,7 @@ class PayrollExport implements WithEvents, WithColumnWidths
             $style->getFill()
                 ->setFillType(Fill::FILL_SOLID)
                 ->getStartColor()
-                ->setARGB('FFFFFF00'); 
+                ->setARGB('FFFFFF00');
             $style->getFont()->setBold(true);
         }
         $row++;

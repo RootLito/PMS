@@ -262,15 +262,15 @@
                                     </td>
                                     <td></td>
                                     <td class="px-2 text-right">
-                                        {{-- {{ $officeGroup['totalGross'] ? number_format($officeGroup['totalGross'], 2) : '-' }} --}}
-                                        @php
+                                        {{ $officeGroup['totalGross'] ? number_format($officeGroup['totalGross'], 2) : '-' }}
+                                        {{-- @php
                                             $gross = $officeGroup['totalGross'] ?? 0;
                                             $adjustment = $officeGroup['totalAdjustment'] ?? 0;
 
                                             $total =
                                                 $gross + ($adjustment !== null && $adjustment != 0 ? $adjustment : 0);
                                         @endphp
-                                        {{ $total ? number_format($total, 2) : '-' }}
+                                        {{ $total ? number_format($total, 2) : '-' }} --}}
                                     </td>
                                     <td class="px-2 text-right">
                                         {{ $officeGroup['totalAbsent'] ? number_format($officeGroup['totalAbsent'], 2) : '-' }}
@@ -353,8 +353,8 @@
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ number_format($employee->monthly_rate, 2) }}</td>
                                     <td class="border border-gray-300 px-2 py-1 text-right">
-                                        {{-- {{ number_format($employee->gross, 2) }}
-                                         {{ $rc->adjustment ? number_format($rc->adjustment, 2) : '-' }} --}}
+                                        {{-- {{ number_format($employee->gross, 2) }} --}}
+                                        {{-- {{ $rc->adjustment ? number_format($rc->adjustment, 2) : '-' }} --}}
                                         @php
                                             $total = $employee->gross + ($rc->adjustment ?? 0);
                                         @endphp
@@ -371,7 +371,9 @@
                                         {{ $rc->net_late_absences ? number_format($rc->net_late_absences, 2) : '-' }}
                                     </td>
                                     <td class="border border-gray-300 px-2 py-1 text-right">
-                                        {{ $rc->tax ? number_format($rc->tax, 2) : '-' }}</td>
+                                        {{-- {{ $rc->tax ? number_format($rc->tax, 2) : '-' }} --}}
+                                        {{ $rc->tax > 0 ? number_format($rc->tax, 2) : '-' }}
+                                    </td>
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ $rc->net_tax ? number_format($rc->net_tax, 2) : '-' }}</td>
                                     @if ($cutoff === '1-15')

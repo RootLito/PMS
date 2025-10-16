@@ -407,6 +407,7 @@ class RawComputation extends Component
 
 
         $this->net_late_absences = $this->gross;
+        $this->calculateNetPay();
     }
 
 
