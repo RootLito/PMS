@@ -1,5 +1,6 @@
 <div class="flex-1 flex-col relative gap-2">
     <div class="w-full flex justify-between items-center mb-6 p-6 bg-white rounded-xl">
+        
         <h2 class="font-black text-gray-700">PAYROLL SUMMARY</h2>
         <div class="flex text-sm gap-2">
             <div class="w-150  relative rounded border border-gray-200 shadow-sm cursor-pointer">
@@ -355,10 +356,11 @@
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{-- {{ number_format($employee->gross, 2) }} --}}
                                         {{-- {{ $rc->adjustment ? number_format($rc->adjustment, 2) : '-' }} --}}
-                                        @php
+                                        {{-- {{ $rc->adjustment ? number_format($rc->adjustment, 2) : '-' }} --}}
+                                        {{-- @php
                                             $total = $employee->gross + ($rc->adjustment ?? 0);
                                         @endphp
-                                        {{ number_format($total, 2) }}
+                                        {{ number_format($total, 2) }} --}}
                                     </td>
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ $rc->absent ? number_format($rc->absent, 2) : '-' }}</td>

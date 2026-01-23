@@ -124,8 +124,6 @@ class RawComputation extends Component
         if ($this->employeeSelectedId) {
             $this->goToEmployeePage();
             $this->employeeSelected($this->employeeSelectedId);
-
-
         }
         $day = Carbon::now()->day;
         if ($day >= 1 && $day <= 15) {
@@ -160,6 +158,14 @@ class RawComputation extends Component
             }
         }
     }
+
+
+
+
+
+
+
+
     public function employeeSelected($employeeId)
     {
         $this->deductionRates = [];
@@ -234,23 +240,45 @@ class RawComputation extends Component
             $this->ec_con = $ec['amount'] ?? null;
             $this->wisp = $wisp['amount'] ?? null;
 
-            $this->tax = floor(($taxData['tax'] ?? 0) / 2);
+            // $this->tax = floor(($taxData['tax'] ?? 0) / 2);
+            $this->tax = ($taxData['tax'] ?? 0) / 2;
+
+
             if ($this->cutoff === '1-15') {
-                $this->total_cont = (float) $this->hdmf_pi + (float) $this->hdmf_mp2 + (float) $this->hdmf_mpl
-                    + (float) $this->hdmf_cl + (float) $this->dareco;
-                $this->net_pay = $this->net_pay - $this->total_cont;
+                $this->total_cont = (float) $this->hdmf_pi + (float) $this->hdmf_mp2 + (float) $this->hdmf_mpl + (float) $this->hdmf_cl + (float) $this->dareco;
                 $this->net_pay = $this->net_pay - $this->tax;
+                $this->net_pay = $this->net_pay - $this->total_cont;
             } elseif ($this->cutoff === '16-31') {
                 $this->total_cont = (float) $this->ss_con + (float) $this->ec_con + (float) $this->wisp;
-                $this->net_pay = $this->net_pay - $this->total_cont;
                 $this->net_pay = $this->net_pay - $this->tax;
+                $this->net_pay = $this->net_pay - $this->total_cont;
             }
-
-
         } else {
             $this->resetContributionAmounts();
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function resetContributionAmounts()
     {
         $this->ss_con = null;
@@ -370,19 +398,16 @@ class RawComputation extends Component
     // tax 
     public function updatedTax($value)
     {
-        if (!is_null($value)) {
-            $this->calculateTax();
-        }
-    }
-    public function calculateTax()
-    {
-        $this->net_pay -= (float) $this->tax;
-        $this->net_pay = round($this->net_pay, 2);
-
-        // if ($this->net_pay == 0) {
-        //     $this->net_pay = null;
+        // if (!is_null($value)) {
+        //     $this->calculateTax();
         // }
+        $this->tax = (float) $this->tax;
     }
+    // public function calculateTax()
+    // {
+    //     $this->net_pay -= (float) $this->tax;
+    //     // $this->net_pay = round($this->net_pay, 2);
+    // }
 
 
 
@@ -401,30 +426,17 @@ class RawComputation extends Component
         // if ($this->net_pay == 0) {
         //     $this->net_pay = null;
         // }
-        $this->gross = $this->baseGross;
-        $this->gross += (float) $this->adjustment;
-        $this->gross = round($this->gross, 2);
+        // $this->gross = $this->baseGross;
+        // $this->gross += (float) $this->adjustment;
+        // $this->gross = round($this->gross, 2);
 
 
-        $this->net_late_absences = $this->gross;
-        $this->calculateNetPay();
+        // $this->net_late_absences = $this->gross;
+        // $this->calculateNetPay();
+
+
+        $this->net_pay += (float) $this->adjustment;
     }
-
-
-
-
-    // net pay
-    // public function updatedNetPay($value)
-    // {
-    //     if (!is_null($value)) {
-    //         $this->calculateNet();
-    //     }
-    // }
-    // public function calculateNet(){
-    //     $this->net_pay = $this->gross;
-    // }
-
-
 
 
     // net pay 
@@ -433,14 +445,23 @@ class RawComputation extends Component
         $this->calculateDeduction();
         $this->calculateNetPay();
     }
+
+    
     public function calculateNetPay()
     {
+        // $this->calculateTax();
+        // $this->calculateAdjustment();
+
+        $this->tax = (float) $this->tax;
+        // $this->adjustment = (float) $this->adjustment;
+
+
         $deductions = 0;
         foreach ($this->fields as $field) {
             $key = $field['model'];
             $deductions += isset($this->{$key}) ? (float) $this->{$key} : 0;
         }
-        $this->net_pay = round($this->net_late_absences - $deductions, 2);
+        $this->net_pay = round($this->net_late_absences - $this->tax - $deductions, 2);
         if ($this->net_pay == 0) {
             $this->net_pay = null;
         }
@@ -498,7 +519,6 @@ class RawComputation extends Component
             'total_deduction' => $totalDeduction,
             'net_pay' => $this->net_pay,
             'adjustment' => $this->adjustment,
-            // 'remarks' => $this->remarks,
             'cutoff' => $this->cutoff,
             'month' => $this->month,
             'year' => $this->year,

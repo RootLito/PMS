@@ -88,19 +88,12 @@
                                 </td>
                                 <td class="px-4 py-2 font-black text-gray-700">{{ number_format($employee->gross, 2) }}
                                 </td>
-
-
-
                                 <td class="px-4 py-2">
                                     <button wire:click="employeeSelected({{ $employee->id }})"
                                         class="bg-green-700 hover:bg-green-800 text-white px-3 py-1 rounded flex items-center gap-1 cursor-pointer">
                                         {{ $selectedEmployee === $employee->id ? 'Selected' : 'Select' }}
                                     </button>
                                 </td>
-
-
-
-
                             </tr>
                         @endforeach
                     </tbody>
@@ -201,8 +194,6 @@
                     @endif
                 </p>
 
-
-
                 <div class="w-full grid grid-cols-4 gap-2 mt-2">
                     <div class="flex flex-col">
                         <label for="daily" class="block text-sm text-gray-700">
@@ -259,7 +250,6 @@
                     <div class="flex flex-col">
                         <label for="adjustment" class="block text-sm text-gray-700">
                             ADJUSTMENTS
-                            {{-- <br> GROSS : {{ $gross }} --}}
                         </label>
                         <input id="adjustment" wire:model.live="adjustment" type="number" step="0.01"
                             class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
@@ -275,19 +265,6 @@
                     </div>
                 </div>
 
-
-                {{-- <div class="w-full flex gap-2">
-                    <div class="w-full flex flex-col mt-2">
-                        <label for="remarks" class="block text-sm text-gray-700 mt-auto">
-                            Remarks
-                        </label>
-                        <input id="remarks" wire:model.live="remarks" type="text"
-                            class="mt-1 block w-full h-10 border border-gray-200 bg-gray-50 rounded-md px-2"
-                            {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
-                    </div>
-                </div> --}}
-
-
                 <div class="w-full grid grid-cols-2 gap-2 mt-2">
                     <div class="flex flex-col">
                         <label for="total" class="block text-sm text-gray-700">
@@ -301,15 +278,12 @@
                         <label for="tax" class="block text-sm text-gray-700">
                             No. of instance (Late)
                         </label>
-                        <input id="tax" wire:model.live="late" type="number"
+                        <input id="tax" wire:model.live="late" type="number" step="0.01"
                             class="mt-1 block w-full h-9 border border-gray-200 bg-gray-50 rounded-md px-2"
                             {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                     </div>
                 </div>
 
-
-
-                {{-- remarks   --}}
                 <div class="w-full flex gap-2">
                     <div class="w-full flex flex-col mt-2">
                         <label for="remarks" class="block text-sm text-gray-700 mt-auto">
@@ -320,13 +294,6 @@
                             {{ is_null($selectedEmployee) ? 'disabled' : '' }}>
                     </div>
                 </div>
-
-
-
-
-
-
-
 
                 <div class="flex justify-between mt-4">
                     <h2 class="text-2xl text-gray-700 font-bold">Contribution</h2>

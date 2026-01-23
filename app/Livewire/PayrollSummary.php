@@ -90,9 +90,12 @@ class PayrollSummary extends Component
             ->values()
             ->toArray();
 
+
+
         foreach ($designationsData as $item) {
             $this->officeOptions[$item->designation][$item->office] = $item->pap;
         }
+        
         $this->assigned = Assigned::with(['prepared', 'noted', 'funds', 'approved'])->latest()->first();
         $this->initializeDateOptions();
     }
