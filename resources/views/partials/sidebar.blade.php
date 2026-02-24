@@ -82,6 +82,13 @@
                     Signatory
                 </a>
 
+                <a href="/configuration/contribution"
+                    class="flex items-center gap-2 font-semibold px-2 h-10 text-sm rounded hover:bg-gray-200 transition-all
+            {{ request()->is('configuration/contribution') ? 'bg-gray-300 font-medium text-gray-800' : 'text-gray-600' }}">
+                    <i class="fa-solid fa-money-bill-wave ml-2 text-lg"></i>
+                    Contribution
+                </a>
+
                 @auth
                     @if (auth()->user()->role === 'sysadmin')
                         <a href="/configuration/account"

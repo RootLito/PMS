@@ -321,7 +321,6 @@
                             <p class="text-sm text-gray-700 font-bold">NET PAY</p>
                             <p class="text-sm text-gray-700 font-bold">CUTOFF</p>
                         </div>
-
                         <div class="w-full flex justify-between items-end">
                             <h2 class="text-2xl">₱
                                 <?php echo number_format((float) $this->net_pay, 2); ?>

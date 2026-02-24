@@ -45,7 +45,7 @@ class PayrollSummary extends Component
     }
     protected $cutoffFields = [
         '1-15' => [
-            ['label' => 'HDMF-PI', 'model' => 'hdmf_pi'],
+            ['label' => 'HDMF-PI (more than minimum)', 'model' => 'hdmf_pi'],
             ['label' => 'HDMF-MPL', 'model' => 'hdmf_mpl'],
             ['label' => 'HDMF-MP2', 'model' => 'hdmf_mp2'],
             ['label' => 'HDMF-CL', 'model' => 'hdmf_cl'],

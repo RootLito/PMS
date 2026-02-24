@@ -15,7 +15,6 @@ use Livewire\WithPagination;
 class RawComputation extends Component
 {
     use WithPagination;
-    // public $remarks = '';
     public $cutoff = '';
     public $search = '';
     public $designation = '';
@@ -26,14 +25,8 @@ class RawComputation extends Component
     public $selectedEmployee = null;
     public $monthly_rate = null;
     public $matchedRate;
-
-
-    // gross  
     public $gross = null;
     public $baseGross = null;
-
-
-
     public $daily = null;
     public $minutes = null;
     public $absent = null;
@@ -106,10 +99,6 @@ class RawComputation extends Component
             $query->orderByRaw('LOWER(TRIM(last_name)) ' . $this->sortOrder);
         }
         $allEmployeeIds = $query->pluck('id')->toArray();
-
-
-
-
         $index = array_search($this->employeeSelectedId, $allEmployeeIds);
         if ($index === false) {
             $this->dispatch('error', message: 'Employee not found in the current listing.');
@@ -185,13 +174,8 @@ class RawComputation extends Component
         if ($employee) {
             $this->resetCalculation();
             $this->selectedEmployee = $employeeId;
-
-
-            // set gross 
             $this->gross = $employee->gross;
             $this->baseGross = $employee->gross;
-
-
             $this->net_late_absences = $employee->gross;
             $this->net_pay = $employee->gross;
             $this->employeeSelectedId = $employee->id;
@@ -229,15 +213,19 @@ class RawComputation extends Component
             }
 
             // 1st cutoff 
-            $this->hdmf_pi = $hdmf_pi['ee_share'] ?? null;
+            // $this->hdmf_pi = $hdmf_pi['ee_share'] ?? null;
+            $this->hdmf_pi = (($res = ($hdmf_pi['ee_share'] ?? 0) - 400) > 0) ? $res : null;
             $this->hdmf_mp2 = $totalEeShare ?? null;
             $this->hdmf_mpl = $hdmf_mpl['amount'] ?? null;
             $this->hdmf_cl = $hdmf_cl['cl_amount'] ?? null;
             $this->dareco = $dareco['amount'] ?? null;
 
             // 2nd cutoff 
-            $this->ss_con = $sss['amount'] ?? null;
-            $this->ec_con = $ec['amount'] ?? null;
+            // $this->ss_con = $sss['amount'] ?? null;
+            // $this->ec_con = $ec['amount'] ?? null;
+            // $this->ss_con = (($res = ($sss['amount'] + $ec['amount']) - 760) > 0) ? $res : null;
+            $this->ss_con = (($res = (($sss['amount'] ?? 0) + ($ec['amount'] ?? 0)) - 760) > 0) ? $res : null;
+            $this->ec_con = null;
             $this->wisp = $wisp['amount'] ?? null;
 
             // $this->tax = floor(($taxData['tax'] ?? 0) / 2);
@@ -429,12 +417,8 @@ class RawComputation extends Component
         // $this->gross = $this->baseGross;
         // $this->gross += (float) $this->adjustment;
         // $this->gross = round($this->gross, 2);
-
-
         // $this->net_late_absences = $this->gross;
         // $this->calculateNetPay();
-
-
         $this->net_pay += (float) $this->adjustment;
     }
 
@@ -446,7 +430,7 @@ class RawComputation extends Component
         $this->calculateNetPay();
     }
 
-    
+
     public function calculateNetPay()
     {
         // $this->calculateTax();
