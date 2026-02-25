@@ -34,7 +34,8 @@
                 <option value="hdmf_mpl">HDMF - MPL</option>
                 <option value="hdmf_cl">HDMF - CL</option>
                 <option value="dareco">DARECO</option>
-                <option value="sss_ec_wisp">SSS, EC, WISP</option>
+                {{-- <option value="sss_ec_wisp">SSS, EC, WISP</option> --}}
+                <option value="sss_ec_wisp">SSS</option>
                 {{-- <option value="tax">TAX</option> --}}
             </select>
             <button wire:click.prevent="exportContribution"

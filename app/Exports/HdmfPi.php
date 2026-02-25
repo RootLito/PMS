@@ -12,66 +12,70 @@ use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class HdmfPi implements FromArray, WithEvents, WithCustomStartCell
 {
-    public $signatories = [];
-    public $total_remittance = 0;
+    public $signatories;
+    
+    protected $headerInfo = [
+        'employer_id' => '210457140007',
+        'employer_name' => 'JO-BUREAU OF FISHERIES AND AQUATIC RESOURCES XI',
+        'address' => 'RAMON MAGSAYSAY AVENUE, DAVAO CITY',
+        'contact' => '09915148718',
+        'email' => 'hrms.region11@bfar.da.gov.ph',
+        'total' => '', 
+    ];
+
+    // Table starts after the 6 header rows + 1 gap
+    protected $startRow = 9;
 
     public function __construct()
     {
         $this->signatories = Assigned::with(['prepared', 'noted', 'funds', 'approved'])->latest()->first();
     }
 
-    protected $headerInfo = [
-        'employer_id' => '210457140007',
-        'employer_name' => 'BUREAU OF FISHERIES AND AQUATIC RESOURCES XI - CONTRACT OF SERVICE',
-        'address' => 'RAMON MAGSAYSAY AVENUE, DAVAO CITY',
-    ];
-
-    protected $startRow = 5;
-
     public function array(): array
     {
-        $data = Contribution::with('employee')
+        $contributions = Contribution::with('employee')
             ->whereNotNull('hdmf_pi')
             ->join('employees', 'contributions.employee_id', '=', 'employees.id')
             ->orderBy('employees.last_name', 'asc')
             ->select('contributions.*')
-            ->get()
-            ->map(function ($contribution) {
-                $piRaw = $contribution->hdmf_pi ?? '';
-                $piDecoded = [];
-                if (is_string($piRaw)) {
-                    $firstDecode = json_decode($piRaw, true);
-                    $piDecoded = is_string($firstDecode) ? json_decode($firstDecode, true) : $firstDecode;
-                    if (!is_array($piDecoded)) {
-                        $piDecoded = [];
-                    }
-                } elseif (is_array($piRaw)) {
-                    $piDecoded = $piRaw;
-                }
-                $amount = isset($piDecoded['ee_share']) ? (float) $piDecoded['ee_share'] : 0;
-                $this->total_remittance += $amount;
+            ->get();
 
-                return [
-                    $piDecoded['pag_ibig_id_rtn'] ?? '',
-                    $piDecoded['app_no'] ?? '',
-                    $piDecoded['mem_program'] ?? '',
-                    // strtoupper($contribution->employee->last_name ?? ''),
-                    // strtoupper($contribution->employee->first_name ?? ''),
-                    // strtoupper($contribution->employee->suffix ?? ''),
-                    // strtoupper($contribution->employee->middle_initial ?? ''),
-                    mb_strtoupper($contribution->employee->last_name ?? '', 'UTF-8'),
-                    mb_strtoupper($contribution->employee->first_name ?? '', 'UTF-8'),
-                    mb_strtoupper($contribution->employee->suffix ?? '', 'UTF-8'),
-                    mb_strtoupper($contribution->employee->middle_initial ?? '', 'UTF-8'),
-                    $piDecoded['percov'] ?? '',
-                    $piDecoded['ee_share'] ?? '',
-                    $piDecoded['er_share'] ?? '',
-                    $piDecoded['remarks'] ?? '',
-                ];
-            })->toArray();
+        $data = [];
+        $runningTotal = 0;
+
+        foreach ($contributions as $contribution) {
+            $piRaw = $contribution->hdmf_pi;
+            $piDecoded = is_string($piRaw) ? json_decode($piRaw, true) : $piRaw;
+            
+            $eeShare = (float)($piDecoded['ee_share'] ?? 0);
+            $minEE = 100.00; 
+            $moreThanMinEE = max(0, $eeShare - $minEE);
+            
+            $runningTotal += $eeShare;
+
+            $data[] = [
+                $piDecoded['pag_ibig_id_rtn'] ?? '', 
+                $piDecoded['app_no'] ?? '',          
+                $piDecoded['mem_program'] ?? '',     
+                mb_strtoupper($contribution->employee->last_name ?? '', 'UTF-8'),
+                mb_strtoupper($contribution->employee->first_name ?? '', 'UTF-8'),
+                mb_strtoupper($contribution->employee->suffix ?? '', 'UTF-8'),
+                mb_strtoupper($contribution->employee->middle_initial ?? '', 'UTF-8'),
+                $piDecoded['percov'] ?? '',          
+                $piDecoded['monthly_comp'] ?? '',    
+                $piDecoded['er_share'] ?? '',        
+                $minEE,                              
+                $moreThanMinEE ?: null,              
+                $eeShare,                            
+                $piDecoded['remarks'] ?? '',         
+            ];
+        }
+
+        $this->headerInfo['total'] = $runningTotal;
 
         return $data;
     }
@@ -87,158 +91,102 @@ class HdmfPi implements FromArray, WithEvents, WithCustomStartCell
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
-                $sheet->getPageMargins()->setTop(0.9843);
-                $sheet->getPageMargins()->setBottom(0.2362);
-                $sheet->getPageMargins()->setLeft(0.5118);
-                $sheet->getPageMargins()->setRight(0.5118);
-                $sheet->getPageSetup()->setScale(72);
-
-                $sheet->getColumnDimension('A')->setWidth(15);
-                $sheet->getColumnDimension('B')->setWidth(12);
-                $sheet->getColumnDimension('C')->setWidth(18);
-                $sheet->getColumnDimension('D')->setWidth(20);
-                $sheet->getColumnDimension('E')->setWidth(20);
-                $sheet->getColumnDimension('F')->setWidth(15);
-                $sheet->getColumnDimension('G')->setWidth(20);
-                $sheet->getColumnDimension('H')->setWidth(12);
-                $sheet->getColumnDimension('I')->setWidth(15);
-                $sheet->getColumnDimension('J')->setWidth(15);
-                $sheet->getColumnDimension('K')->setWidth(15);
-
-                $sheet->setCellValue('A1', 'Employer ID');
+                // --- THE 6 HEADER ROWS ---
+                $sheet->setCellValue('A1', 'Employer ID No.');
                 $sheet->setCellValueExplicit('B1', $this->headerInfo['employer_id'], DataType::TYPE_STRING);
-                $sheet->setCellValue('J1', 'HQP-SLF-017');
-                $sheet->setCellValue('A2', 'Employer Name');
+
+                $sheet->setCellValue('A2', 'Employer/Business Name');
                 $sheet->setCellValue('B2', $this->headerInfo['employer_name']);
-                $sheet->setCellValue('A3', 'Address');
+
+                $sheet->setCellValue('A3', 'Employer/Business Address');
                 $sheet->setCellValue('B3', $this->headerInfo['address']);
 
-                $sheet->getStyle('A1')->getFont()->setBold(true);
-                $sheet->getStyle('B1')->getFont()->setBold(true);
-                $sheet->getStyle('I1')->getFont()->setBold(true);
-                $sheet->getStyle('A2')->getFont()->setBold(true);
-                $sheet->getStyle('B2')->getFont()->setBold(true);
-                $sheet->getStyle('A3')->getFont()->setBold(true);
-                $sheet->getStyle('B3')->getFont()->setBold(true);
+                $sheet->setCellValue('A4', 'Contact Number');
+                $sheet->setCellValueExplicit('B4', $this->headerInfo['contact'], DataType::TYPE_STRING);
 
-                $headerRow = $this->startRow - 1;
-                $headings = [
-                    'A' => 'Pag-IBIG ID/RTN',
-                    'B' => 'ACCOUNT NO',
-                    'C' => 'MEMBERSHIP PROGRAM',
-                    'D' => 'LAST NAME',
-                    'E' => 'FIRST NAME',
-                    'F' => 'NAME EXTENSION',
-                    'G' => 'MIDDLE NAME',
-                    'H' => 'PERCOV',
-                    'I' => 'EE SHARE',
-                    'J' => 'ER SHARE',
-                    'K' => 'REMARKS',
-                ];
+                $sheet->setCellValue('A5', 'Email Address');
+                $sheet->setCellValue('B5', $this->headerInfo['email']);
 
-                foreach ($headings as $col => $text) {
-                    $sheet->setCellValue("{$col}{$headerRow}", $text);
+                $sheet->setCellValue('A6', 'Total Remittance');
+                $sheet->setCellValue('B6', $this->headerInfo['total']);
+                $sheet->getStyle('B6')->getNumberFormat()->setFormatCode('#,##0.00');
+
+                // Bold labels A1 to A6
+                $sheet->getStyle('A1:A6')->getFont()->setBold(true);
+
+                // --- TABLE HEADERS (Rows 7 & 8) ---
+                $sheet->mergeCells('A7:B7');
+                $sheet->setCellValue('A7', 'Pag-IBIG IDENTIFICATION NO.');
+                $sheet->setCellValue('A8', 'MID NO.');
+                $sheet->setCellValue('B8', 'MP2 ACCOUNT NO.');
+
+                $sheet->mergeCells('C7:C8');
+                $sheet->setCellValue('C7', 'MEMBERSHIP PROGRAM');
+
+                $cols = ['D' => 'LAST NAME', 'E' => 'FIRST NAME', 'F' => 'NAME EXTENSION', 'G' => 'MIDDLE NAME', 'H' => 'PERCOV'];
+                foreach ($cols as $col => $text) {
+                    $sheet->mergeCells("{$col}7:{$col}8");
+                    $sheet->setCellValue("{$col}7", $text);
                 }
 
-                $sheet->getStyle("A{$headerRow}:K{$headerRow}")->getFont()->setBold(true);
-                $sheet->getRowDimension($headerRow)->setRowHeight(35);
-                $sheet->getStyle("A{$headerRow}:K{$headerRow}")->getAlignment()->setWrapText(true);
+                $sheet->mergeCells('I7:J7');
+                $sheet->setCellValue('I7', 'For PAG-IBIG I only');
+                $sheet->setCellValue('I8', 'MONTHLY COMPENSATION');
+                $sheet->setCellValue('J8', 'ER SHARE');
 
-                $sheet->getStyle("A{$headerRow}:K{$headerRow}")
-                    ->getFill()
-                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                    ->getStartColor()
-                    ->setRGB('DDDBDD');
+                $sheet->mergeCells('K7:M7');
+                $sheet->setCellValue('K7', 'EE SHARE');
+                $sheet->setCellValue('K8', 'HDMF MC (minimum)');
+                $sheet->setCellValue('L8', 'HDMF MC (more than minimum)');
+                $sheet->setCellValue('M8', 'TOTAL');
 
-                $sheet->getStyle("A{$headerRow}:K{$headerRow}")
-                    ->getAlignment()
+                $sheet->mergeCells('N7:N8');
+                $sheet->setCellValue('N7', 'REMARKS');
+
+                // Header Styling
+                $headerRange = 'A7:N8';
+                $sheet->getStyle($headerRange)->getFont()->setBold(true);
+                $sheet->getStyle($headerRange)->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                    ->setVertical(Alignment::VERTICAL_BOTTOM);
+                    ->setVertical(Alignment::VERTICAL_CENTER)
+                    ->setWrapText(true);
+                
+                $sheet->getStyle($headerRange)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('DDDBDD');
 
-                $sheet->getStyle("A{$headerRow}:K{$headerRow}")
-                    ->getBorders()
-                    ->getAllBorders()
-                    ->setBorderStyle(Border::BORDER_THIN)
-                    ->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF000000'));
+                // Apply Borders to data
+                $lastRow = $sheet->getHighestRow();
+                $sheet->getStyle("A7:N{$lastRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
-                foreach (range($this->startRow, $sheet->getHighestRow()) as $row) {
-                    $sheet->getCell('A' . $row)
-                        ->setValueExplicit(
-                            $sheet->getCell('A' . $row)->getValue(),
-                            DataType::TYPE_STRING
-                        );
+                // --- FIX FOR SCIENTIFIC NOTATION (MID NO.) HERE ---
+                for ($i = $this->startRow; $i <= $lastRow; $i++) {
+                    $midNo = $sheet->getCell('A' . $i)->getValue();
+                    if ($midNo) {
+                        $sheet->getCell('A' . $i)->setValueExplicit($midNo, DataType::TYPE_STRING);
+                    }
                 }
 
-                $lastDataRow = $sheet->getHighestRow();
-                $sheet->getStyle("A{$this->startRow}:F{$lastDataRow}")->getFont()->setBold(true);
+                // --- SIGNATORIES (3 Row Gap) ---
+                $sigRow = $lastRow + 4;
+                $sheet->setCellValue("A{$sigRow}", "Prepared by:");
+                $sheet->setCellValue("D{$sigRow}", "Checked by:");
+                $sheet->setCellValue("G{$sigRow}", "Funds Availability:");
 
-                $dataRange = "A{$this->startRow}:K{$lastDataRow}";
-                $sheet->getStyle($dataRange)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF000000'));
-
-                $sheet->getStyle("H{$this->startRow}:H{$lastDataRow}")
-                    ->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-                $sheet->getStyle("E{$this->startRow}:E{$lastDataRow}")
-                    ->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-                $sheet->getStyle("F{$this->startRow}:F{$lastDataRow}")
-                    ->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->getStyle("G{$this->startRow}:G{$lastDataRow}")
-                    ->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-                $totalLabelRow = $lastDataRow + 2;
-                $totalAmountRow = $totalLabelRow;
-
-                $sheet->setCellValue("A{$totalLabelRow}", "Total Remittance");
-                $sheet->getStyle("A{$totalLabelRow}")->getFont()->setBold(true);
-
-                $sheet->setCellValue("I{$totalAmountRow}", number_format($this->total_remittance, 2));
-                $sheet->getStyle("I{$totalAmountRow}")
-                    ->getNumberFormat()
-                    ->setFormatCode('₱#,##0.00');
-                $sheet->getStyle("I{$totalAmountRow}")
-                    ->getFont()
-                    ->setBold(true);
-                $sheet->getStyle("I{$totalAmountRow}")
-                    ->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-                $sheet->getStyle("H{$totalAmountRow}")->getFont()->setBold(true);
-                $sheet->getStyle("H{$totalAmountRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-
-                $signatoryStartRow = $totalLabelRow + 2;
-
-                $sheet->setCellValue("A{$signatoryStartRow}", "Prepared by:");
-                $sheet->setCellValue("D{$signatoryStartRow}", "Checked by:");
-                $sheet->setCellValue("G{$signatoryStartRow}", "Funds Availability:");
-
-                $nameRow = $signatoryStartRow + 2;
-
+                $nameRow = $sigRow + 2;
                 $sheet->setCellValue("A{$nameRow}", strtoupper($this->signatories->prepared->name ?? ''));
                 $sheet->setCellValue("D{$nameRow}", strtoupper($this->signatories->noted->name ?? ''));
                 $sheet->setCellValue("G{$nameRow}", strtoupper($this->signatories->funds->name ?? ''));
+                $sheet->getStyle("A{$nameRow}:G{$nameRow}")->getFont()->setBold(true);
 
-                $sheet->getStyle("A{$nameRow}")->getFont()->setBold(true);
-                $sheet->getStyle("D{$nameRow}")->getFont()->setBold(true);
-                $sheet->getStyle("G{$nameRow}")->getFont()->setBold(true);
+                $sheet->setCellValue("A" . ($nameRow + 1), "Payroll Clerk");
+                $sheet->setCellValue("D" . ($nameRow + 1), "OIC, HRMU");
+                $sheet->setCellValue("G" . ($nameRow + 1), "OIC, Accounting Unit");
 
-                $sheet->setCellValue("A" . ($signatoryStartRow + 3), "Payroll Clerk");
-                $sheet->setCellValue("D" . ($signatoryStartRow + 3), "OIC, HRMU");
-                $sheet->setCellValue("G" . ($signatoryStartRow + 3), "OIC, Accounting Unit");
-
-                $sheet->getPageSetup()->setPrintArea('A1:K' . $sheet->getHighestRow());
-                $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_PORTRAIT);
+                // Page Setup
+                $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+                $sheet->getPageSetup()->setPaperSize(PageSetup::PAPERSIZE_LEGAL);
                 $sheet->getPageSetup()->setFitToWidth(1);
-                $sheet->getPageSetup()->setFitToHeight(0);
-
-                $lastRow = $sheet->getHighestRow();
-                $sheet->insertNewRowBefore($lastRow + 1, 1);
             }
         ];
     }

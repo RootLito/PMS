@@ -7,6 +7,7 @@ use App\Exports\HdmfCl;
 use App\Exports\HdmfMp2;
 use App\Exports\HdmfPi;
 use App\Exports\SssEcWisp;
+use App\Exports\SssUpdated;
 use Livewire\WithPagination;
 use App\Models\Employee;
 use App\Models\Contribution;
@@ -585,10 +586,12 @@ class EmployeeContribution extends Component
                 return Excel::download(new HdmfCl, "COS-CAL {$year}.xlsx");
             case 'dareco':
                 break;
-
+            // case 'sss_ec_wisp':
+            //     $year = (String) Carbon::now()->year;
+            //     return Excel::download(new SssEcWisp(), "COS-SSS {$year}.xlsx");
             case 'sss_ec_wisp':
                 $year = (String) Carbon::now()->year;
-                return Excel::download(new SssEcWisp(), "COS-SSS {$year}.xlsx");
+                return Excel::download(new SssUpdated(), "COS-SSS {$year}.xlsx");
             default:
                 break;
         }
