@@ -164,8 +164,8 @@ class PayrollExport implements WithEvents, WithColumnWidths
             $subHeaders['R9'] = 'DARECO';
         } else {
             $subHeaders['N9'] = 'SSS/GSIS Con';
-            $subHeaders['O9'] = 'EC Con';
-            $subHeaders['P9'] = 'WISP';
+            $subHeaders['O9'] = '';
+            $subHeaders['P9'] = '';
             $subHeaders['Q9'] = '';
             $subHeaders['R9'] = '';
         }
