@@ -1,6 +1,5 @@
 <div class="flex-1 flex-col relative gap-2">
     <div class="w-full flex justify-between items-center mb-6 p-6 bg-white rounded-xl">
-        
         <h2 class="font-black text-gray-700">PAYROLL SUMMARY</h2>
         <div class="flex text-sm gap-2">
             <div class="w-150  relative rounded border border-gray-200 shadow-sm cursor-pointer">
@@ -51,14 +50,9 @@
             <button wire:click.prevent="saveArchive"
                 class="bg-green-700 text-white font-semibold px-4 py-1 rounded cursor-pointer hover:bg-green-600"><i
                     class="fa-solid fa-floppy-disk mr-1"></i> Save to Archive</button>
-
-
-
             <button wire:click.prevent="exportPayroll"
                 class="bg-slate-700 text-white font-semibold px-4 py-1 rounded cursor-pointer hover:bg-slate-600">
                 <i class="fa-regular fa-file-excel mr-1"></i>Export to Excel</button>
-
-
         </div>
     </div>
     <div class="bg-white p-6 min-h-100 rounded-xl">
@@ -125,7 +119,7 @@
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Net of Late/Absences</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Tax</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Net of Tax</th>
-                        <th colspan="5" class="border border-gray-300 px-2 py-1 text-center">Contributions</th>
+                        <th colspan="4" class="border border-gray-300 px-2 py-1 text-center">Contributions</th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Total Deductions (Contribution)
                         </th>
                         <th rowspan="2" class="border border-gray-300 px-2 py-1">Net Pay</th>
@@ -354,7 +348,7 @@
                                     <td class="border border-gray-300 px-2 py-1 text-right">
                                         {{ number_format($employee->monthly_rate, 2) }}</td>
                                     <td class="border border-gray-300 px-2 py-1 text-right">
-                                        {{-- {{ number_format($employee->gross, 2) }} --}}
+                                        {{ number_format($employee->gross, 2) }}
                                         {{-- {{ $rc->adjustment ? number_format($rc->adjustment, 2) : '-' }} --}}
                                         {{-- {{ $rc->adjustment ? number_format($rc->adjustment, 2) : '-' }} --}}
                                         {{-- @php
@@ -380,7 +374,8 @@
                                         {{ $rc->net_tax ? number_format($rc->net_tax, 2) : '-' }}</td>
                                     @if ($cutoff === '1-15')
                                         <td class="border border-gray-300 px-2 py-1 text-right">
-                                            {{ $rc->hdmf_pi ? number_format($rc->hdmf_pi, 2) : '-' }}</td>
+                                            {{ $rc->hdmf_pi - 400 > 0 ? number_format($rc->hdmf_pi - 400, 2) : '-' }}
+                                        </td>
                                         <td class="border border-gray-300 px-2 py-1 text-right">
                                             {{ $rc->hdmf_mpl ? number_format($rc->hdmf_mpl, 2) : '-' }}</td>
                                         <td class="border border-gray-300 px-2 py-1 text-right">
@@ -390,12 +385,17 @@
                                         <td class="border border-gray-300 px-2 py-1 text-right">
                                             {{ $rc->dareco ? number_format($rc->dareco, 2) : '-' }}</td>
                                     @elseif($cutoff === '16-31')
-                                        <td class="border border-gray-300 px-2 py-1 text-right">
+                                        {{-- <td class="border border-gray-300 px-2 py-1 text-right">
                                             {{ $rc->ss_con ? number_format($rc->ss_con, 2) : '-' }}</td>
                                         <td class="border border-gray-300 px-2 py-1 text-right">
                                             {{ $rc->ec_con ? number_format($rc->ec_con, 2) : '-' }}</td>
                                         <td class="border border-gray-300 px-2 py-1 text-right">
-                                            {{ $rc->wisp ? number_format($rc->wisp, 2) : '-' }}</td>
+                                            {{ $rc->wisp ? number_format($rc->wisp, 2) : '-' }}</td> --}}
+                                        <td class="border border-gray-300 px-2 py-1 text-right">
+                                            {{ $rc->ss_con && $rc->ec_con ? number_format($rc->ss_con + $rc->ec_con, 2) : '-' }}
+                                        </td>
+                                        <td class="border border-gray-300 px-2 py-1 text-right">-</td>
+                                        <td class="border border-gray-300 px-2 py-1 text-right">-</td>
                                         <td class="border border-gray-300 px-2 py-1 text-right">-</td>
                                         <td class="border border-gray-300 px-2 py-1 text-right">-</td>
                                     @endif

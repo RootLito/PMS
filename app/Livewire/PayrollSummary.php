@@ -49,12 +49,13 @@ class PayrollSummary extends Component
             ['label' => 'HDMF-MPL', 'model' => 'hdmf_mpl'],
             ['label' => 'HDMF-MP2', 'model' => 'hdmf_mp2'],
             ['label' => 'HDMF-CL', 'model' => 'hdmf_cl'],
-            ['label' => 'DARECO', 'model' => 'dareco'],
+            // ['label' => 'DARECO', 'model' => 'dareco'],
         ],
         '16-31' => [
-            ['label' => 'SS CON', 'model' => 'ss_con'],
-            ['label' => 'EC CON', 'model' => 'ec_con'],
-            ['label' => 'WISP', 'model' => 'wisp'],
+            ['label' => 'SS CON (more than minimum)', 'model' => 'ss_con'],
+            // ['label' => 'EC CON', 'model' => 'ec_con'],
+            // ['label' => 'WISP', 'model' => 'wisp'],
+            ['label' => '', 'model' => ''],
             ['label' => '', 'model' => ''],
             ['label' => '', 'model' => ''],
         ],
@@ -539,6 +540,9 @@ class PayrollSummary extends Component
             'assigned' => $this->assigned,
         ];
     }
+
+
+    
     //ARCHIVE-------------------------------------
     public function saveArchive()
     {
