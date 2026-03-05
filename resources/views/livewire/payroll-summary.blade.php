@@ -325,6 +325,7 @@
                                     <td></td>
                                 </tr>
                             @endif
+
                             {{-- Office employees --}}
                             @foreach ($officeGroup['employees'] as $index => $employee)
                                 @php $rc = $employee->rawCalculation; @endphp
@@ -374,7 +375,8 @@
                                         {{ $rc->net_tax ? number_format($rc->net_tax, 2) : '-' }}</td>
                                     @if ($cutoff === '1-15')
                                         <td class="border border-gray-300 px-2 py-1 text-right">
-                                            {{ $rc->hdmf_pi - 400 > 0 ? number_format($rc->hdmf_pi - 400, 2) : '-' }}
+                                            {{-- {{ $rc->hdmf_pi - 400 > 0 ? number_format($rc->hdmf_pi - 400, 2) : '-' }} --}}
+                                            {{ $rc->hdmf_pi ? number_format($rc->hdmf_pi, 2) : '-' }}
                                         </td>
                                         <td class="border border-gray-300 px-2 py-1 text-right">
                                             {{ $rc->hdmf_mpl ? number_format($rc->hdmf_mpl, 2) : '-' }}</td>

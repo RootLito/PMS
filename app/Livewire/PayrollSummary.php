@@ -263,9 +263,7 @@ class PayrollSummary extends Component
                         : ($e->office_name ?? $e->rawCalculation->office_name)
                     )
                     ->map(function ($officeGroup) use ($cutoff) {
-                        // $totalGross = $officeGroup->sum('gross');
                         $totalGross = $officeGroup->sum('gross');
-                        // $totalAdjustment = $officeGroup->whereNotNull('adjustment')->sum('adjustment');
                         $totalAdjustment = $officeGroup->sum(fn($e) => $e->rawCalculation->adjustment ?? 0);
                         $totalGross += $totalAdjustment;
 
@@ -669,7 +667,6 @@ class PayrollSummary extends Component
 
                     $totalNetPay = $totalNetTax - $totalTotalDeduction;
 
-                    // dd($totalGross);
     
 
                     return [

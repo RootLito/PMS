@@ -7,11 +7,29 @@
 
     <div class="flex-1 flex flex-col p-6 bg-white rounded-xl shadow">
         <div class="w-full flex justify-between">
-            <h2 class="text-xl text-gray-700 font-bold mb-6">
-                Employees with more than minimum contribution
-            </h2>
-            <input type="text" id="search" placeholder="Search Employee" wire:model.live="search"
-                class="w-1/2 h-10 border border-gray-200 bg-gray-50 rounded-md px-2 text-sm">
+            <div class="w-full flex flex-col">
+                <h2 class="text-xl text-gray-700 font-bold mb-4">
+                    Employees with more than minimum contribution
+                </h2>
+
+                <div class="w-full flex justify-between">
+                    <input type="text" id="search" placeholder="Search Employee" wire:model.live="search"
+                        class="w-100 h-10 border border-gray-200 bg-gray-50 rounded-md px-2 text-sm">
+                    <div class="flex gap-2">
+                        <button wire:click="$set('showPagIbigModal', true)"
+                            class="w-32 h-10 bg-slate-700 rounded-md text-white cursor-pointer hover:bg-slate-500">
+                            Pag-ibig
+                        </button>
+                        <button wire:click="$set('showSSSModal', true)"
+                            class="w-32 h-10 bg-slate-700 rounded-md text-white cursor-pointer hover:bg-slate-500">
+                            SSS
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+
         </div>
 
         <table class="min-w-full table-auto text-sm mt-10">
@@ -88,4 +106,62 @@
             </div>
         @endif
     </div>
+
+
+
+    @if ($showPagIbigModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-gray-900/50" wire:click="$set('showPagIbigModal', false)">
+            </div>
+            <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Pag-ibig</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contribution Amount</label>
+                            <input type="number" wire:model="pagIbigAmount"
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-slate-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-8">
+                        <button wire:click="$set('showPagIbigModal', false)"
+                            class="px-4 py-2 text-gray-600 font-medium hover:text-gray-800 cursor-pointer hover:bg-gray-200 rounded-lg">Close</button>
+                        <button wire:click="applyPagIbig" wire:loading.attr="disabled"
+                            class="px-6 py-2 bg-slate-700 text-white rounded-lg font-bold hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span wire:loading.remove wire:target="applyPagIbig">Apply</span>
+                            <span wire:loading wire:target="applyPagIbig">Processing...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @if ($showSSSModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-gray-900/50" wire:click="$set('showSSSModal', false)"></div>
+            <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">SSS</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contribution Amount</label>
+                            <input type="number" wire:model="sssAmount"
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-slate-500 outline-none">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-8">
+                        <button wire:click="$set('showSSSModal', false)"
+                            class="px-4 py-2 text-gray-600 font-medium hover:text-gray-800 cursor-pointer hover:bg-gray-200 rounded-lg">Close</button>
+                        <button wire:click="applySSS" wire:loading.attr="disabled"
+                            class="px-6 py-2 bg-slate-700 text-white rounded-lg font-bold hover:bg-slate-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span wire:loading.remove wire:target="applySSS">Apply</span>
+                            <span wire:loading wire:target="applySSS">Processing...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>
