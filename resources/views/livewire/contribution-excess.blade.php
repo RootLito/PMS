@@ -35,9 +35,14 @@
         <table class="min-w-full table-auto text-sm mt-10">
             <thead class="bg-gray-100 text-left">
                 <tr class="border-b border-t border-gray-200">
-                    <th class="px-4 py-3 text-nowrap" width="50%">Name</th>
-                    <th class="px-4 py-3 text-nowrap" width="25%">Pag-ibig Excess</th>
-                    <th class="px-4 py-3 text-nowrap" width="25%">SSS Excess</th>
+                    <th class="px-4 py-3 text-nowrap" width="30%">Name</th>
+                    <th class="px-4 py-3 text-nowrap">Monthy Rate</th>
+                    <th class="px-4 py-3 text-nowrap">Pag-ibig</th>
+                    <th class="px-4 py-3 text-nowrap">Minimum</th>
+                    <th class="px-4 py-3 text-nowrap">More than minimum</th>
+                    <th class="px-4 py-3 text-nowrap">SSS</th>
+                    <th class="px-4 py-3 text-nowrap">Minimum</th>
+                    <th class="px-4 py-3 text-nowrap">More than minimum</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,15 +54,29 @@
                                 {{ $employee->suffix }}
                             @endif
                         </td>
-
-                        {{-- Pag-ibig Excess: (ee_share - 400) --}}
                         <td class="px-4 py-3 text-gray-700">
-                            {{ $employee->display_hdmf > 0 ? number_format($employee->display_hdmf, 2) : '-' }}
+                            ₱ {{ number_format($employee->monthly_rate, 2) }}
                         </td>
 
-                        {{-- SSS Excess: (amount + ec - 760) --}}
                         <td class="px-4 py-3 text-gray-700">
-                            {{ $employee->display_sss > 0 ? number_format($employee->display_sss, 2) : '-' }}
+                            ₱ {{ number_format($employee->display_hdmf + 400, 2) }}
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">
+                            ₱ 400.00
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">
+                            ₱ {{ $employee->display_hdmf > 0 ? number_format($employee->display_hdmf, 2) : '0.00' }}
+                        </td>
+
+
+                        <td class="px-4 py-3 text-gray-700">
+                            ₱ {{ number_format($employee->display_sss + 760, 2) }}
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">
+                            ₱ 760.00
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">
+                            ₱ {{ $employee->display_sss > 0 ? number_format($employee->display_sss, 2) : '0.00' }}
                         </td>
                     </tr>
                 @empty

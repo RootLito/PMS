@@ -18,47 +18,56 @@ class ContributionExcess extends Component
     public $pagIbigAmount;
     public $sssAmount;
 
-
-
     // public function applyPagIbig()
     // {
-    //     $this->validate([
-    //         'pagIbigAmount' => 'required|numeric',
-    //     ]);
+    //     $this->validate(['pagIbigAmount' => 'required|numeric']);
     //     $contributions = Contribution::all();
     //     foreach ($contributions as $contribution) {
     //         $data = $contribution->hdmf_pi;
+    //         if (is_string($data)) {
+    //             $data = json_decode($data, true);
+    //         }
     //         $currentEeShare = (float) ($data['ee_share'] ?? 0);
-    //         $newEeShare = $currentEeShare - (float) $this->pagIbigAmount;
+    //         $newEeShare = $currentEeShare + (float) $this->pagIbigAmount; // Changed subtraction to addition
+    //         // This line formats the number as a string with 2 decimal places
     //         $data['ee_share'] = number_format(max(0, $newEeShare), 2, '.', '');
     //         $contribution->hdmf_pi = $data;
     //         $contribution->save();
     //     }
-
     //     $this->showPagIbigModal = false;
     //     $this->reset('pagIbigAmount');
     //     $this->dispatch('success', message: 'Pag-ibig deduction applied successfully.');
     // }
 
+
     // public function applySSS()
     // {
-    //     $this->validate([
-    //         'sssAmount' => 'required|numeric',
-    //     ]);
-
+    //     $this->validate(['sssAmount' => 'required|numeric']);
     //     $contributions = Contribution::all();
-
     //     foreach ($contributions as $contribution) {
     //         $sssData = $contribution->sss;
     //         $ecData = $contribution->ec;
+    //         if (is_string($sssData))
+    //             $sssData = json_decode($sssData, true);
+    //         if (is_string($ecData))
+    //             $ecData = json_decode($ecData, true);
+
     //         $currentSss = (float) ($sssData['amount'] ?? 0);
     //         $currentEc = (float) ($ecData['amount'] ?? 0);
+
     //         $combinedTotal = $currentSss + $currentEc;
-    //         $newTotal = max(0, $combinedTotal - (float) $this->sssAmount);
-    //         $sssData['amount'] = number_format($newTotal, 2, '.', '');
-    //         $ecData['amount'] = "0.00";
+
+    //         $newTotal = ($combinedTotal - (float) $this->sssAmount) - 10;
+
+    //         $formattedNew = number_format($newTotal, 2, '.', '');
+
+    //         $sssData['amount'] = $formattedNew;
+
+    //         $ecData['amount'] = "10";
+
     //         $contribution->sss = $sssData;
     //         $contribution->ec = $ecData;
+
     //         $contribution->save();
     //     }
 
@@ -68,21 +77,29 @@ class ContributionExcess extends Component
     // }
 
 
+
     public function applyPagIbig()
     {
         $this->validate(['pagIbigAmount' => 'required|numeric']);
         $contributions = Contribution::all();
+
         foreach ($contributions as $contribution) {
             $data = $contribution->hdmf_pi;
+
+            // Ensure we are working with an array for the math
             if (is_string($data)) {
                 $data = json_decode($data, true);
             }
+
             $currentEeShare = (float) ($data['ee_share'] ?? 0);
             $newEeShare = $currentEeShare - (float) $this->pagIbigAmount;
             $data['ee_share'] = number_format(max(0, $newEeShare), 2, '.', '');
-            $contribution->hdmf_pi = $data;
+
+            // Manually JSON encode it here to force the double-encoding
+            $contribution->hdmf_pi = json_encode($data);
             $contribution->save();
         }
+
         $this->showPagIbigModal = false;
         $this->reset('pagIbigAmount');
         $this->dispatch('success', message: 'Pag-ibig deduction applied successfully.');
@@ -92,30 +109,37 @@ class ContributionExcess extends Component
     {
         $this->validate(['sssAmount' => 'required|numeric']);
         $contributions = Contribution::all();
+
         foreach ($contributions as $contribution) {
             $sssData = $contribution->sss;
             $ecData = $contribution->ec;
+
             if (is_string($sssData))
                 $sssData = json_decode($sssData, true);
             if (is_string($ecData))
                 $ecData = json_decode($ecData, true);
+
             $currentSss = (float) ($sssData['amount'] ?? 0);
             $currentEc = (float) ($ecData['amount'] ?? 0);
+
             $combinedTotal = $currentSss + $currentEc;
             $newTotal = max(0, $combinedTotal - (float) $this->sssAmount);
             $formattedNew = number_format($newTotal, 2, '.', '');
+
             $sssData['amount'] = $formattedNew;
             $ecData['amount'] = "0.00";
-            $contribution->sss = $sssData;
-            $contribution->ec = $ecData;
+
+            // Manually JSON encode both to match your desired format
+            $contribution->sss = json_encode($sssData);
+            $contribution->ec = json_encode($ecData);
+
             $contribution->save();
         }
+
         $this->showSSSModal = false;
         $this->reset('sssAmount');
         $this->dispatch('success', message: 'SSS deduction applied successfully.');
     }
-
-
 
     public function updatingSearch()
     {
